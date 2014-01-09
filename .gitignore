@@ -11,3 +11,8 @@
 *.lai
 *.la
 *.a
+
+# Output Folder
+PPC603GNU/*
+
+# Project Files
