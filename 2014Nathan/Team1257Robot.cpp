@@ -77,7 +77,7 @@ void Team1257Robot::ZTwistDrive()
 {
 	if(rightStickIsEnabled)
 	{
-		this->GetDrive()->ArcadeDrive(this->GetRightStick()->GetZ(), this->GetRightStick(.))->GetTwist(),false);
+		this->GetDrive()->ArcadeDrive(this->GetRightStick()->GetZ(), this->GetRightStick()->GetTwist(),false);
 	}
 	else if (leftStickIsEnabled)
 	{
