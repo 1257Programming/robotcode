@@ -1,6 +1,4 @@
 #include "Team1257Robot.h"
-#include <Wait.h>
-#include <cstdarg>
 Team1257Robot::Team1257Robot():
 team1257Robot(LEFT,RIGHT),
 LeftStick(LEFT),
