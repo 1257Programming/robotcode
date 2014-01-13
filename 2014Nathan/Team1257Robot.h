@@ -1,4 +1,6 @@
 #include <WPILib.h>
+#include <Wait.h>
+#include <cstdarg>
 #define LEFT 1
 #define RIGHT 2
 #define LARM 3
