@@ -194,7 +194,7 @@ Servo * Team1257Robot::GetServoInstanceFromNumber(int num)
 		return &(this->armBend2);
 		break;
 	default:
-		return &armServo1;
+		return NULL;
 		break;
 	}
 }
