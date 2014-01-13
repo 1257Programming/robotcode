@@ -11,7 +11,6 @@
 #define ARCADE_DRIVE 1
 #define ZTWIST_DRIVE 2
 #define XY_DRIVE 3
-#define NULL (void*)0
 class Team1257Robot : public SimpleRobot {
 	RobotDrive team1257Robot;
 	Joystick LeftStick;
