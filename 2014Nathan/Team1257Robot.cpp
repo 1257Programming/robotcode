@@ -77,22 +77,22 @@ void Team1257Robot::ZTwistDrive()
 {
 	if(rightStickIsEnabled)
 	{
-		team1257Robot.ArcadeDrive(RightStick.GetZ(), RightStick.GetTwist(),false);
+		this->GetDrive()->ArcadeDrive(this->GetRightStick()->GetZ(), this->GetRightStick(.))->GetTwist(),false);
 	}
 	else if (leftStickIsEnabled)
 	{
-		team1257Robot.ArcadeDrive(LeftStick.GetZ(),LeftStick.GetTwist(),false);
+		this->GetDrive()->ArcadeDrive(this->GetLeftStick()->GetZ(),this->GetLeftStick()->GetTwist(),false);
 	}
 }
 void Team1257Robot::XYDrive()
 {
 	if(rightStickIsEnabled)
 	{
-		team1257Robot.ArcadeDrive(RightStick.GetX(), RightStick.GetY(),false);
+		this->GetDrive()->ArcadeDrive(this->GetRightStick()->GetX(), this->GetRightStick()->GetY(),false);
 	}
 	else if (leftStickIsEnabled)
 	{
-		team1257Robot.ArcadeDrive(LeftStick.GetX(),LeftStick.GetY(),false);
+		this->GetDrive()->ArcadeDrive(this->GetLeftStick()->GetX(),this->GetLeftStick()->GetY(),false);
 	}
 }
 void Team1257Robot::Drive(float left, float right)
