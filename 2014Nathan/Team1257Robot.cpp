@@ -3,8 +3,8 @@ Team1257Robot::Team1257Robot():
 team1257Robot(LEFT,RIGHT),
 LeftStick(LEFT),
 RightStick(RIGHT),
-armServo1(LARM),
-armServo2(RARM),
+Arm1(LARM),
+Arm2(RARM),
 armBend1(LBEND),
 armBend2(RBEND)
 {
@@ -150,13 +150,13 @@ void Team1257Robot::CheckSetDriveSticks()
 }
 void Team1257Robot::SetArmsX(float value)
 {
-	this->GetServoInstanceFromNumber(1)->Set(value);
-	this->GetServoInstanceFromNumber(2)->Set(-value);
+	this->GetVictorInstanceFromNumber(1)->Set(value);
+	this->GetVictorInstanceFromNumber(2)->Set(-value);
 }
 void Team1257Robot::SetArmsY(float value)
 {
-	this->GetServoInstanceFromNumber(3)->Set(value);
-	this->GetServoInstanceFromNumber(4)->Set(value);
+	this->GetServoInstanceFromNumber(1)->Set(value);
+	this->GetServoInstanceFromNumber(2)->Set(value);
 }
 void Team1257Robot::printf(char * Template , ...)
 {
@@ -182,20 +182,26 @@ Servo * Team1257Robot::GetServoInstanceFromNumber(int num)
 	switch(num)
 	{
 	case 1:
-		return &(this->armServo1);
-		break;
-	case 2:
-		return &(this->armServo2);
-		break;
-	case 3:
 		return &(this->armBend1);
 		break;
-	case 4:
+	case 2:
 		return &(this->armBend2);
 		break;
 	default:
 		return NULL;
 		break;
+	}
+}
+Victor * Team1257Robot::GetVictorInstanceFromNumber(int num)
+{
+	switch(num)
+	{
+	case 1:
+		return &this->Arm1;
+	case 2:
+		return &this->Arm2;
+	default:
+		return NULL;
 	}
 }
 DriverStationLCD * Team1257Robot::GetLCD()
