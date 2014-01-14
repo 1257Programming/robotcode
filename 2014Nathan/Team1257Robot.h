@@ -17,8 +17,7 @@ class Team1257Robot : public SimpleRobot {
 	Joystick RightStick;
 	Victor Arm1;
 	Victor Arm2;
-	Servo armBend1;
-	Servo armBend2;
+	Servo armBend;
 	DriverStationLCD * team1257LCD;
 	bool leftStickIsEnabled;
 	bool rightStickIsEnabled;
@@ -41,7 +40,7 @@ public:
 	RobotDrive * GetDrive();
 	Joystick * GetRightStick();
 	Joystick * GetLeftStick();
-	Servo * GetServoInstanceFromNumber(int);
+	Servo * GetArmBend();
 	Victor * GetVictorInstanceFromNumber(int);
 	DriverStationLCD * GetLCD();
 };
