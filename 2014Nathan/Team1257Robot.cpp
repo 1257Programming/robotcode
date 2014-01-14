@@ -5,8 +5,7 @@ LeftStick(LEFT),
 RightStick(RIGHT),
 Arm1(LARM),
 Arm2(RARM),
-armBend1(LBEND),
-armBend2(RBEND)
+armBend(LBEND)
 {
 	team1257LCD = DriverStationLCD::GetInstance();
 	team1257Robot.SetExpiration(.1);
@@ -158,8 +157,7 @@ void Team1257Robot::SetArmsX(float value)
 }
 void Team1257Robot::SetArmsY(float value)
 {
-	this->GetServoInstanceFromNumber(1)->Set(value);
-	this->GetServoInstanceFromNumber(2)->Set(value);
+	this->GetArmBend()->Set(value);
 }
 void Team1257Robot::printf(char * Template , ...)
 {
@@ -181,20 +179,9 @@ Joystick * Team1257Robot::GetLeftStick()
 {
 	return &(this->LeftStick);
 }
-Servo * Team1257Robot::GetServoInstanceFromNumber(int num)
+Servo * Team1257Robot::GetArmBend()
 {
-	switch(num)
-	{
-	case 1:
-		return &(this->armBend1);
-		break;
-	case 2:
-		return &(this->armBend2);
-		break;
-	default:
-		return NULL;
-		break;
-	}
+	return &(this->armBend);	
 }
 Victor * Team1257Robot::GetVictorInstanceFromNumber(int num)
 {
