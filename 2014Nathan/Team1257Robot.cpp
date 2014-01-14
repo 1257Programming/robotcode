@@ -26,10 +26,11 @@ void Team1257Robot::Autonomous()
 }
 void Team1257Robot::OperatorControl()
 {
-	CheckSetDriveSticks();
-	this->printf("Driving with %i",this->GetWhichDrive());
+	
 	while(IsOperatorControl())
 	{
+		CheckSetDriveSticks();
+		this->printf("Driving with %i",this->GetWhichDrive());
 		switch(GetWhichDrive())
 		{
 		case TANK_DRIVE:
@@ -46,6 +47,8 @@ void Team1257Robot::OperatorControl()
 			break;
 		}
 		//TODO Handle Servos
+		this->GetLCD()->Clear();
+		this->GetLCD()->UpdateLCD();
 	}
 }
 void Team1257Robot::TankDrive()
@@ -164,6 +167,7 @@ void Team1257Robot::printf(char * Template , ...)
 	va_start(subs, Template);
 	this->GetLCD()->VPrintf(this->GetLCD()->kUser_Line1,1,Template,subs);
 	va_end(subs);
+	this->GetLCD()->UpdateLCD();
 }
 RobotDrive * Team1257Robot::GetDrive()
 {
