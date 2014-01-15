@@ -5,7 +5,7 @@ LeftStick(LEFT),
 RightStick(RIGHT),
 Arm1(LARM),
 Arm2(RARM),
-armBend(LBEND)
+armBend(BEND)
 {
 	team1257LCD = DriverStationLCD::GetInstance();
 	team1257Robot.SetExpiration(.1);
