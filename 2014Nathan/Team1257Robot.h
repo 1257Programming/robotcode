@@ -5,8 +5,7 @@
 #define RIGHT 2
 #define LARM 3
 #define RARM 4
-#define LBEND 5
-#define RBEND 6
+#define BEND 5
 #define TANK_DRIVE 0
 #define ARCADE_DRIVE 1
 #define ZTWIST_DRIVE 2
