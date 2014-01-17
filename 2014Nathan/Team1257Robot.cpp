@@ -52,6 +52,11 @@ void Team1257Robot::OperatorControl()
 			this->SetArmsX((this->GetLeftArm()->GetX() + this->GetRightArm()->GetX())/2);
 			this->SetArmsY((this->GetLeftArm()->GetY() + this->GetRightArm()->GetY())/2);
 		}
+                else if(this->GetLeftStick()->GetRawButton(12)
+                {
+                        this->SetArmsX((this->GetLeftArm()->GetX() + this->GetLeftArm->GetZ())/2);
+                        this->SetArmsY((this->GetLeftArm()->GetY() + this->GetLeftArm->GetTwist())/2);
+                }
 		this->GetLCD()->Clear();
 		this->GetLCD()->UpdateLCD();
 	}
