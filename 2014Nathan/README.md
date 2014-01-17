@@ -5,3 +5,12 @@ This is my version I wrote from the ground up as a remake of the other code. I d
 Don't question it. 
 
 --N
+
+UPDATE:
+-------
+
+I have implemented preliminary arm code and plan to add acceleration soon.
+
+RAGGLE FRAGGLE!!
+
+--N
