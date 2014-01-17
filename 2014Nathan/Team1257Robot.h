@@ -37,6 +37,10 @@ public:
 	void CheckSetDriveSticks();
 	void SetArmsX(float);
 	void SetArmsY(float);
+	bool GetLeftStickEnabled();
+	void SetLeftStickEnabled(bool);
+	bool GetRightStickEnabled();
+	void SetRightStickEnabled(bool);
 	void printf(char*, ...);
 	RobotDrive * GetDrive();
 	Joystick * GetRightStick();
@@ -46,4 +50,5 @@ public:
 	Victor * GetArmBend();
 	Victor * GetVictorInstanceFromNumber(int);
 	DriverStationLCD * GetLCD();
+	void SetLCDInstance(DriverStationLCD *);
 };

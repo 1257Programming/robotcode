@@ -10,10 +10,10 @@ Arm1(LARM),
 Arm2(RARM),
 armBend(BEND)
 {
-	team1257LCD = DriverStationLCD::GetInstance();
-	team1257Robot.SetExpiration(.1);
-	leftStickIsEnabled = false;
-	rightStickIsEnabled = false;
+	this->SetLCDInstance(DriverStationLCD::GetInstance());
+	this->GetDrive()->SetExpiration(.1);
+	this->SetLeftStickEnabled(false);
+	this->SetRightStickEnabled(false);
 	SetWhichDrive(TANK_DRIVE);
 }
 void Team1257Robot::Autonomous()
@@ -63,7 +63,7 @@ void Team1257Robot::OperatorControl()
 }
 void Team1257Robot::TankDrive()
 {
-	if(this->leftStickIsEnabled && this->rightStickIsEnabled)
+	if(this->GetLeftStickEnabled() && this->GetRightStickEnabled())
 	{
 		float sf = .1;
 		while(sf <= .5)
@@ -72,7 +72,7 @@ void Team1257Robot::TankDrive()
 			sf += .1;
 		}
 	}
-	else if (this-leftStickIsEnabled)
+	else if (this->GetLeftStickEnabled())
 	{
 		float sf = .1;
 		while(sf <= .5)
@@ -84,15 +84,15 @@ void Team1257Robot::TankDrive()
 }
 void Team1257Robot::ArcadeDrive()
 {
-	if(this->rightStickIsEnabled && this->leftStickIsEnabled)
+	if(this->GetRightStickEnabled() && this->GetLeftStickEnabled())
 	{
 		this->GetDrive()->ArcadeDrive(this->GetLeftStick(),1,this->GetRightStick(),2,false);
 	}
-	else if (this->leftStickIsEnabled)
+	else if (this->GetLeftStickEnabled())
 	{
 		this->GetDrive()->ArcadeDrive(this->GetLeftStick(),false);
 	}
-	else if (this->rightStickIsEnabled)
+	else if (this->GetRightStickEnabled())
 	{
 		this->GetDrive()->ArcadeDrive(this->GetRightStick(),false);
 	}
@@ -100,22 +100,22 @@ void Team1257Robot::ArcadeDrive()
 }
 void Team1257Robot::ZTwistDrive()
 {
-	if(rightStickIsEnabled)
+	if(this->GetRightStickEnabled())
 	{
 		this->GetDrive()->ArcadeDrive(this->GetRightStick()->GetZ(), this->GetRightStick()->GetTwist(),false);
 	}
-	else if (leftStickIsEnabled)
+	else if (this->GetLeftStickEnabled())
 	{
 		this->GetDrive()->ArcadeDrive(this->GetLeftStick()->GetZ(),this->GetLeftStick()->GetTwist(),false);
 	}
 }
 void Team1257Robot::XYDrive()
 {
-	if(rightStickIsEnabled)
+	if(this->GetRightStickEnabled())
 	{
 		this->GetDrive()->ArcadeDrive(this->GetRightStick()->GetX(), this->GetRightStick()->GetY(),false);
 	}
-	else if (leftStickIsEnabled)
+	else if (this->GetLeftStickEnabled())
 	{
 		this->GetDrive()->ArcadeDrive(this->GetLeftStick()->GetX(),this->GetLeftStick()->GetY(),false);
 	}
@@ -142,42 +142,43 @@ void Team1257Robot::CheckSetDriveSticks()
 	if(this->GetLeftStick()->GetRawButton(5) && this->GetLeftStick()->GetRawButton(6))
 	{
 		SetWhichDrive(TANK_DRIVE);
-		leftStickIsEnabled = true;
+		this->SetLeftStickEnabled(true);
 	}
 	else if(this->GetLeftStick()->GetRawButton(1) && this->GetRightStick()->GetRawButton(1))
 	{
 		SetWhichDrive(TANK_DRIVE);
-		rightStickIsEnabled = leftStickIsEnabled = true;
+		this->SetLeftStickEnabled(true);
+		this->SetRightStickEnabled(true);
 	}
 	else if(this->GetLeftStick()->GetRawButton(1))
 	{
 		SetWhichDrive(ARCADE_DRIVE);
-		leftStickIsEnabled = true;
+		this->SetLeftStickEnabled(true);
 	}
 	else if(this->GetRightStick()->GetRawButton(1))
 	{
 		SetWhichDrive(ARCADE_DRIVE);
-		rightStickIsEnabled = true;
+		this->SetRightStickEnabled(true);
 	}
 	else if(this->GetLeftStick()->GetRawButton(12))
 	{
 		SetWhichDrive(ZTWIST_DRIVE);
-		leftStickIsEnabled = true;
+		this->SetLeftStickEnabled(true);
 	}
 	else if(this->GetRightStick()->GetRawButton(12))
 	{
 		SetWhichDrive(ZTWIST_DRIVE);
-		rightStickIsEnabled = true;
+		this->SetRightStickEnabled(true);
 	}
 	else if(this->GetLeftStick()->GetRawButton(11))
 	{
 		SetWhichDrive(XY_DRIVE);
-		leftStickIsEnabled = true;
+		this->SetLeftStickEnabled(true);
 	}
 	else if(this->GetRightStick()->GetRawButton(11))
 	{
 		SetWhichDrive(XY_DRIVE);
-		rightStickIsEnabled = true;
+		this->SetRightStickEnabled(true);
 	}
 }
 void Team1257Robot::SetArmsX(float value)
@@ -188,6 +189,22 @@ void Team1257Robot::SetArmsX(float value)
 void Team1257Robot::SetArmsY(float value)
 {
 	this->GetArmBend()->Set(value);
+}
+bool Team1257Robot::GetLeftStickEnabled()
+{
+	return this->leftStickIsEnabled;
+}
+void Team1257Robot::SetLeftStickEnabled(bool value)
+{
+	this->leftStickIsEnabled = value;
+}
+bool Team1257Robot::GetRightStickEnabled()
+{
+	return this->rightStickIsEnabled;
+}
+void Team1257Robot::SetRightStickEnabled(bool value)
+{
+	this->rightStickIsEnabled = value;
 }
 void Team1257Robot::printf(char * Template , ...)
 {
@@ -226,9 +243,9 @@ Victor * Team1257Robot::GetVictorInstanceFromNumber(int num)
 	switch(num)
 	{
 	case 1:
-		return &this->Arm1;
+		return &(this->Arm1);
 	case 2:
-		return &this->Arm2;
+		return &(this->Arm2);
 	default:
 		return NULL;
 	}
@@ -236,6 +253,10 @@ Victor * Team1257Robot::GetVictorInstanceFromNumber(int num)
 DriverStationLCD * Team1257Robot::GetLCD()
 {
 	return this->team1257LCD;
+}
+void Team1257Robot::SetLCDInstance(DriverStationLCD * instance)
+{
+	this->team1257LCD = instance;
 }
 RobotBase * FRC_userClassFactory() 
 { 
