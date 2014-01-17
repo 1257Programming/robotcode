@@ -2,8 +2,7 @@ NOTES
 =====
 
 Getters and Setters
-___________________
-
+-------------------
 All access to class variables in this code is done through getters and setters. It makes the code longer but safer.
 
 Class Team1257Robot
@@ -14,7 +13,7 @@ Drive Funcions
 I use multiple drive functions:
 	
 TankDrive() and ArcadeDrive()
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Self-explanatory.
 XYDrive()
 ---------
