@@ -47,8 +47,11 @@ void Team1257Robot::OperatorControl()
 			XYDrive();
 			break;
 		}
-		this->SetArmsX((this->GetLeftArm()->GetX() + this->GetRightArm()->GetX())/2);
-		this->SetArmsY((this->GetLeftArm()->GetY() + this->GetRightArm()->GetY())/2);
+		if(this->GetLeftArm()->GetRawButton(1) && this->GetRightArm()->GetRawButton(1))
+		{
+			this->SetArmsX((this->GetLeftArm()->GetX() + this->GetRightArm()->GetX())/2);
+			this->SetArmsY((this->GetLeftArm()->GetY() + this->GetRightArm()->GetY())/2);
+		}
 		this->GetLCD()->Clear();
 		this->GetLCD()->UpdateLCD();
 	}
