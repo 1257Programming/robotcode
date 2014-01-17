@@ -6,8 +6,8 @@ Don't question it.
 
 --N
 
-UPDATE:
--------
+UPDATE 1:
+---------
 
 I have implemented preliminary arm code and plan to add acceleration soon.
 
