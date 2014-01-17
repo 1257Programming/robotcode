@@ -1,8 +1,11 @@
 #include "Team1257Robot.h"
+#include <cassert>
 Team1257Robot::Team1257Robot():
 team1257Robot(LEFT,RIGHT),
 LeftStick(LEFT),
 RightStick(RIGHT),
+LeftArm(LARM),
+RightArm(RARM),
 Arm1(LARM),
 Arm2(RARM),
 armBend(BEND)
@@ -25,7 +28,6 @@ void Team1257Robot::Autonomous()
 }
 void Team1257Robot::OperatorControl()
 {
-	
 	while(IsOperatorControl())
 	{
 		CheckSetDriveSticks();
@@ -45,7 +47,8 @@ void Team1257Robot::OperatorControl()
 			XYDrive();
 			break;
 		}
-		//TODO Handle Servos
+		this->SetArmsX((this->GetLeftArm()->GetX() + this->GetRightArm()->GetX())/2);
+		this->SetArmsY((this->GetLeftArm()->GetY() + this->GetRightArm()->GetY())/2);
 		this->GetLCD()->Clear();
 		this->GetLCD()->UpdateLCD();
 	}
@@ -173,13 +176,21 @@ RobotDrive * Team1257Robot::GetDrive()
 }
 Joystick * Team1257Robot::GetRightStick()
 {
-	return &(this->RightStick);
+	return Joystick::GetStickForPort(2);
 }
 Joystick * Team1257Robot::GetLeftStick()
 {
-	return &(this->LeftStick);
+	return Joystick::GetStickForPort(1);
 }
-Servo * Team1257Robot::GetArmBend()
+Joystick * Team1257Robot::GetRightArm()
+{
+	return Joystick::GetStickForPort(4);
+}
+Joystick * Team1257Robot::GetLeftArm()
+{
+	return Joystick::GetStickForPort(3);
+}
+Victor * Team1257Robot::GetArmBend()
 {
 	return &(this->armBend);	
 }
