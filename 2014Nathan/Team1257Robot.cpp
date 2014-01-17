@@ -64,9 +64,23 @@ void Team1257Robot::OperatorControl()
 void Team1257Robot::TankDrive()
 {
 	if(this->leftStickIsEnabled && this->rightStickIsEnabled)
-		this->GetDrive()->SetLeftRightMotorOutputs(-.5*this->GetLeftStick()->GetY(),-.5*this->GetRightStick()->GetY());
+	{
+		float sf = .1;
+		while(sf <= .5)
+		{
+			this->GetDrive()->SetLeftRightMotorOutputs(-sf*this->GetLeftStick()->GetY(),-(sf)*this->GetRightStick()->GetY());
+			sf += .1;
+		}
+	}
 	else if (this-leftStickIsEnabled)
-		this->GetDrive()->SetLeftRightMotorOutputs(-.5*this->GetLeftStick()->GetY(),-.5*this->GetLeftStick()->GetTwist());
+	{
+		float sf = .1;
+		while(sf <= .5)
+		{
+			this->GetDrive()->SetLeftRightMotorOutputs(-sf*this->GetLeftStick()->GetY(),-sf*this->GetLeftStick()->GetTwist());
+			sf += .1;
+		}
+	}
 }
 void Team1257Robot::ArcadeDrive()
 {
@@ -108,7 +122,12 @@ void Team1257Robot::XYDrive()
 }
 void Team1257Robot::Drive(float left, float right)
 {
-	this->GetDrive()->SetLeftRightMotorOutputs(-left, -right);
+	float sf = .1;
+	while (sf <= 1)
+	{
+		this->GetDrive()->SetLeftRightMotorOutputs(-sf*left, -sf*right);
+		sf += .2;
+	}
 }
 int Team1257Robot::GetWhichDrive()
 {
