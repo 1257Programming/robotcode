@@ -1,5 +1,4 @@
 #include "Team1257Robot.h"
-#include <cassert>
 Team1257Robot::Team1257Robot():
 team1257Robot(LEFT,RIGHT),
 LeftStick(LEFT),
@@ -18,7 +17,7 @@ armBend(BEND)
 }
 void Team1257Robot::Autonomous()
 {
-	while(IsAutonomous())
+	while(IsAutonomous() && IsEnabled())
 	{
 		Drive(.3,.3);
 		Wait(4);
@@ -28,22 +27,25 @@ void Team1257Robot::Autonomous()
 }
 void Team1257Robot::OperatorControl()
 {
-	while(IsOperatorControl())
+	while(IsOperatorControl() && IsEnabled())
 	{
 		CheckSetDriveSticks();
-		this->printf("Driving with %i",this->GetWhichDrive());
 		switch(GetWhichDrive())
 		{
 		case TANK_DRIVE:
+			this->printf("Driving With Tank Drive\n Left Enabled = %i,\n Right Enabled = %i", this->GetLeftStickEnabled(), this->GetRightStickEnabled());
 			TankDrive();
 			break;
 		case ARCADE_DRIVE:
+			this->printf("Driving With Arcade Drive\n Left Enabled = %i,\n Right Enabled = %i", this->GetLeftStickEnabled(), this->GetRightStickEnabled());
 			ArcadeDrive();
 			break;
 		case ZTWIST_DRIVE:
+			this->printf("Driving With Z-Twist Drive\n Left Enabled = %i,\n Right Enabled = %i", this->GetLeftStickEnabled(), this->GetRightStickEnabled());
 			ZTwistDrive();
 			break;
 		case XY_DRIVE:
+			this->printf("Driving With X-Y Drive\n Left Enabled = %i,\n Right Enabled = %i", this->GetLeftStickEnabled(), this->GetRightStickEnabled());
 			XYDrive();
 			break;
 		}

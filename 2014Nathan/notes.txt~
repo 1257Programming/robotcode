@@ -49,8 +49,9 @@ Class Team1257Robot
 	---------------------
 	Self-explanatory
 	
-I Removed the <cassert> inclusion!!!
-------------------------------------
+<cassert> inclusion
+--------------------
+Need to remove but too lazy...
 
 THE END!!!
 ----------
