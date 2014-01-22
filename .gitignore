@@ -19,3 +19,6 @@ PPC603GNU/*
 .w*
 .cproject
 .project
+
+# Backup Files
+*~
