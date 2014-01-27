@@ -23,3 +23,7 @@ I now have acceleration code in the tank-drive and drive functions.
 FLEEDLE DEEDLE!
 
 —N
+COMMENT BY BRIAN:
+-----------------
+
+I think that we should standardize on one piece of code. this-> is unnecessarily complicated! (factorial)
