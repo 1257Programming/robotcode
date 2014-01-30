@@ -18,7 +18,7 @@ Robot::Robot() :
 #define PRINT(msg){lcd->Printf(dLcd::kUser_Line1, 1, msg);}//simple print
 void Robot::Autonomous() {
 	PRINT("Starting Autonomous");
-	relay.Set(relay.kForward);
+	//relay.Set(relay.kForward);
 	bool got = false;
 	while (IsAutonomous() && IsEnabled()) {
 		if (!got) {
@@ -27,7 +27,7 @@ void Robot::Autonomous() {
 		} else
 			continue;
 	}
-	relay.Set(relay.kOff);
+	//relay.Set(relay.kOff);
 }
 
 void Robot::OperatorControl() {
@@ -36,28 +36,26 @@ void Robot::OperatorControl() {
 	while (IsOperatorControl() && IsEnabled()) {
 		if (stick.GetRawButton(5) && stick.GetRawButton(6))
 			arcadeDrive();
-		else if (stick.GetRawButton(7) && stick.GetRawButton(8))
+		else if (stick.GetZ())
 			drive();
 	}
 }
 
 inline void Robot::drive(double x, double y) {
-	rd.SetLeftRightMotorOutputs(-x, -y);
+	rd.SetLeftRightMotorOutputs(x, y);
 }
 
 void Robot::drive()//tank drive
 {
 	double x = stick.GetY();
-	double y = stick.GetTwist();
+	double y = stick.GetRawAxis(5);
 	accel(x, y);
 }
 
 void Robot::arcadeDrive() {
-	double x = stick.GetX(); double y = stick.GetTwist();
-	if (abs((int) x) > 0) {
-		drive(x / 2 * sf, -x / 2 * sf);
-	} else
-		accel(y * sf, y * sf);
+	double x = stick.GetX();
+	double y = stick.GetRawAxis(5);
+	rd.ArcadeDrive(y, x, false);
 }
 
 void Robot::accel(double x, double y) {
@@ -76,7 +74,6 @@ void Robot::accel(double x, double y) {
 			while (n < target) {
 				drive(n, n);
 				n += 0.05;
-				//int i = 0/0;
 			}
 		}
 	} else
