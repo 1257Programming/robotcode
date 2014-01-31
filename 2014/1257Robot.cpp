@@ -13,7 +13,7 @@ void Team1257Robot::OperatorControl()
 	while(IsOperatorControl() && IsEnabled())
 	{
 		drive(); // XBox Controller 1 drives robot
-		arms();//XBox Controller 2 conrols arms
+		arms(); //XBox Controller 2 conrols arms
 	}
 }
 
