@@ -8,8 +8,12 @@
  * the driver station or the field controls.
  */
 
+float targetSpeed[2] = { 0, 0 };
+float *speeds;
+bool arms = false;
+
 Robot::Robot() :
-	rd(1, 2), stick(LEFT_STICK), angle(1), relay(1) {
+	rd(1, 2), stick(LEFT_STICK), angle(1), relay(1), ac(3), arm1(3), arm2(4) {
 	rd.SetExpiration(0.1);
 	lcd = dLcd::GetInstance();
 	speed = 0;
@@ -18,19 +22,27 @@ Robot::Robot() :
 #define PRINT(msg){lcd->Printf(dLcd::kUser_Line1, 1, msg);}//simple print
 void Robot::Autonomous() {
 	PRINT("Starting Autonomous");
-	//relay.Set(relay.kForward);
+	relay.Set(relay.kForward);
 	bool got = false;
 	while (IsAutonomous() && IsEnabled()) {
 		if (!got) {
-			vis.aim();
+			if (vis.aim()) {
+				print("Yay", 2);
+				lcd->UpdateLCD();
+			} else {
+				print("Awww", 2);
+				lcd->UpdateLCD();
+			}
 			got = true;
 		} else
 			continue;
 	}
-	//relay.Set(relay.kOff);
+	relay.Set(relay.kOff);
 }
 
 void Robot::OperatorControl() {
+	bool control = false;
+	bool t = false;
 	relay.Set(relay.kOff);
 	PRINT("Started Operator Control");
 	while (IsOperatorControl() && IsEnabled()) {
@@ -38,6 +50,34 @@ void Robot::OperatorControl() {
 			arcadeDrive();
 		else if (stick.GetZ())
 			drive();
+		if (stick.GetRawButton(1)) {
+			if (arms)
+				arms = false;
+			else
+				arms = true;
+		}
+		if (arms) {
+			control = controlArms(arms);
+			if (control) {
+				time.Start();
+				while(!t)
+				{
+					if(time.Get() >= 1.0)
+					{
+						t = true;
+						break;
+					}
+					else
+						continue;
+				}
+				time.Stop(); time.Reset();
+			}
+		}
+		else
+		{
+			control = false;
+			t = false;
+		}
 	}
 }
 
@@ -55,7 +95,19 @@ void Robot::drive()//tank drive
 void Robot::arcadeDrive() {
 	double x = stick.GetX();
 	double y = stick.GetRawAxis(5);
-	rd.ArcadeDrive(y, x, false);
+	rd.ArcadeDrive(x, y, false);
+}
+
+bool Robot::controlArms(bool arm) {
+	if (arm) {
+		double d = toMM(ac.GetVoltage());
+		if (d <= 20) {
+			return true;
+		} else
+			return false;
+	}
+	else
+		return false;
 }
 
 void Robot::accel(double x, double y) {
@@ -107,6 +159,15 @@ void Robot::print(char* msg, int i) {
 		break;
 	}
 	lcd->UpdateLCD();
+}
+
+inline double Robot::toMM(double volts) {
+	return (volts / 2.5) * 6450;//* 253.937; // 
+	//0-2.5 volts converted to MM (max distnace of 6,450mm)
+}
+
+inline double Robot::toIN(double volts) {
+	return (toMM(volts) / 10) / 2.54; //dimensional analysis for the win!!!
 }
 
 START_ROBOT_CLASS(Robot)
