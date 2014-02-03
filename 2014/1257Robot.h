@@ -39,7 +39,7 @@ public:
 	double accel(Joystick& stick, int axis, double& current, double limit);
 	void drive();
 	void arms();
-	inline double dabs(double value)
+	/*inline*/ double dabs(double value) //I don't see any inline assembly here   --N
 	{
 		if(value >= 0)
 			return value;
