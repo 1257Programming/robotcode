@@ -53,8 +53,7 @@ double Team1257Robot::accel(Joystick& stick, int axis, double& current, double l
 		current -= .05;
 	else if(dabs(raw) < dabs(current)) // If the target speed is lesser, reduce to that instantly, like for stopping
 		current = raw;
-	/*else*/ if(dabs(raw) <= .1) // Taking into account SLIGHTLY off-centered axes ;; Careful with the 'else'; the above condition will most likely evaluate if this is true, so this one then will not.  --N
-		current = 0;
+	/*else*/ if(dabs(raw) <= .1) // Taking into account SLIGHTLY off-centered axes
 	return (current * limit);
 }
 
