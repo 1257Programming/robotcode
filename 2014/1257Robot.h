@@ -39,7 +39,7 @@ public:
 	double accel(Joystick& stick, int axis, double& current, double limit);
 	void drive();
 	void arms();
-	/*inline*/ double dabs(double value)
+	double dabs(double value)
 	{
 		if(value >= 0)
 			return value;
