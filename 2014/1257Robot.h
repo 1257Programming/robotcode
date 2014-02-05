@@ -1,5 +1,5 @@
 #include "WPILib.h"
-
+#define dAbs(val) (val < 0 ? -val : val)
 class Team1257Robot : public SimpleRobot
 {
 public:
