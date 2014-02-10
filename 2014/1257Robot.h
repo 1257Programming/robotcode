@@ -1,19 +1,17 @@
 #include "WPILib.h"
-#define dAbs(val) (val < 0 ? -val : val)
+
 class Team1257Robot : public SimpleRobot
 {
 public:
-	Joystick Stick1;
-	Joystick Stick2;
+	Joystick Stick1; //Driver
+	Joystick Stick2; //Arms
 	Victor LeftDrive;
 	Victor RightDrive;
 	RobotDrive Drive;
 	Victor LeftArm;
 	Victor RightArm;
 	Victor ArmShoulder;
-	Gyro Angle;
-	//AnalogChannel Usonic;
-	DriverStationLCD* Lcd;
+	DriverStationLCD* Lcd; //Message Box
 	double leftspeed;
 	double rightspeed;
 	double speed;
@@ -23,7 +21,7 @@ public:
 	double shoulderspeed;
 	
 	Team1257Robot(): Stick1(1), Stick2(2), LeftDrive(1), RightDrive(2), Drive(LeftDrive, RightDrive),
-			LeftArm(3), RightArm(4), ArmShoulder(5), Angle(1)
+			LeftArm(4), RightArm(5), ArmShoulder(3)
 	{
 		Drive.SetExpiration(.1);
 		Lcd = DriverStationLCD::GetInstance();
@@ -32,11 +30,13 @@ public:
 		leftarmspeed = 0;
 		rightarmspeed = 0;
 		shoulderspeed = 0;
+		speed = 0;
+		curve = 0;
 	}
 	void OperatorControl();
 	void Autonomous();
 	void Test();
-	double accel(Joystick& stick, int axis, double& current, double limit);
+	double accel(Joystick& stick, int axis, double& current, double sf);
 	void drive();
 	void arms();
 	double dabs(double value)
