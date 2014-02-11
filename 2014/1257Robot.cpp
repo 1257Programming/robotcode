@@ -26,21 +26,22 @@ void Team1257Robot::drive()
 {
 	if(Stick1.GetRawButton(5) && Stick1.GetRawButton(6))
 	{
-		Drive.TankDrive(accel(Stick1, 2, leftspeed, .5), accel(Stick1, 5, rightspeed, .5), false);
+		Drive.TankDrive(-accel(Stick1, 2, leftspeed, .5), -accel(Stick1, 5, rightspeed, .5), false);
 	}
 	else if (Stick1.GetRawAxis(3)) // Back button; just one, not both
 	{
-		Drive.ArcadeDrive(accel(Stick1, 5, speed, .5), accel(Stick1, 1, curve, .5), false);
+		Drive.ArcadeDrive(-accel(Stick1, 5, speed, .5), -accel(Stick1, 1, curve, .5), false);
 	}
 }
 
 void Team1257Robot::arms()
 {
-	if(Stick2.GetRawButton(5))
-		LeftArm.Set(accel(Stick2, 1, leftarmspeed, .2));
-	if(Stick2.GetRawButton(6))
-		RightArm.Set(accel(Stick2, 4, rightarmspeed, .2));
-	ArmShoulder.Set(accel(Stick2, 3, shoulderspeed, .2));
+	double sf =.5;
+	if(Stick2.GetRawButton(5) && Stick2.GetRawButton(6))
+		sf = 1;
+	LeftArm.Set(-accel(Stick2, 1, leftarmspeed, sf));
+	RightArm.Set(accel(Stick2, 4, rightarmspeed, sf));
+	ArmShoulder.Set(accel(Stick2, 3, shoulderspeed, .4));
 }
 
 double Team1257Robot::accel(Joystick& stick, int axis, double& current, double sf)
@@ -58,4 +59,3 @@ double Team1257Robot::accel(Joystick& stick, int axis, double& current, double s
 }
 
 START_ROBOT_CLASS(Team1257Robot);
-
