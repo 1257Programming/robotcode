@@ -19,6 +19,7 @@ public:
 	double leftarmspeed;
 	double rightarmspeed;
 	double shoulderspeed;
+	bool realbot; // Testbot or Realbot
 	
 	Team1257Robot(): Stick1(1), Stick2(2), LeftDrive(1), RightDrive(2), Drive(LeftDrive, RightDrive),
 			LeftArm(4), RightArm(5), ArmShoulder(3)
@@ -32,6 +33,7 @@ public:
 		shoulderspeed = 0;
 		speed = 0;
 		curve = 0;
+		realbot = true; // Assume real robot
 	}
 	void OperatorControl();
 	void Autonomous();
@@ -47,3 +49,4 @@ public:
 			return -value;
 	}
 };
+
