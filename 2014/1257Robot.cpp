@@ -64,7 +64,7 @@ void Team1257Robot::arms()
 	DigitalInput LimitSwitch(1);
 	if(!LimitSwitch.Get())
 		ArmShoulder.Set(0);
-	ArmShoulder.Set(accel(Stick2, 3, shoulderspeed, .4));
+	else ArmShoulder.Set(accel(Stick2, 3, shoulderspeed, .4));
 }
 
 double Team1257Robot::accel(Joystick& stick, int axis, double& current, double sf)
