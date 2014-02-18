@@ -5,12 +5,16 @@ class Team1257Robot : public SimpleRobot
 public:
 	Joystick Stick1; //Driver
 	Joystick Stick2; //Arms
-	Victor LeftDrive;
-	Victor RightDrive;
+	Victor LeftDrive1;
+	Victor LeftDrive2;
+	Victor RightDrive1;
+	Victor RightDrive2;
 	RobotDrive Drive;
+	RobotDrive TestBot;
 	Victor LeftArm;
 	Victor RightArm;
-	Victor ArmShoulder;
+	Victor ArmShoulder1;
+	Victor ArmShoulder2;
 	DriverStationLCD* Lcd; //Message Box
 	double leftspeed;
 	double rightspeed;
@@ -19,12 +23,14 @@ public:
 	double leftarmspeed;
 	double rightarmspeed;
 	double shoulderspeed;
-	bool realbot; // Testbot or Realbot
 	
-	Team1257Robot(): Stick1(1), Stick2(2), LeftDrive(1), RightDrive(2), Drive(LeftDrive, RightDrive),
-			LeftArm(4), RightArm(5), ArmShoulder(3)
+	Team1257Robot(): Stick1(1), Stick2(2), LeftDrive1(1), LeftDrive2(2), RightDrive1(7), RightDrive2(8), 
+			Drive(LeftDrive1, LeftDrive2, RightDrive1, RightDrive2), 
+			TestBot(1, 2),
+			LeftArm(3), RightArm(4), ArmShoulder1(5), ArmShoulder2(6)
 	{
 		Drive.SetExpiration(.1);
+		TestBot.SetExpiration(.1);
 		Lcd = DriverStationLCD::GetInstance();
 		leftspeed = 0;
 		rightspeed = 0;
@@ -33,7 +39,6 @@ public:
 		shoulderspeed = 0;
 		speed = 0;
 		curve = 0;
-		realbot = true; // Assume real robot
 	}
 	void OperatorControl();
 	void Autonomous();
@@ -49,4 +54,3 @@ public:
 			return -value;
 	}
 };
-
