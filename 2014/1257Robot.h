@@ -1,5 +1,7 @@
 #include "WPILib.h"
 
+typedef DriverStationLCD dLcd;
+
 class Team1257Robot : public SimpleRobot
 {
 public:
@@ -50,4 +52,5 @@ public:
 		else
 			return -value;
 	}
+	
 };
