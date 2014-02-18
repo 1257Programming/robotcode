@@ -10,7 +10,6 @@ public:
 	Victor RightDrive1;
 	Victor RightDrive2;
 	RobotDrive Drive;
-	RobotDrive TestBot;
 	Victor LeftArm;
 	Victor RightArm;
 	Victor ArmShoulder1;
@@ -26,11 +25,9 @@ public:
 	
 	Team1257Robot(): Stick1(1), Stick2(2), LeftDrive1(1), LeftDrive2(2), RightDrive1(7), RightDrive2(8), 
 			Drive(LeftDrive1, LeftDrive2, RightDrive1, RightDrive2), 
-			TestBot(1, 2),
 			LeftArm(3), RightArm(4), ArmShoulder1(5), ArmShoulder2(6)
 	{
 		Drive.SetExpiration(.1);
-		TestBot.SetExpiration(.1);
 		Lcd = DriverStationLCD::GetInstance();
 		leftspeed = 0;
 		rightspeed = 0;
