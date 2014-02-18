@@ -37,8 +37,6 @@ void Team1257Robot::drive()
 		Drive.ArcadeDrive(-accel(Stick1, 5, speed, sf), -accel(Stick1, 1, curve, sf), false);
 	}
 }
-	
-
 
 void Team1257Robot::arms()
 {
@@ -47,9 +45,12 @@ void Team1257Robot::arms()
 		sf = 1;
 	LeftArm.Set(-accel(Stick2, 1, leftarmspeed, sf));
 	RightArm.Set(accel(Stick2, 4, rightarmspeed, sf));
-	DigitalInput LimitSwitch(1);
-	ArmShoulder1.Set(accel(Stick2, 3, shoulderspeed, .4));
-	ArmShoulder2.Set(-accel(Stick2, 3, shoulderspeed, .4));
+	DigitalInput LimitSwitch(2);
+	if(!LimitSwitch.Get() || Stick2.GetRawAxis(3) > 0)
+	{
+		ArmShoulder1.Set(accel(Stick2, 3, shoulderspeed, .4));
+		ArmShoulder2.Set(-accel(Stick2, 3, shoulderspeed, .4));
+	}
 }
 
 double Team1257Robot::accel(Joystick& stick, int axis, double& current, double sf)
@@ -67,5 +68,4 @@ double Team1257Robot::accel(Joystick& stick, int axis, double& current, double s
 }
 
 START_ROBOT_CLASS(Team1257Robot);
-
 
