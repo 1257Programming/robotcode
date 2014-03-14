@@ -41,8 +41,7 @@ public:
 	}
 	void OperatorControl();
 	void Autonomous();
-	void Test();
-	double accel(Joystick& stick, int axis, double& current, double sf);
+	void Test();	double accel(Joystick& stick, int axis, double& current, double sf);
 	void drive();
 	void arms();
 	double dabs(double value)
