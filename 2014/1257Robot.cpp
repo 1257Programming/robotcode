@@ -4,7 +4,11 @@ void Team1257Robot::Autonomous()
 {
 	while(IsAutonomous() && IsEnabled())
 	{
-		Drive.SetLeftRightMotorOutputs(-.3, -.3);
+		Timer time;
+		time.Start();
+		while(time.Get() < 4)
+			Drive.SetLeftRightMotorOutputs(-.3, -.3);
+		Drive.SetLeftRightMotorOutputs(0, 0);
 	}
 }
 
@@ -32,25 +36,49 @@ void Team1257Robot::drive()
 	{
 		Drive.TankDrive(-accel(Stick1, 2, leftspeed, sf), -accel(Stick1, 5, rightspeed, sf), false);
 	}
-	else if (Stick1.GetRawAxis(3)) // Back button; just one, not both
+	else if (Stick1.GetRawAxis(3) < 0) // Back button; just one, not both
 	{
-		Drive.ArcadeDrive(-accel(Stick1, 5, speed, sf), -accel(Stick1, 1, curve, sf), false);
+		Drive.ArcadeDrive(-accel(Stick1, 5, speed, sf), -accel(Stick1, 1, curve, sf), false); 
 	}
+	else if (Stick1.GetRawAxis(3) > 0)
+	{
+		Drive.ArcadeDrive(-accel(Stick1, 2, speed, sf), -accel(Stick1, 4, curve, sf), false); 
+	}
+	else
+		Drive.SetLeftRightMotorOutputs(0, 0);
 }
 
 void Team1257Robot::arms()
 {
+	bool limitswitchenabled = true;
+	if(Stick2.GetRawButton(1))
+		limitswitchenabled = true;
+	else if(Stick2.GetRawButton(2))
+		limitswitchenabled = false;
 	double sf =.5;
-	if(Stick2.GetRawButton(5) && Stick2.GetRawButton(6))
-		sf = 1;
+	LeftArm.Set(-accel(Stick2, 1, leftarmspeed, sf));
+	RightArm.Set(accel(Stick2, 4, rightarmspeed, sf));
+	if(Stick2.GetRawButton(5))
+	{
+		LeftArm.Set(.3);
+		RightArm.Set(-.3);
+	}
 	LeftArm.Set(-accel(Stick2, 1, leftarmspeed, sf));
 	RightArm.Set(accel(Stick2, 4, rightarmspeed, sf));
 	DigitalInput LimitSwitch(2);
-	if(!LimitSwitch.Get() || Stick2.GetRawAxis(3) > 0)
+	if(!LimitSwitch.Get() || Stick2.GetRawAxis(3) > 0 || !limitswitchenabled)
 	{
 		ArmShoulder1.Set(accel(Stick2, 3, shoulderspeed, .4));
 		ArmShoulder2.Set(-accel(Stick2, 3, shoulderspeed, .4));
 	}
+	else
+	{
+		ArmShoulder1.Set(0);
+		ArmShoulder2.Set(0);
+	}
+	
+	Lcd->Printf(DriverStationLCD::kUser_Line2, 1, "Limit switch: %i", LimitSwitch.Get());
+	Lcd->UpdateLCD();
 }
 
 double Team1257Robot::accel(Joystick& stick, int axis, double& current, double sf)
@@ -68,4 +96,3 @@ double Team1257Robot::accel(Joystick& stick, int axis, double& current, double s
 }
 
 START_ROBOT_CLASS(Team1257Robot);
-
