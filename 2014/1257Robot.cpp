@@ -2,13 +2,17 @@
 
 void Team1257Robot::Autonomous()
 {
+	Timer time;
+	time.Start();
 	while(IsAutonomous() && IsEnabled())
-	{
-		Timer time;
-		time.Start();
-		while(time.Get() < 4)
-			Drive.SetLeftRightMotorOutputs(-.3, -.3);
-		Drive.SetLeftRightMotorOutputs(0, 0);
+	{	
+		if(time.Get() <= .8)
+			Drive.SetLeftRightMotorOutputs(.5, .5);
+		else if(time.Get() <= 2.5)
+			Drive.SetLeftRightMotorOutputs(.25, .25);
+		else
+			Drive.SetLeftRightMotorOutputs(0, 0);
+		Wait(.005);
 	}
 }
 
@@ -31,45 +35,51 @@ void Team1257Robot::Test()
 
 void Team1257Robot::drive()
 {
-	double sf = .5;
+	double sf;
+	sf = .8;
 	if(Stick1.GetRawButton(5) && Stick1.GetRawButton(6))
 	{
 		Drive.TankDrive(-accel(Stick1, 2, leftspeed, sf), -accel(Stick1, 5, rightspeed, sf), false);
 	}
 	else if (Stick1.GetRawAxis(3) < 0) // Back button; just one, not both
 	{
+		if(Stick1.GetRawButton(6))
+			sf = 1;
 		Drive.ArcadeDrive(-accel(Stick1, 5, speed, sf), -accel(Stick1, 1, curve, sf), false); 
 	}
 	else if (Stick1.GetRawAxis(3) > 0)
 	{
 		Drive.ArcadeDrive(-accel(Stick1, 2, speed, sf), -accel(Stick1, 4, curve, sf), false); 
+		if(Stick1.GetRawButton(6))
+					sf = 1;
 	}
+	/*else if(Stick1.GetRawButton(5) && Stick1.GetRawAxis(3))
+	{
+		Drive.ArcadeDrive(1, 1, false); //turbo
+	}*/
 	else
 		Drive.SetLeftRightMotorOutputs(0, 0);
+	Wait(0.005);
 }
 
 void Team1257Robot::arms()
 {
 	bool limitswitchenabled = true;
 	if(Stick2.GetRawButton(1))
-		limitswitchenabled = true;
-	else if(Stick2.GetRawButton(2))
-		limitswitchenabled = false;
-	double sf =.5;
-	LeftArm.Set(-accel(Stick2, 1, leftarmspeed, sf));
-	RightArm.Set(accel(Stick2, 4, rightarmspeed, sf));
-	if(Stick2.GetRawButton(5))
 	{
-		LeftArm.Set(.3);
-		RightArm.Set(-.3);
+		limitswitchenabled = true;
+		Lcd->Printf(DriverStationLCD::kUser_Line3, 1, "LS  Enabled");
 	}
-	LeftArm.Set(-accel(Stick2, 1, leftarmspeed, sf));
-	RightArm.Set(accel(Stick2, 4, rightarmspeed, sf));
-	DigitalInput LimitSwitch(2);
+	else if(Stick2.GetRawButton(2))
+	{
+		limitswitchenabled = false;
+		Lcd->Printf(DriverStationLCD::kUser_Line3, 1, "LS Disabled");
+	}
+
 	if(!LimitSwitch.Get() || Stick2.GetRawAxis(3) > 0 || !limitswitchenabled)
 	{
-		ArmShoulder1.Set(accel(Stick2, 3, shoulderspeed, .4));
-		ArmShoulder2.Set(-accel(Stick2, 3, shoulderspeed, .4));
+		ArmShoulder1.Set(accel(Stick2, 3, shoulderspeed, .6));
+		ArmShoulder2.Set(-accel(Stick2, 3, shoulderspeed, .6));
 	}
 	else
 	{
