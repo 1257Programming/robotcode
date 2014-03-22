@@ -59,7 +59,6 @@ void Team1257Robot::drive()
 	}*/
 	else
 		Drive.SetLeftRightMotorOutputs(0, 0);
-	Wait(0.005);
 }
 
 void Team1257Robot::arms()
