@@ -8,7 +8,7 @@ Nathan, Rohan and Brian's code
 
 Version we all wrote together to be the standard, official code for competition.
 
-(2014)<Name>
+(2014)\<Name\>
 -----------
 
-Version worked on by <Name>
+Version worked on by \<Name\>
