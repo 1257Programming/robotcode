@@ -4,18 +4,16 @@ void Team1257Robot::Autonomous()
 {
 	Timer time;
 	time.Start();
-	while(IsAutonomous() && IsEnabled())
-	{	
-		if(time.Get() <= .8)
-			Drive.SetLeftRightMotorOutputs(.5, .5);
-		else if(time.Get() <= 2.5)
-			Drive.SetLeftRightMotorOutputs(.25, .25);
-		else
-			Drive.SetLeftRightMotorOutputs(0, 0);
-		Wait(.005);
-	}
+	
+	Drive.SetLeftRightMotorOutputs(-.25, -2.5);
+	Wait(2750);
+	Drive.SetLeftRightMotorOutputs(0, 0);
+	Wait(500);
+	fire.Set(fire.kForward);
+	Wait(500);
+	fire.Set(fire.kOff);
+	Wait(100);
 }
-
 void Team1257Robot::OperatorControl()
 {
 	Lcd->Clear();
@@ -24,7 +22,59 @@ void Team1257Robot::OperatorControl()
 	while(IsOperatorControl() && IsEnabled())
 	{
 		drive(); // XBox Controller 1 drives robot
-		arms();//XBox Controller 2 conrols arms
+		arms();//XBox Controller 2 conrols arms / shooter
+		if(!pressureSense.Get())
+			Lcd->Printf(DriverStationLCD::kUser_Line2, 1, "Pressurizing");
+		else
+			Lcd->Printf(DriverStationLCD::kUser_Line2, 1, "Pressurized!");
+		//Lcd->Printf(dLcd::kUser_Line2, 1, "%i", pressureSense.Get());
+		Lcd->UpdateLCD();
+		
+		if(!pressureSense.Get()) 
+		{
+			compress.Set(compress.kForward);
+		}
+		else
+			compress.Set(compress.kOff);
+		shoot();
+	}
+	
+}
+
+void Team1257Robot::shoot()
+{
+	if(Stick2.GetRawButton(6))
+	{
+		fire.Set(fire.kForward);
+	}
+	else if(Stick2.GetRawButton(2))
+	{
+		Timer time;
+		time.Start();
+		while(time.Get() <= 0.5)
+		{
+			Drive.SetLeftRightMotorOutputs(0.5, 0.5);
+		}
+		Drive.SetLeftRightMotorOutputs(0, 0);
+		Wait(500);
+		fire.Set(fire.kForward);
+	}
+	else if(Stick2.GetRawButton(1))
+	{
+		Timer time;
+		time.Start();
+		while(time.Get() <= 0.5)
+		{
+			Drive.SetLeftRightMotorOutputs(0.5, 0.5);
+		}
+		Drive.SetLeftRightMotorOutputs(0, 0);
+		while(time.Get() >= .5 && time.Get() <= 1)
+			fire.Set(fire.kForward);
+		fire.Set(fire.kOff);
+	}
+	else
+	{
+		fire.Set(fire.kOff);
 	}
 }
 
@@ -39,19 +89,17 @@ void Team1257Robot::drive()
 	sf = .8;
 	if(Stick1.GetRawButton(5) && Stick1.GetRawButton(6))
 	{
-		Drive.TankDrive(-accel(Stick1, 2, leftspeed, sf), -accel(Stick1, 5, rightspeed, sf), false);
+		Drive.TankDrive(accel(Stick1, 2, leftspeed, sf), accel(Stick1, 5, rightspeed, sf), false);
 	}
 	else if (Stick1.GetRawAxis(3) < 0) // Back button; just one, not both
 	{
 		if(Stick1.GetRawButton(6))
 			sf = 1;
-		Drive.ArcadeDrive(-accel(Stick1, 5, speed, sf), -accel(Stick1, 1, curve, sf), false); 
+		Drive.ArcadeDrive(accel(Stick1, 5, speed, sf), accel(Stick1, 1, curve, sf), false); 
 	}
 	else if (Stick1.GetRawAxis(3) > 0)
 	{
-		Drive.ArcadeDrive(-accel(Stick1, 2, speed, sf), -accel(Stick1, 4, curve, sf), false); 
-		if(Stick1.GetRawButton(6))
-					sf = 1;
+		Drive.ArcadeDrive(accel(Stick1, 2, speed, sf), accel(Stick1, 4, curve, sf), false); 
 	}
 	/*else if(Stick1.GetRawButton(5) && Stick1.GetRawAxis(3))
 	{
@@ -59,34 +107,15 @@ void Team1257Robot::drive()
 	}*/
 	else
 		Drive.SetLeftRightMotorOutputs(0, 0);
+	//while(Stick1.GetRawButton(1))
+		//		Drive.SetLeftRightMotorOutputs(-.25, -.25);
 }
 
 void Team1257Robot::arms()
 {
-	bool limitswitchenabled = true;
-	if(Stick2.GetRawButton(1))
-	{
-		limitswitchenabled = true;
-		Lcd->Printf(DriverStationLCD::kUser_Line3, 1, "LS  Enabled");
-	}
-	else if(Stick2.GetRawButton(2))
-	{
-		limitswitchenabled = false;
-		Lcd->Printf(DriverStationLCD::kUser_Line3, 1, "LS Disabled");
-	}
-
-	if(!LimitSwitch.Get() || Stick2.GetRawAxis(3) > 0 || !limitswitchenabled)
-	{
-		ArmShoulder1.Set(accel(Stick2, 3, shoulderspeed, .6));
-		ArmShoulder2.Set(-accel(Stick2, 3, shoulderspeed, .6));
-	}
-	else
-	{
-		ArmShoulder1.Set(0);
-		ArmShoulder2.Set(0);
-	}
+	ArmShoulder1.Set(accel(Stick2, 3, shoulderspeed, 1));
+	ArmShoulder2.Set(-accel(Stick2, 3, shoulderspeed, 1));
 	
-	Lcd->Printf(DriverStationLCD::kUser_Line2, 1, "Limit switch: %i", LimitSwitch.Get());
 	Lcd->UpdateLCD();
 }
 
