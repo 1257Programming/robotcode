@@ -1,54 +1,58 @@
-#include <WPILib.h>
-#include <Wait.h>
-#include <cstdarg>
-#define LEFT 1
-#define RIGHT 2
-#define LARM 3
-#define RARM 4
-#define BEND 5
-#define TANK_DRIVE 0
-#define ARCADE_DRIVE 1
-#define ZTWIST_DRIVE 2
-#define XY_DRIVE 3
-class Team1257Robot : public SimpleRobot {
-	RobotDrive team1257Robot;
-	Joystick LeftStick;
-	Joystick RightStick;
-	Joystick LeftArm;
-	Joystick RightArm;
-	Victor Arm1;
-	Victor Arm2;
-	Victor armBend;
-	DriverStationLCD * team1257LCD;
-	bool leftStickIsEnabled;
-	bool rightStickIsEnabled;
-	int whichDrive;
+#include "WPILib.h"
+
+typedef DriverStationLCD dLcd;
+
+class Team1257Robot : public SimpleRobot
+{
 public:
-	Team1257Robot();
-	void Autonomous();
+	Joystick Stick1; //Driver
+	Joystick Stick2; //Arms
+	Victor LeftDrive1;
+	Victor LeftDrive2;
+	Victor RightDrive1;
+	Victor RightDrive2;
+	RobotDrive Drive;
+	Victor LeftArm;
+	Victor RightArm;
+	Victor ArmShoulder1;
+	Victor ArmShoulder2;
+	DriverStationLCD* Lcd; //Message Box
+	Relay fire, compress;
+	DigitalInput pressure;
+	double leftspeed;
+	double rightspeed;
+	double speed;
+	double curve;
+	double leftarmspeed;
+	double rightarmspeed;
+	double shoulderspeed;
+
+	Team1257Robot(): Stick1(1), Stick2(2), LeftDrive1(1), LeftDrive2(2), RightDrive1(7), RightDrive2(8), 
+			Drive(LeftDrive1, LeftDrive2, RightDrive1, RightDrive2), 
+			LeftArm(3), RightArm(4), ArmShoulder1(5), ArmShoulder2(6), fire(1), compress(3), pressure(3)
+	{
+		Drive.SetExpiration(.1);
+		Lcd = DriverStationLCD::GetInstance();
+		leftspeed = 0;
+		rightspeed = 0;
+		leftarmspeed = 0;
+		rightarmspeed = 0;
+		shoulderspeed = 0;
+		speed = 0;
+		curve = 0;
+	}
 	void OperatorControl();
-	void TankDrive();
-	void ArcadeDrive();
-	void ZTwistDrive();
-	void XYDrive();
-	void Drive(float, float);
-	int GetWhichDrive();
-	void SetWhichDrive(int);
-	void CheckSetDriveSticks();
-	void SetArmsX(float);
-	void SetArmsY(float);
-	bool GetLeftStickEnabled();
-	void SetLeftStickEnabled(bool);
-	bool GetRightStickEnabled();
-	void SetRightStickEnabled(bool);
-	void printf(char*, ...);
-	RobotDrive * GetDrive();
-	Joystick * GetRightStick();
-	Joystick * GetLeftStick();
-	Joystick * GetRightArm();
-	Joystick * GetLeftArm();
-	Victor * GetArmBend();
-	Victor * GetVictorInstanceFromNumber(int);
-	DriverStationLCD * GetLCD();
-	void SetLCDInstance(DriverStationLCD *);
+	void Autonomous();
+	void Test();	double accel(Joystick& stick, int axis, double& current, double sf);
+	void drive();
+	void arms();
+	void shoot();
+	double dabs(double value)
+	{
+		if(value >= 0)
+			return value;
+		else
+			return -value;
+	}
+	
 };
