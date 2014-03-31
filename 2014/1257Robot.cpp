@@ -6,13 +6,13 @@ void Team1257Robot::Autonomous()
 	time.Start();
 	
 	Drive.SetLeftRightMotorOutputs(-.25, -2.5);
-	Wait(2750);
+	Wait(2.750);
 	Drive.SetLeftRightMotorOutputs(0, 0);
-	Wait(500);
+	Wait(5.00);
 	fire.Set(fire.kForward);
-	Wait(500);
+	Wait(5.00);
 	fire.Set(fire.kOff);
-	Wait(100);
+	Wait(1.00);
 }
 void Team1257Robot::OperatorControl()
 {
@@ -56,7 +56,7 @@ void Team1257Robot::shoot()
 			Drive.SetLeftRightMotorOutputs(0.5, 0.5);
 		}
 		Drive.SetLeftRightMotorOutputs(0, 0);
-		Wait(500);
+		Wait(5.00);
 		fire.Set(fire.kForward);
 	}
 	else if(Stick2.GetRawButton(1))
