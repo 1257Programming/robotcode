@@ -16,8 +16,10 @@ public:
 	//BWOKE Victor RightArm;
 	Victor ArmShoulder1;
 	Victor ArmShoulder2;
+	Relay fire, compress; //pneumatics
+	DigitalInput pressureSense;
+	//Timer ShotTime;
 	DriverStationLCD* Lcd; //Message Box
-	DigitalInput LimitSwitch;
 	double leftspeed;
 	double rightspeed;
 	double speed;
@@ -26,9 +28,11 @@ public:
 	double rightarmspeed;
 	double shoulderspeed;
 	
-	Team1257Robot(): Stick1(1), Stick2(2), LeftDrive1(3), LeftDrive2(4), RightDrive1(9), RightDrive2(10), 
+	Team1257Robot(): Stick1(1), Stick2(2), 
+			LeftDrive1(3), LeftDrive2(4), RightDrive1(9), RightDrive2(10), 
 			Drive(LeftDrive1, LeftDrive2, RightDrive1, RightDrive2), 
-			ArmShoulder1(7), ArmShoulder2(8), LimitSwitch(2)
+			ArmShoulder1(7), ArmShoulder2(8), 
+			fire(1), compress(3), pressureSense(3)
 	{
 		Drive.SetExpiration(.1);
 		Lcd = DriverStationLCD::GetInstance();
@@ -46,6 +50,7 @@ public:
 	double accel(Joystick& stick, int axis, double& current, double sf);
 	void drive();
 	void arms();
+	void shoot();
 	double dabs(double value)
 	{
 		if(value >= 0)
