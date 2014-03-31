@@ -1,273 +1,121 @@
-#include "Team1257Robot.h"
-Team1257Robot::Team1257Robot():
-team1257Robot(LEFT,RIGHT),
-LeftStick(LEFT),
-RightStick(RIGHT),
-LeftArm(LARM),
-RightArm(RARM),
-Arm1(LARM),
-Arm2(RARM),
-armBend(BEND)
-{
-	this->SetLCDInstance(DriverStationLCD::GetInstance());
-	this->GetDrive()->SetExpiration(.1);
-	this->SetLeftStickEnabled(false);
-	this->SetRightStickEnabled(false);
-	SetWhichDrive(TANK_DRIVE);
-}
+#include "1257Robot.h"
+
 void Team1257Robot::Autonomous()
 {
+	Timer time;
+	time.Start();
 	while(IsAutonomous() && IsEnabled())
 	{
-		Drive(.3,.3);
-		Wait(4);
-		Drive(0,0);
-		while(true);
+		while(time.Get() < .8)
+			Drive.SetLeftRightMotorOutputs(.5, .5);
+		while(time.Get() < 2.5)
+			Drive.SetLeftRightMotorOutputs(2.5, 2.5);
+		Drive.SetLeftRightMotorOutputs(0, 0);
+		fire.Set(fire.kForward);
+		Wait(.5);
+		fire.Set(fire.kOff);
 	}
 }
+
 void Team1257Robot::OperatorControl()
 {
+	Lcd->Clear();
+	Lcd->Printf(DriverStationLCD::kUser_Line1, 1, "Teleoperated!");
+	Lcd->UpdateLCD();
 	while(IsOperatorControl() && IsEnabled())
 	{
-		CheckSetDriveSticks();
-		switch(GetWhichDrive())
-		{
-		case TANK_DRIVE:
-			this->printf("Driving With Tank Drive\n Left Enabled = %i,\n Right Enabled = %i", this->GetLeftStickEnabled(), this->GetRightStickEnabled());
-			TankDrive();
-			break;
-		case ARCADE_DRIVE:
-			this->printf("Driving With Arcade Drive\n Left Enabled = %i,\n Right Enabled = %i", this->GetLeftStickEnabled(), this->GetRightStickEnabled());
-			ArcadeDrive();
-			break;
-		case ZTWIST_DRIVE:
-			this->printf("Driving With Z-Twist Drive\n Left Enabled = %i,\n Right Enabled = %i", this->GetLeftStickEnabled(), this->GetRightStickEnabled());
-			ZTwistDrive();
-			break;
-		case XY_DRIVE:
-			this->printf("Driving With X-Y Drive\n Left Enabled = %i,\n Right Enabled = %i", this->GetLeftStickEnabled(), this->GetRightStickEnabled());
-			XYDrive();
-			break;
-		}
-		if(this->GetLeftArm()->GetRawButton(1) && this->GetRightArm()->GetRawButton(1))
-		{
-			this->SetArmsX((this->GetLeftArm()->GetX() + this->GetRightArm()->GetX())/2);
-			this->SetArmsY((this->GetLeftArm()->GetY() + this->GetRightArm()->GetY())/2);
-		}
-		else if(this->GetLeftArm()->GetRawButton(11))
-		{
-			this->SetArmsX((this->GetLeftArm()->GetX() + this->GetLeftArm()->GetZ())/2);
-			this->SetArmsY((this->GetLeftArm()->GetY() + this->GetLeftArm()->GetTwist())/2);
-		}
-		this->GetLCD()->Clear();
-		this->GetLCD()->UpdateLCD();
+		drive(); // XBox Controller 1 drives robot
+		//arms();//XBox Controller 2 conrols arms
+		shoot();
 	}
 }
-void Team1257Robot::TankDrive()
+
+void Team1257Robot::Test()
 {
-	if(this->GetLeftStickEnabled() && this->GetRightStickEnabled())
+	
+}
+
+void Team1257Robot::drive()
+{
+	double sf = .5;
+	if(Stick1.GetRawButton(5) && Stick1.GetRawButton(6))
 	{
-		float sf = .1;
-		while(sf <= .5)
-		{
-			this->GetDrive()->SetLeftRightMotorOutputs(-sf*this->GetLeftStick()->GetY(),-(sf)*this->GetRightStick()->GetY());
-			sf += .1;
-		}
+		Drive.TankDrive(-accel(Stick1, 2, leftspeed, sf), -accel(Stick1, 5, rightspeed, sf), false);
 	}
-	else if (this->GetLeftStickEnabled())
+	else if (Stick1.GetRawAxis(3) < 0) // Back button; just one, not both
 	{
-		float sf = .1;
-		while(sf <= .5)
-		{
-			this->GetDrive()->SetLeftRightMotorOutputs(-sf*this->GetLeftStick()->GetY(),-sf*this->GetLeftStick()->GetTwist());
-			sf += .1;
-		}
+		Drive.ArcadeDrive(-accel(Stick1, 5, speed, sf), -accel(Stick1, 1, curve, sf), false); 
 	}
-}
-void Team1257Robot::ArcadeDrive()
-{
-	if(this->GetRightStickEnabled() && this->GetLeftStickEnabled())
+	else if (Stick1.GetRawAxis(3) > 0)
 	{
-		this->GetDrive()->ArcadeDrive(this->GetLeftStick(),1,this->GetRightStick(),2,false);
+		Drive.ArcadeDrive(-accel(Stick1, 2, speed, sf), -accel(Stick1, 4, curve, sf), false); 
 	}
-	else if (this->GetLeftStickEnabled())
+	else
+		Drive.SetLeftRightMotorOutputs(0, 0);
+}
+
+void Team1257Robot::arms()
+{
+	bool limitswitchenabled = true;
+	if(Stick2.GetRawButton(1))
+		limitswitchenabled = true;
+	else if(Stick2.GetRawButton(2))
+		limitswitchenabled = false;
+	double sf =.5;
+	LeftArm.Set(-accel(Stick2, 1, leftarmspeed, sf));
+	RightArm.Set(accel(Stick2, 4, rightarmspeed, sf));
+	if(Stick2.GetRawButton(5))
 	{
-		this->GetDrive()->ArcadeDrive(this->GetLeftStick(),false);
+		LeftArm.Set(.3);
+		RightArm.Set(-.3);
 	}
-	else if (this->GetRightStickEnabled())
+	LeftArm.Set(-accel(Stick2, 1, leftarmspeed, sf));
+	RightArm.Set(accel(Stick2, 4, rightarmspeed, sf));
+	DigitalInput LimitSwitch(2);
+	if(!LimitSwitch.Get() || Stick2.GetRawAxis(3) > 0 || !limitswitchenabled)
 	{
-		this->GetDrive()->ArcadeDrive(this->GetRightStick(),false);
+		ArmShoulder1.Set(accel(Stick2, 3, shoulderspeed, .4));
+		ArmShoulder2.Set(-accel(Stick2, 3, shoulderspeed, .4));
 	}
-	else this->Drive(0,0);
-}
-void Team1257Robot::ZTwistDrive()
-{
-	if(this->GetRightStickEnabled())
+	else
 	{
-		this->GetDrive()->ArcadeDrive(this->GetRightStick()->GetZ(), this->GetRightStick()->GetTwist(),false);
+		ArmShoulder1.Set(0);
+		ArmShoulder2.Set(0);
 	}
-	else if (this->GetLeftStickEnabled())
+	
+	Lcd->Printf(DriverStationLCD::kUser_Line2, 1, "Limit switch: %i", LimitSwitch.Get());
+	Lcd->UpdateLCD();
+}
+void Team1257Robot::shoot()
+{
+	if(Stick2.GetRawButton(6))
 	{
-		this->GetDrive()->ArcadeDrive(this->GetLeftStick()->GetZ(),this->GetLeftStick()->GetTwist(),false);
+		fire.Set(fire.kForward);
+		compress.Set(compress.kOff);
 	}
-}
-void Team1257Robot::XYDrive()
-{
-	if(this->GetRightStickEnabled())
+	else if(!pressure.Get())
 	{
-		this->GetDrive()->ArcadeDrive(this->GetRightStick()->GetX(), this->GetRightStick()->GetY(),false);
+		fire.Set(fire.kOff);
+		compress.Set(compress.kForward);
 	}
-	else if (this->GetLeftStickEnabled())
+	else 
 	{
-		this->GetDrive()->ArcadeDrive(this->GetLeftStick()->GetX(),this->GetLeftStick()->GetY(),false);
+		fire.Set(fire.kOff);
+		compress.Set(compress.kOff);
 	}
 }
-void Team1257Robot::Drive(float left, float right)
+double Team1257Robot::accel(Joystick& stick, int axis, double& current, double sf)
 {
-	float sf = .1;
-	while (sf <= 1)
-	{
-		this->GetDrive()->SetLeftRightMotorOutputs(-sf*left, -sf*right);
-		sf += .2;
-	}
+	double raw = stick.GetRawAxis(axis);
+	if(raw > current && raw > 0) // If speeding up, increment it there, instead of sudden jerk
+		current += .05;
+	if(raw < current && raw < 0) // Same as above, taking into account negative joystick values
+		current -= .05;
+	if(dabs(raw) < dabs(current)) // If the target speed is lesser, reduce to that instantly, like for stopping
+		current = raw;
+	if(dabs(raw) < .2) // Taking into account SLIGHTLY off-centered axes
+		current = 0;
+	return (current * sf);
 }
-int Team1257Robot::GetWhichDrive()
-{
-	return this->whichDrive;
-}
-void Team1257Robot::SetWhichDrive(int value)
-{
-	this->whichDrive = value;
-}
-void Team1257Robot::CheckSetDriveSticks()
-{
-	if(this->GetLeftStick()->GetRawButton(5) && this->GetLeftStick()->GetRawButton(6))
-	{
-		SetWhichDrive(TANK_DRIVE);
-		this->SetLeftStickEnabled(true);
-	}
-	else if(this->GetLeftStick()->GetRawButton(1) && this->GetRightStick()->GetRawButton(1))
-	{
-		SetWhichDrive(TANK_DRIVE);
-		this->SetLeftStickEnabled(true);
-		this->SetRightStickEnabled(true);
-	}
-	else if(this->GetLeftStick()->GetRawButton(1))
-	{
-		SetWhichDrive(ARCADE_DRIVE);
-		this->SetLeftStickEnabled(true);
-	}
-	else if(this->GetRightStick()->GetRawButton(1))
-	{
-		SetWhichDrive(ARCADE_DRIVE);
-		this->SetRightStickEnabled(true);
-	}
-	else if(this->GetLeftStick()->GetRawButton(12))
-	{
-		SetWhichDrive(ZTWIST_DRIVE);
-		this->SetLeftStickEnabled(true);
-	}
-	else if(this->GetRightStick()->GetRawButton(12))
-	{
-		SetWhichDrive(ZTWIST_DRIVE);
-		this->SetRightStickEnabled(true);
-	}
-	else if(this->GetLeftStick()->GetRawButton(11))
-	{
-		SetWhichDrive(XY_DRIVE);
-		this->SetLeftStickEnabled(true);
-	}
-	else if(this->GetRightStick()->GetRawButton(11))
-	{
-		SetWhichDrive(XY_DRIVE);
-		this->SetRightStickEnabled(true);
-	}
-}
-void Team1257Robot::SetArmsX(float value)
-{
-	this->GetVictorInstanceFromNumber(1)->Set(value);
-	this->GetVictorInstanceFromNumber(2)->Set(-value);
-}
-void Team1257Robot::SetArmsY(float value)
-{
-	this->GetArmBend()->Set(value);
-}
-bool Team1257Robot::GetLeftStickEnabled()
-{
-	return this->leftStickIsEnabled;
-}
-void Team1257Robot::SetLeftStickEnabled(bool value)
-{
-	this->leftStickIsEnabled = value;
-}
-bool Team1257Robot::GetRightStickEnabled()
-{
-	return this->rightStickIsEnabled;
-}
-void Team1257Robot::SetRightStickEnabled(bool value)
-{
-	this->rightStickIsEnabled = value;
-}
-void Team1257Robot::printf(char * Template , ...)
-{
-	va_list subs;
-	va_start(subs, Template);
-	this->GetLCD()->VPrintf(this->GetLCD()->kUser_Line1,1,Template,subs);
-	va_end(subs);
-	this->GetLCD()->UpdateLCD();
-}
-RobotDrive * Team1257Robot::GetDrive()
-{
-	return &(this->team1257Robot);
-}
-Joystick * Team1257Robot::GetRightStick()
-{
-	return Joystick::GetStickForPort(2);
-}
-Joystick * Team1257Robot::GetLeftStick()
-{
-	return Joystick::GetStickForPort(1);
-}
-Joystick * Team1257Robot::GetRightArm()
-{
-	return Joystick::GetStickForPort(4);
-}
-Joystick * Team1257Robot::GetLeftArm()
-{
-	return Joystick::GetStickForPort(3);
-}
-Victor * Team1257Robot::GetArmBend()
-{
-	return &(this->armBend);	
-}
-Victor * Team1257Robot::GetVictorInstanceFromNumber(int num)
-{
-	switch(num)
-	{
-	case 1:
-		return &(this->Arm1);
-	case 2:
-		return &(this->Arm2);
-	default:
-		return NULL;
-	}
-}
-DriverStationLCD * Team1257Robot::GetLCD()
-{
-	return this->team1257LCD;
-}
-void Team1257Robot::SetLCDInstance(DriverStationLCD * instance)
-{
-	this->team1257LCD = instance;
-}
-RobotBase * FRC_userClassFactory() 
-{ 
-	return new Team1257Robot(); 
-} 
-extern "C" { 
-	int32_t FRC_UserProgram_StartupLibraryInit() 
-	{ 
-		RobotBase::startRobotTask((FUNCPTR)FRC_userClassFactory); 
-		return 0; 
-	} 
-}
+
+START_ROBOT_CLASS(Team1257Robot);
