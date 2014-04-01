@@ -5,7 +5,7 @@ void Team1257Robot::Autonomous()
 	Timer time;
 	time.Start();
 	
-	Drive.SetLeftRightMotorOutputs(-.25, -2.5);
+	Drive.SetLeftRightMotorOutputs(-.25, -.25);
 	Wait(2750);
 	Drive.SetLeftRightMotorOutputs(0, 0);
 	Wait(500);
