@@ -3,9 +3,11 @@
 
 typedef DriverStationLCD dLcd;
 
+#define failed return false
+
 class Team1257Robot : public SimpleRobot
 {
-public:
+public:	
 	Joystick Stick1; //Driver
 	Joystick Stick2; //Arms
 	Victor LeftDrive1;
@@ -33,7 +35,7 @@ public:
 			LeftDrive1(3), LeftDrive2(4), RightDrive1(9), RightDrive2(10), 
 			Drive(LeftDrive1, LeftDrive2, RightDrive1, RightDrive2), 
 			ArmShoulder1(7), ArmShoulder2(8), fire(1), compress(4),
-			pressureSense(3), transd(1)
+			pressureSense(3), transd(2)
 	{
 		Drive.SetExpiration(.1);
 		Lcd = DriverStationLCD::GetInstance();
