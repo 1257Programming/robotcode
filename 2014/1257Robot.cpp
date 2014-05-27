@@ -3,19 +3,18 @@
 
 void Team1257Robot::Autonomous()
 {
-	
 	Timer time;
 	time.Start();
 	while(IsAutonomous() && IsEnabled() && time.Get() <= 10)
 	{
 		if(time.Get() <= 2.25)
-		Drive.SetLeftRightMotorOutputs(-.25, -.25); //Make faster for Monty for more time for Vision
+			Drive.SetLeftRightMotorOutputs(.4, .4); //Make faster for Monty for more time for Vision
 		else if(time.Get() <= 3.25)
 		{
 			Drive.SetLeftRightMotorOutputs(0, 0);
 		}
 
-		else if((time.Get() <= 3.75))
+		else if(time.Get() <= 3.75)
 		{
 			fire.Set(fire.kForward);
 			Wait(.5);
@@ -24,6 +23,30 @@ void Team1257Robot::Autonomous()
 	}
 	time.Stop();
 }
+	
+	/*
+	Lcd->Clear();
+	Lcd->UpdateLCD();
+	NetworkTable* table = NetworkTable::GetTable("SmartDashboard");
+	Timer time;
+	time.Start();
+	while(IsAutonomous() && IsEnabled() && time.Get() <= 10)
+	{
+		if(time.Get() <= 2.25)
+			Drive.SetLeftRightMotorOutputs(.25, .25); //Make faster for Monty for more time for Vision
+		else if(time.Get() <= 3.25)
+		{
+			Drive.SetLeftRightMotorOutputs(0, 0);
+		}
+
+		else if((time.Get() <= 3.75))
+		{
+				//fire.Set(fire.kForward);
+			Wait(.5);
+				//fire.Set(fire.kOff);
+		}
+	}
+}*/
 void Team1257Robot::OperatorControl()
 {
 	Lcd->Clear();
@@ -80,45 +103,42 @@ void Team1257Robot::shoot()
 
 void Team1257Robot::Test()
 {
-	Timer time;
-	time.Start();
-	//NetworkTable *table = NetworkTable::GetTable("SmartDashboard");
-	//table->PutBoolean("RUN",1);
-	//Wait(1);
-	bool found = 1; //table->GetBoolean("RESULT");
-	while(IsTest() && IsEnabled())
+	Lcd->Clear();
+	Lcd->UpdateLCD();
+	NetworkTable* table = NetworkTable::GetTable("SmartDashboard");
+	table->PutNumber("ROBORUN", 1);
+	Wait(1);
+	table->PutNumber("ROBORUN", 0);
+	Wait(.5);
+	bool result = table->GetBoolean("RESULT");
+	if(result)
 	{
-		
-		if(time.Get() <= 2.25)
-		{
-			Drive.SetLeftRightMotorOutputs(-.25, -.25);
-			Lcd->Printf(DriverStationLCD::kUser_Line3, 1, "Driving");
-		}
-		else if(time.Get() <= 3.25)
-		{
-			Drive.SetLeftRightMotorOutputs(0, 0);
-			Lcd->Printf(DriverStationLCD::kUser_Line3, 1, "Stopped");
-		}
-		
-		else if((time.Get() <= 3.75) && found)
-		{
-			//table->PutBoolean("RUN",0);
-			Lcd->Printf(DriverStationLCD::kUser_Line3, 1, "FOUNDED");
-			fire.Set(fire.kForward);
-			Wait(.5);
-			fire.Set(fire.kOff);
-		}
-		else if(time.Get() > 5 && !found)
-		{
-			//table->PutBoolean("RUN",0);
-			Lcd->Printf(DriverStationLCD::kUser_Line3, 1, "NOFOUND");
-			fire.Set(fire.kForward);
-			Wait(.5);
-			fire.Set(fire.kOff);
-		}
+		Lcd->Printf(DriverStationLCD::kUser_Line1, 1, "Yay!");
 		Lcd->UpdateLCD();
+		Drive.SetLeftRightMotorOutputs(.6, .6); //Make faster for Monty for more time for Vision
+		Wait(2);
+		Drive.SetLeftRightMotorOutputs(0, 0);
+		Wait(.5);
+		Lcd->Printf(DriverStationLCD::kUser_Line1, 1, "Firing!");
+		Lcd->UpdateLCD();
+		//fire.Set(fire.kForward);
+		Wait(1);
+		fire.Set(fire.kOff);
 	}
-	time.Stop();
+	else
+	{
+		Lcd->Printf(DriverStationLCD::kUser_Line1, 1, "NO!!");
+		Lcd->UpdateLCD();
+		Drive.SetLeftRightMotorOutputs(.6, .6);
+		Wait(2);
+		Drive.SetLeftRightMotorOutputs(0, 0);
+		Wait(3);
+		Lcd->Printf(DriverStationLCD::kUser_Line1, 1, "Firing!");
+		Lcd->UpdateLCD();
+		//fire.Set(fire.kForward);
+		Wait(1);
+		fire.Set(fire.kOff);
+	}
 }
 
 
@@ -126,17 +146,22 @@ void Team1257Robot::drive()
 {
 	double sf;
 	sf = 1.0;
-	if(Stick1.GetRawButton(5) && Stick1.GetRawButton(6))
+	if(/*Stick1.GetRawButton(5) && Stick1.GetRawButton(6)*/false)
 	{
 		Drive.TankDrive(accel(Stick1, 5, leftspeed, sf), accel(Stick1, 2, rightspeed, sf), false);
 	}
-	else if (Stick1.GetRawAxis(3) < 0) // Back button; just one, not both
+	else if (Stick1.GetRawButton(6)) // Back button; just one, not both
 	{
-		Drive.ArcadeDrive(accel(Stick1, 5, speed, sf), -accel(Stick1, 1, curve, sf), false); 
+		Drive.ArcadeDrive(-accel(Stick1, 5, speed, sf), -accel(Stick1, 1, curve, sf), false); 
 	}
-	else if (Stick1.GetRawAxis(3) > 0)
+	else if (Stick1.GetRawButton(5))
 	{
-		Drive.ArcadeDrive(accel(Stick1, 2, speed, sf), -accel(Stick1, 4, curve, sf), false); 
+		Drive.ArcadeDrive(-accel(Stick1, 2, speed, sf), -accel(Stick1, 4, curve, sf), false); 
+	}
+	
+	else if(Stick1.GetRawAxis(3))
+	{
+		Drive.ArcadeDrive(-accel(Stick1, 2, speed, sf), -accel(Stick1, 1, curve, sf), false);
 	}
 	
 	else
