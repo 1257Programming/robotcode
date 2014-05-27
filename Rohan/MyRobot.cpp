@@ -9,7 +9,7 @@
  */
 
 float targetSpeed[2] = { 0, 0 };
-float *speeds;
+float *speeds = 0;
 bool arms = false;
 
 Robot::Robot() :
