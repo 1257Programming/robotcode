@@ -2,6 +2,8 @@
 *.slo
 *.lo
 *.o
+*.out
+*.d
 
 # Compiled Dynamic libraries
 *.so
@@ -12,11 +14,9 @@
 *.la
 *.a
 
-# Output Folder
-PPC603GNU/*
 
 # Project Files
-.w*
+.wrproject
 .cproject
 .project
 
