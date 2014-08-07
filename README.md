@@ -45,8 +45,8 @@ ucpp init
 # configure the project once you've made it:
 ucpp configure
 ```
-The project in 2014-ucpp is ready to go, but if necessary you can always re-configure it.
-to build:
+The project in 2014-ucpp is ready to go, but if necessary you can always re-configure it.<br>
+To build:
 ```shell
 make
 make deploy
