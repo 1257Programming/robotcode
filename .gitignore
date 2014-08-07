@@ -15,10 +15,10 @@ ctdt.c
 *.a
 
 
-# Project Files
-.wrproject
-.cproject
-.project
+# Project Files and makefiles
+.*
+Makefile*
+PPC603GNU
 
 # Backup Files
 *~
@@ -28,3 +28,4 @@ CMakeFiles/*
 CMakeFiles/*/*
 *.cmake
 CMakeCache.txt
+
