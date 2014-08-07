@@ -22,3 +22,9 @@ ctdt.c
 
 # Backup Files
 *~
+# frcmake stuff
+CMakeFiles
+CMakeFiles/*
+CMakeFiles/*/*
+*.cmake
+CMakeCache.txt
