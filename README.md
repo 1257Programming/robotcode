@@ -39,13 +39,12 @@ to set it up, use
 ```shell
 ucpp setup -t1257
 ```
-to initialize a project, use
+to initialize the project, use
 ```shell
 ucpp init
 # configure the project once you've made it:
 ucpp configure
 ```
-The project in 2014-ucpp is ready to go, but if necessary you can always re-configure it.<br>
 To build:
 ```shell
 make
