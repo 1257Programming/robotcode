@@ -19,6 +19,9 @@ ctdt.c
 .*
 Makefile*
 PPC603GNU
+bin
+bin/*
+bin/*/*
 
 # Backup Files
 *~
