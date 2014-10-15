@@ -10,7 +10,11 @@ Version we all wrote together to be the standard, official code for competition.
 build on frcmake after the WindRiver license expires.
 <br>
 NOTE ABOUT FRCMAKE:
-Use the shell script in the root directory of the repo to install the frc c++11 toolchain and frcmake on linux. You can then go into 2014-frcmake and run:
+Use the shell script in the root directory of the repo to install the frc c++11 toolchain and frcmake on linux:
+```bash
+sudo ./gcc-vxworks-install-debubuntu
+```
+You can then go into 2014-frcmake and run:
 ```shell
 # create makefiles
 frcmake
