@@ -2,9 +2,10 @@
 echo "deb http://debian.repo.frc.s3.amazonaws.com jessie main" | sudo tee -a /etc/apt/sources.list
 wget -O - http://debian.repo.frc.s3.amazonaws.com/rbmj.gpg.key | sudo apt-key add -
 sudo apt-get update
-sudo apt-get install cmake gcc-powerpc-wrs-vxworks frc-buildscripts wpilib
+sudo apt-get install cmake gcc-powerpc-wrs-vxworks binutils-powerpc-wrs-vxworks frc-buildscripts wpilib
 echo "export WIND_BASE=/usr/powerpc-wrs-vxworks/wind_base" >> ~/.bashrc
 source ~/.bashrc
+rm -rf ~/frcmake
 git clone https://bitbucket.org/frc-cpp11/frcmake.git ~/frcmake
 cd ~/frcmake
 cmake .
