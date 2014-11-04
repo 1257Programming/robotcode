@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "deb http://debian.repo.frc.s3.amazonaws.com jessie main" | sudo tee -a /etc/apt/sources.list
+echo "deb http://http.debian.net/debian jessie main" | sudo tee -a /etc/apt/sources.list
 wget -O - http://debian.repo.frc.s3.amazonaws.com/rbmj.gpg.key | sudo apt-key add -
 sudo apt-get update
 sudo apt-get install cmake gcc-powerpc-wrs-vxworks binutils-powerpc-wrs-vxworks frc-buildscripts wpilib
