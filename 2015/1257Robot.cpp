@@ -10,18 +10,17 @@ void Team1257Robot::TeleopInit()
 {
 
 }
-
+#define strafesf 1
+#define sf .5
 void Team1257Robot::TeleopPeriodic()
 {
-	double sf = 1;
-
 	if (Stick1.GetRawButton(5) && !Stick1.GetRawButton(6)) // Back button; just one, not both
 	{
-		Center.Set((float)accel(Stick1, 0, strafe, sf));
+		Center.Set(-(float)accel(Stick1, 0, strafe, strafesf));
 		if(!Stick1.GetRawAxis(4) || dAbs(Stick1.GetRawAxis(4)) < .2)
 		{
-			Left.Set((float)accel(Stick1, 1, forwardback, sf));
-			Right.Set(-(float)accel(Stick1, 1, forwardback, sf));
+			Left.Set(-(float)accel(Stick1, 1, forwardback, sf));
+			Right.Set((float)accel(Stick1, 1, forwardback, sf));
 		}
 		else
 		{
@@ -31,11 +30,11 @@ void Team1257Robot::TeleopPeriodic()
 	}
 	else if (!Stick1.GetRawButton(5) && Stick1.GetRawButton(6))
 	{
-		Center.Set((float)accel(Stick1, 4, strafe, sf));
+		Center.Set(-(float)accel(Stick1, 4, strafe, strafesf));
 		if(!Stick1.GetRawAxis(0) || dAbs(Stick1.GetRawAxis(0)) < .2)
 		{
-			Left.Set((float)accel(Stick1, 5, forwardback, sf));
-			Right.Set(-(float)accel(Stick1, 5, forwardback, sf));
+			Left.Set(-(float)accel(Stick1, 5, forwardback, sf));
+			Right.Set((float)accel(Stick1, 5, forwardback, sf));
 		}
 		else
 		{
