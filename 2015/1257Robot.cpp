@@ -10,10 +10,11 @@ void Team1257Robot::TeleopInit()
 {
 
 }
-#define strafesf 1
-#define sf .5
+
 void Team1257Robot::TeleopPeriodic()
 {
+	double sf = 0.5;
+	double strafesf = 1;
 	if (Stick1.GetRawButton(5) && !Stick1.GetRawButton(6)) // Back button; just one, not both
 	{
 		Center.Set(-(float)accel(Stick1, 0, strafe, strafesf));
@@ -129,7 +130,7 @@ double Team1257Robot::accel(Joystick& Stick, int axis, double& current, double s
 		current -= .05;
 	if(dAbs(raw) < dAbs(current)) // If the target speed is lesser, reduce to that instantly, like for stopping
 		current = raw;
-	if(dAbs(raw) < .2) // Taking into account SLIGHTLY off-centered axes
+	if(dAbs(raw) < .2) //Taking into account SLIGHTLY off-centered axes
 		current = 0;
 	return (current * sf);
 }
