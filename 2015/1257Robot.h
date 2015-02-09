@@ -1,6 +1,6 @@
 #include "WPILib.h"
 #include <sstream>
-
+#include "Pixy.h"
 class Team1257Robot : public IterativeRobot
 {
 public:
@@ -18,7 +18,7 @@ public:
 	DoubleSolenoid dSolenoid;
 	Pixy pixy;
 	Team1257Robot();
-
+	void blockProcess(Block*);
 	void AutonomousInit();
 	void AutonomousPeriodic();
 	void TeleopInit();
