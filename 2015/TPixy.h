@@ -12,6 +12,7 @@
 #define PIXY_START_WORD             0xaa55
 #define PIXY_START_WORDX            0x55aa
 #define PIXY_DEFAULT_ADDR           0x54  // I2C
+
 struct Block
 {
   uint16_t signature;
@@ -20,10 +21,12 @@ struct Block
   uint16_t width;
   uint16_t height;
 };
+typedef void (RobotBase::*BlockProcessCallbackPtr)(Block*);
 void defaultBlockProcess(Block*);
 template <class LinkType> class TPixy {
 public:
   TPixy(uint8_t addr=PIXY_DEFAULT_ADDR, void* procCall(Block*) = defaultBlockProcess);
+  TPixy(uint8_t addr=PIXY_DEFAULT_ADDR, BlockProcessCallbackPtr);
   ~TPixy();
   void processBlocks(Block *);
   uint16_t getBlocks(uint16_t maxBlocks=1000);
