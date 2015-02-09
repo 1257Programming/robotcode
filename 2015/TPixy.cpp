@@ -17,7 +17,17 @@ template <class LinkType> TPixy<LinkType>::TPixy(uint8_t addr, void * procCall(B
   link.setAddress(addr);
   processBlocks = procCall;
 }
-
+template <class LinkType> TPixy<LinkType>::TPixy(uint8_t addr, BlockProcessCallbackPtr ptr, RobotBase bot)
+{
+  skipStart = false;
+  blockCount = 0;
+  blockArraySize = PIXY_INITIAL_ARRAYSIZE;
+  blocks = (Block *)malloc(sizeof(Block)*blockArraySize);
+  link.setAddress(addr);
+  m_classbased_proc = true;
+  m_process = ptr;
+  m_bot = bot;
+}
 template <class LinkType> void TPixy<LinkType>::init()
 {
   link.init();
@@ -116,7 +126,10 @@ template <class LinkType> void TPixy<LinkType>::update()
 {
 	if(getBlocks())
 	{
-		processBlocks(blocks);
+		if(!m_classbased_proc)
+			processBlocks(blocks);
+		else
+			m_bot.*m_process(blocks);
 	}
 }
 void defaultBlockProcess(Block * blocks)
