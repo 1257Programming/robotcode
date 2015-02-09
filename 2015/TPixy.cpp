@@ -27,6 +27,7 @@ template <class LinkType> TPixy<LinkType>::TPixy(uint8_t addr, BlockProcessCallb
   m_classbased_proc = true;
   m_process = ptr;
   m_bot = bot;
+  processBlocks = defaultBlockProcess;
 }
 template <class LinkType> void TPixy<LinkType>::init()
 {
