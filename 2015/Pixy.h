@@ -8,7 +8,7 @@
 #ifndef AUTONOMOUS_PIXY_H_
 #define AUTONOMOUS_PIXY_H_
 #include "TPixy.h"
-#include </home/nathan/wpilib/cpp/current/include/SPI.h>
+#include <SPI.h>
 
 
 #define PIXY_SYNC_BYTE              0x5a
