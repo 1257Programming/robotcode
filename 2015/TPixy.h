@@ -22,7 +22,7 @@ struct Block
   uint16_t height;
 };
 typedef void (RobotBase::*BlockProcessCallbackPtr)(Block*);
-#define GET_CALL_PTR(class, func) static_cast<BlockProcessCallbackPtr>(&class::func)
+#define GET_CALL_PTR(clss, func) static_cast<BlockProcessCallbackPtr>(&clss::func)
 void defaultBlockProcess(Block*);
 template <class LinkType> class TPixy {
 public:
