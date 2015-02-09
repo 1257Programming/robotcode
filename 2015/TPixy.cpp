@@ -17,7 +17,7 @@ template <class LinkType> TPixy<LinkType>::TPixy(uint8_t addr, void * procCall(B
   link.setAddress(addr);
   processBlocks = procCall;
 }
-template <class LinkType> TPixy<LinkType>::TPixy(uint8_t addr, BlockProcessCallbackPtr ptr, RobotBase bot)
+template <class LinkType> TPixy<LinkType>::TPixy(BlockProcessCallbackPtr ptr, RobotBase bot, uint8_t addr)
 {
   skipStart = false;
   blockCount = 0;
