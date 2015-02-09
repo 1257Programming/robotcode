@@ -5,7 +5,10 @@ Team1257Robot::Team1257Robot():
 {
 	Lw = LiveWindow::GetInstance();
 }
-
+void Team1257Robot::BlockProcess(Block* blocks)
+{
+	//Do stuff
+}
 void Team1257Robot::TeleopInit()
 {
 
@@ -97,7 +100,7 @@ void Team1257Robot::AutonomousInit()
 
 void Team1257Robot::AutonomousPeriodic()
 {
-
+	pixy.update();
 }
 
 void Team1257Robot::TestInit()
