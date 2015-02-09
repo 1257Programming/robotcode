@@ -130,7 +130,7 @@ template <class LinkType> void TPixy<LinkType>::update()
 		if(!m_classbased_proc)
 			processBlocks(blocks);
 		else
-			m_bot.*m_process(blocks);
+			(m_bot.*m_process)(blocks);
 	}
 }
 void defaultBlockProcess(Block * blocks)
