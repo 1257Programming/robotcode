@@ -12,7 +12,7 @@
 #define PIXY_START_WORD             0xaa55
 #define PIXY_START_WORDX            0x55aa
 #define PIXY_DEFAULT_ADDR           0x54  // I2C
-
+#include <RobotBase.h>
 struct Block
 {
   uint16_t signature;
@@ -22,6 +22,7 @@ struct Block
   uint16_t height;
 };
 typedef void (RobotBase::*BlockProcessCallbackPtr)(Block*);
+#define GET_CALL_PTR(class, func) static_cast<BlockProcessCallbackPtr>(&class::func)
 void defaultBlockProcess(Block*);
 template <class LinkType> class TPixy {
 public:
