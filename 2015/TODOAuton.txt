@@ -1,0 +1,2 @@
+-One tote get and set
+-avoid other robots
