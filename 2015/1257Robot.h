@@ -16,7 +16,7 @@ public:
 	double strafe = 0;
 	double turn = 0;
 	DoubleSolenoid dSolenoid;
-
+	Pixy pixy;
 	Team1257Robot();
 
 	void AutonomousInit();
