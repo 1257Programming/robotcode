@@ -26,7 +26,7 @@ void defaultBlockProcess(Block*);
 template <class LinkType> class TPixy {
 public:
   TPixy(uint8_t addr=PIXY_DEFAULT_ADDR, void* procCall(Block*) = defaultBlockProcess);
-  TPixy(uint8_t addr=PIXY_DEFAULT_ADDR, BlockProcessCallbackPtr, RobotBase);
+  TPixy(BlockProcessCallbackPtr, RobotBase, uint8_t addr=PIXY_DEFAULT_ADDR);
   ~TPixy();
   void processBlocks(Block *);
   uint16_t getBlocks(uint16_t maxBlocks=1000);
