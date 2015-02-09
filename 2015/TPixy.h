@@ -20,15 +20,15 @@ struct Block
   uint16_t width;
   uint16_t height;
 };
-void * defaultBlockProcess(Block*);
+void defaultBlockProcess(Block*);
 template <class LinkType> class TPixy {
 public:
   TPixy(uint8_t addr=PIXY_DEFAULT_ADDR, void* procCall(Block*) = defaultBlockProcess);
   ~TPixy();
-  void * processBlocks(Block *);
+  void processBlocks(Block *);
   uint16_t getBlocks(uint16_t maxBlocks=1000);
   void init();
-
+  void update();
   Block *blocks;
 
 private:

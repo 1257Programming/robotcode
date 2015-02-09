@@ -112,6 +112,13 @@ template <class LinkType> uint16_t TPixy<LinkType>::getBlocks(uint16_t maxBlocks
       return blockCount;
   }
 }
+template <class LinkType> void TPixy<LinkType>::update()
+{
+	if(getBlocks())
+	{
+		processBlocks(blocks);
+	}
+}
 void defaultBlockProcess(Block * blocks)
 {
 	//Do nothing
