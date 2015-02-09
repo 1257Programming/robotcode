@@ -18,7 +18,7 @@ public:
 	DoubleSolenoid dSolenoid;
 	Pixy pixy;
 	Team1257Robot();
-	void blockProcess(Block*);
+	void BlockProcess(Block*);
 	void AutonomousInit();
 	void AutonomousPeriodic();
 	void TeleopInit();
