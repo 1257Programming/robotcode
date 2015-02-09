@@ -1,7 +1,7 @@
 #include "1257Robot.h"
 
 Team1257Robot::Team1257Robot():
-	Left(0), Right(1), Center(2), Lift(3), Stick1(0), Stick2(1), dSolenoid(4, 5)
+	Left(0), Right(1), Center(2), Lift(3), Stick1(0), Stick2(1), dSolenoid(4, 5), pixy(GET_CALL_PTR(Team1257Robot, blockProcess), this)
 {
 	Lw = LiveWindow::GetInstance();
 }
