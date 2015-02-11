@@ -9,6 +9,7 @@
 #define AUTONOMOUS_PIXY_H_
 #include <SPI.h>
 #include <cstring>
+#include "TPixy.h"
 #define PIXY_SYNC_BYTE              0x5a
 #define PIXY_SYNC_BYTE_DATA         0x5b
 #define PIXY_OUTBUF_SIZE            6
