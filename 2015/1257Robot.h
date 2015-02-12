@@ -16,7 +16,8 @@ public:
 	double strafe = 0;
 	double turn = 0;
 	DoubleSolenoid dSolenoid;
-	Pixy pixy;
+	Encoder motorEncoder;
+	//Pixy pixy;
 	Team1257Robot();
 	void blockProcess(Block*);
 	void AutonomousInit();
@@ -25,6 +26,7 @@ public:
 	void TeleopPeriodic();
 	void TestInit();
 	void TestPeriodic();
+	void DisabledPeriodic();
 	double accel(Joystick& stick, int axis, double& current, double sf);
 	inline double dAbs(double x);
 };

@@ -1,9 +1,16 @@
 #include "1257Robot.h"
 
 Team1257Robot::Team1257Robot():
-	Left(0), Right(1), Center(2), Lift(3), Stick1(0), Stick2(1), dSolenoid(4, 5), pixy(&Team1257Robot::blockProcess, this)
+	Left(0), Right(1), Center(2), Lift(3), Stick1(0), Stick2(1), dSolenoid(4, 5), motorEncoder(1, 2, true, Encoder::k4X)
+	//, pixy(&Team1257Robot::blockProcess, this)
 {
 	Lw = LiveWindow::GetInstance();
+
+	motorEncoder.SetMaxPeriod(0.1);
+	motorEncoder.SetMinRate(10);
+	motorEncoder.SetDistancePerPulse(5);
+	motorEncoder.SetReverseDirection(true);
+	motorEncoder.SetSamplesToAverage(7);
 }
 void Team1257Robot::blockProcess(Block* blocks)
 {
@@ -18,6 +25,7 @@ void Team1257Robot::TeleopPeriodic()
 {
 	double sf = 0.5;
 	double strafesf = 1;
+
 	if (Stick1.GetRawButton(5) && !Stick1.GetRawButton(6)) // Back button; just one, not both
 	{
 		Center.Set(-(float)accel(Stick1, 0, strafe, strafesf));
@@ -95,13 +103,16 @@ void Team1257Robot::TeleopPeriodic()
 }
 void Team1257Robot::AutonomousInit()
 {
-
+	motorEncoder.StartLiveWindowMode();
 }
 
 void Team1257Robot::AutonomousPeriodic()
 {
-	pixy.update();
+	//pixy.update();
+	auto d = motorEncoder.GetDistance();
+	SmartDashboard::PutNumber("DB/String 1", d);
 }
+
 
 void Team1257Robot::TestInit()
 {
@@ -122,6 +133,12 @@ void Team1257Robot::TestPeriodic()
 		Center.Set(1);
 	else
 		Center.Set(0);
+}
+
+void Team1257Robot::DisabledPeriodic()
+{
+	motorEncoder.Reset();
+	motorEncoder.StopLiveWindowMode();
 }
 
 double Team1257Robot::accel(Joystick& Stick, int axis, double& current, double sf)
