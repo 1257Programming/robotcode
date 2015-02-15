@@ -1,6 +1,7 @@
 #include "WPILib.h"
 #include <sstream>
-#include "Pixy.h"
+#include "CameraServer.h"
+
 class Team1257Robot : public IterativeRobot
 {
 public:
@@ -16,10 +17,14 @@ public:
 	double strafe = 0;
 	double turn = 0;
 	DoubleSolenoid dSolenoid;
-	Encoder motorEncoder;
-	//Pixy pixy;
+	AnalogInput Ultra;
+
+	DigitalInput bottomlimit;
+	DigitalInput toplimit;
+
 	Team1257Robot();
-	void blockProcess(Block*);
+	~Team1257Robot();
+
 	void AutonomousInit();
 	void AutonomousPeriodic();
 	void TeleopInit();
@@ -27,6 +32,6 @@ public:
 	void TestInit();
 	void TestPeriodic();
 	void DisabledPeriodic();
-	double accel(Joystick& stick, int axis, double& current, double sf);
+	double accel(Joystick& stick, int axis, double& current, double sf, double inc = 0.5);
 	inline double dAbs(double x);
 };
