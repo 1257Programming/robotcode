@@ -70,11 +70,11 @@ void Team1257Robot::TeleopPeriodic()
 		Right.Set(0);
 		Center.Set(0);
 	}
-	if (Stick2.GetRawButton(5))
+	if (Stick2.GetRawButton(6))
 	{
 		dSolenoid.Set(DoubleSolenoid::kForward);
 	}
-	else if(Stick2.GetRawButton(6))
+	else if(Stick2.GetRawButton(5))
 	{
 		dSolenoid.Set(DoubleSolenoid::kReverse);
 	}
@@ -102,51 +102,48 @@ void Team1257Robot::TeleopPeriodic()
 }
 void Team1257Robot::AutonomousInit()
 {
-	/*Lift.Set(0);
-	Right.Set(-.5);
-	Left.Set(.5);
-	Center.Set(0);
-	Wait(2);
-	Lift.Set(.5);
-	Right.Set(0);
-	Left.Set(0);
-	Center.Set(0);
-	Wait(2);
-	Lift.Set(0);
-	Right.Set(0);
-	Left.Set(0);
-	Center.Set(.5);
-	Wait(2);
-	Center.Set(0);*/
-	dSolenoid.Set(DoubleSolenoid::kReverse);
-	Wait(.5);
+
 }
 
 void Team1257Robot::AutonomousPeriodic()
 {
 	if(!bottomlimit.Get() && !toplimit.Get())
 	{
+		dSolenoid.Set(DoubleSolenoid::kForward);
+		Wait(.2);
 		Lift.Set(.9);
-		Wait(2);
+		Wait(2.5);
 		Lift.Set(0);
 		Right.Set(-.5);
 		Left.Set(.5);
-		Wait(.7);
+		Wait(1);
 		Right.Set(0);
 		Left.Set(0);
-		Lift.Set(-.5);
+		Lift.Set(-.55);
 		Wait(1);
-		dSolenoid.Set(DoubleSolenoid::kForward);
+		dSolenoid.Set(DoubleSolenoid::kReverse);
 		Wait(2);
 		Center.Set(-.5);
-		Wait(-.5);
+		Right.Set(.3);
+		Left.Set(-.3);
+		Wait(.5);
 		Center.Set(0);
-		Lift.Set(-.5);
+		Left.Set(0);
+		Right.Set(0);
+		Lift.Set(-.55);
 		Wait(2);
-		dSolenoid.Set(DoubleSolenoid::kReverse);
+		dSolenoid.Set(DoubleSolenoid::kForward);
 		Wait(1);
-		Lift.Set(.3);
+		Lift.Set(.35);
 		Wait(1);
+		Right.Set(.5);
+		Left.Set(.5);
+		Wait(1.3);
+		Right.Set(-.75);
+		Left.Set(.75);
+		Wait(2.5);
+		Right.Set(0);
+		Left.Set(0);
 	}
 	else
 		Lift.Set(0);
@@ -160,117 +157,8 @@ void Team1257Robot::TestInit()
 
 void Team1257Robot::TestPeriodic()
 {
-	/*if(Stick1.GetRawButton(5) && Stick1.GetRawAxis(4) < .2)
-	{
-		if(dAbs(Stick1.GetRawAxis(1)) > .2)
-		{
-			Left.Set(-(dAbs(Stick1.GetRawAxis(1))/Stick1.GetRawAxis(1)) * .3);
-			Right.Set((dAbs(Stick1.GetRawAxis(1))/Stick1.GetRawAxis(1)) * .3);
-		}
-		else
-		{
-			Left.Set(0);
-			Right.Set(0);
-		}
-		if(dAbs(Stick1.GetRawAxis(0)) > .2)
-			Center.Set(-(dAbs(Stick1.GetRawAxis(0))/Stick1.GetRawAxis(0)) * .3);
-		else
-			Center.Set(0);
-	}
-	else if(Stick1.GetRawButton(5))
-	{
-		if(Stick1.GetRawAxis(4) > 0)
-		{
-			Left.Set(.3);
-			Right.Set(.3);
-		}
-		else
-		{
-			Left.Set(-.3);
-			Right.Set(-.3);
-		}
-	}
-
-	else
-	{
-		Left.Set(0);
-		Right.Set(0);
-		Center.Set(0);
-	}
-
-	if(Stick2.GetRawAxis(3))
-		Lift.Set(.3);
-	else if(Stick2.GetRawAxis(2))
-		Lift.Set(-.3);
-
-	if (Stick2.GetRawButton(5))
-	{
-		dSolenoid.Set(DoubleSolenoid::kForward);
-	}
-	else if(Stick2.GetRawButton(6))
-	{
-		dSolenoid.Set(DoubleSolenoid::kReverse);
-	}
-	else
-		dSolenoid.Set(DoubleSolenoid::kOff);*/
-
-	/*const double speed = .5;
-
-	if (Stick1.GetRawAxis(1) > .2)
-	{
-		Right.Set(-speed);
-		Left.Set(speed);
-	}
-	else if (Stick1.GetRawAxis(1) < -.2)
-	{
-		Right.Set(speed);
-		Left.Set(-speed);
-	}
-	else
-	{
-		Right.Set(0);
-		Left.Set(0);
-	}
-
-	if (Stick1.GetRawAxis(4) > .2)
-	{
-		Right.Set(speed);
-		Left.Set(speed);
-	}
-	else if (Stick1.GetRawAxis(4) < -.2)
-	{
-		Right.Set(-speed);
-		Left.Set(-speed);
-	}
-	else
-	{
-		Right.Set(0);
-		Left.Set(0);
-	}
-
-	if (Stick1.GetRawAxis(0) > .2)
-	{
-		Center.Set(-speed);
-	}
-	else if (Stick1.GetRawAxis(0) < -.2)
-	{
-		Center.Set(speed);
-	}
-	else
-		Center.Set(0);
-
-	if (Stick2.GetRawButton(5))
-	{
-		dSolenoid.Set(DoubleSolenoid::kForward);
-	}
-	else if(Stick2.GetRawButton(6))
-	{
-		dSolenoid.Set(DoubleSolenoid::kReverse);
-	}
-	else
-		dSolenoid.Set(DoubleSolenoid::kOff);
-
-	Lift.Set(Stick2.GetRawAxis(3) - Stick2.GetRawAxis(2));*/
+	Right.Set(.5);
+	Left.Set(.5);
 }
 
 void Team1257Robot::DisabledPeriodic()
@@ -301,4 +189,3 @@ inline double Team1257Robot::dAbs(double x)
 }
 
 START_ROBOT_CLASS(Team1257Robot);
-
