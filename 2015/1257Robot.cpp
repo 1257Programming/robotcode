@@ -23,10 +23,14 @@ void Team1257Robot::TeleopInit()
 
 void Team1257Robot::TeleopPeriodic()
 {
-	double sf = 0.5;
-	double strafesf = 1;
+	double sf = 0.5; //scale factor for scaling drive values
+	double strafesf = 1; //scale factor for the strafe wheel since it is weaker
 
-	if (Stick1.GetRawButton(5) && !Stick1.GetRawButton(6)) // Back button; just one, not both
+	if (Stick1.GetRawButton(5) && !Stick1.GetRawButton(6))
+		/*Safety switches - these need to be clicked to do anything
+		 * just one bumper, not both
+		 * which bumper is clicked determines which analog is move forward/back/left/right
+		 */
 	{
 		Center.Set(-(float)accel(Stick1, 0, strafe, strafesf));
 		if(!Stick1.GetRawAxis(4) || dAbs(Stick1.GetRawAxis(4)) < .2)
