@@ -168,7 +168,7 @@ void Team1257Robot::AutonomousPeriodic()
 			dSolenoid.Set(DoubleSolenoid::kForward); // Open the arms
 			Right.Set(.3); // Move backwards
 			Left.Set(-.3); // To avoid having the arms get caught on tote
-			Wait(.4); //keep going back for .4 secons
+			Wait(.4); //keep going back for .4 seconds
 			Right.Set(0); // Stop moving forward
 			Left.Set(0); // Stop moving forward
 			Center.Set(-.5); // Slide into place to pick up tote
