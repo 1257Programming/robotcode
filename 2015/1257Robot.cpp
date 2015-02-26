@@ -22,12 +22,13 @@ Team1257Robot::Team1257Robot(): // Initialization of objects based on connection
 
 }
 
-void Team1257Robot::TeleopInit() // Runs at Teleop start
+void Team1257Robot::TeleopInit() //This runs once at the beginning of teleop.
 {
 	//CameraServer::GetInstance()->StartAutomaticCapture("cam1"); // Automatically send camera images
 }
 
-void Team1257Robot::TeleopPeriodic() //NOTE: THE MOTORS TURN ARE FLIPPED, SO TO HAVE THEM GO IN THE SAME DIRECTION, ONE OF THEM MUST BE NEGATED
+//This runs in a loop during teleop mode.
+void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO HAVE THEM GO IN THE SAME DIRECTION, ONE OF THEM MUST BE NEGATED
 {
 	double sf = .8;//scale factor for scaling drive values
 	double strafesf = 1; //scale factor for the strafe wheel since it is weaker
@@ -140,12 +141,13 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE MOTORS TURN ARE FLIPPED, SO TO 
 }
 
 bool ran = false; // Variable to ensure that Autonomous only runs once
-void Team1257Robot::AutonomousInit()// Runs at AUTO start
+
+void Team1257Robot::AutonomousInit() //This runs once at the beginning of autonomous
 {
 	ran = false; // Makes sure that "ran" is set to false initially
 }
 
-void Team1257Robot::AutonomousPeriodic()// Runs throughout AUTO
+void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous mode
 {
 	while(!ran) // Only run autonomous while the "ran" variable is false
 	{
@@ -166,7 +168,7 @@ void Team1257Robot::AutonomousPeriodic()// Runs throughout AUTO
 			dSolenoid.Set(DoubleSolenoid::kForward); // Open the arms
 			Right.Set(.3); // Move backwards
 			Left.Set(-.3); // To avoid having the arms get caught on tote
-			Wait(.4); //keep going back for .4 secons
+			Wait(.4); //keep going back for .4 seconds
 			Right.Set(0); // Stop moving forward
 			Left.Set(0); // Stop moving forward
 			Center.Set(-.5); // Slide into place to pick up tote
@@ -218,31 +220,35 @@ bool Team1257Robot::TestAngle(int theta) // Returns false until the robot has co
 	float a = angle.GetAngle(); //get angle from gyro
 	if((int)dAbs(a) < theta) //if the magnitude is less than the target angle, return true
 	{
- 		return true;
+ 		return true;//Return true.
 	}
 
 	else //if not
 	{
-		return false;
+		return false;//Return false.
 	}
 }
 
-void Team1257Robot::TestPeriodic() // (Test code) Runs upon entering Test Mode
+void Team1257Robot::TestPeriodic() //This runs in a loop during test mode.
 {
-	float a = angle.GetAngle();
-	if((int)dAbs(a) < 60)
+	float a = angle.GetAngle();//Get the current angle from the gyro and store it as a.
+	if((int)dAbs(a) < 60)//If the angle is less than 60 degrees
 	{
+		//Turn
 		Right.Set(-.5);
 		Left.Set(-.5);
+		//One of the motors is reversed polarity;
+		//It's easier to account in the code than to modify the motor
 	}
 
 	else
 	{
+		//Stop
 		Right.Set(0);
 		Left.Set(0);
 	}
 
-	SmartDashboard::PutString("DB/String 1", ToString((int)a));
+	SmartDashboard::PutString("DB/String 1", ToString((int)a));//Print out the angle
 }
 
 double Team1257Robot::accel(Joystick& Stick, int axis, double& current, double sf, double inc) //smoothly speed up to target speed
@@ -261,10 +267,10 @@ double Team1257Robot::accel(Joystick& Stick, int axis, double& current, double s
 
 inline double Team1257Robot::dAbs(double x) //absolute value for double
 {
-	if(x >= 0)
-		return x;
-	else
-		return -x;
+	if(x >= 0)//If x is positive
+		return x;//Leave it the way it is.
+	else//If it's negative
+		return -x;//Negate it to make it positive.
 }
 
 START_ROBOT_CLASS(Team1257Robot); //Actually run the robot
