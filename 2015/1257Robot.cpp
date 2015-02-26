@@ -3,7 +3,7 @@
 using namespace std;
 
 template<typename T>
-std::string ToString(T t)
+std::string ToString(T t) //convert something else to a string
 {
 	std::stringstream ss; // Declare string stream
 	ss << t; // Insert numerical value into stream
@@ -11,7 +11,6 @@ std::string ToString(T t)
 	ss >> res; // Extract number as std::string
 	return res; // Return the result string
 }
-
 
 Team1257Robot::Team1257Robot(): // Initialization of objects based on connection ports
 	Left(0), Right(1), Center(2), Lift(3), // PWM
@@ -23,7 +22,7 @@ Team1257Robot::Team1257Robot(): // Initialization of objects based on connection
 
 }
 
-void Team1257Robot::TeleopInit()
+void Team1257Robot::TeleopInit() // Runs at Teleop start
 {
 	//CameraServer::GetInstance()->StartAutomaticCapture("cam1"); // Automatically send camera images
 }
@@ -33,17 +32,16 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE MOTORS TURN ARE FLIPPED, SO TO 
 	double sf = .8;//scale factor for scaling drive values
 	double strafesf = 1; //scale factor for the strafe wheel since it is weaker
 
-	//1ST CONTROLER
-
-	if (Stick1.GetRawButton(5) && !Stick1.GetRawButton(6))
+	//1ST CONTROLLER
+	if (Stick1.GetRawButton(5) && !Stick1.GetRawButton(6)) // Back button; just one, not both
+	{
 		/*Safety switches - these need to be clicked to do anything
 		 * just one bumper, not both
 		 * which bumper is clicked determines which analog is move forward/back/left/right
 		 * Here - if the left bumper is clicked, the left analog is is move forward/back/left/right
 		 * the right analog is pivot
 		 */
-	if (Stick1.GetRawButton(5) && !Stick1.GetRawButton(6)) // Back button; just one, not both
-	{
+
 		Center.Set(-(float)accel(Stick1, 0, strafe, strafesf, 0.2)); //smoothly set the speed of the strafe to the left/right values of the left analog
 		if(!Stick1.GetRawAxis(4) || dAbs(Stick1.GetRawAxis(4)) < .2)
 			/*
@@ -100,7 +98,7 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE MOTORS TURN ARE FLIPPED, SO TO 
 		Center.Set(0);
 	}
 
-	//2ND CONTROLER
+	//2ND CONTROLLER
 
 	if (Stick2.GetRawButton(6)) //Right bumper clicked
 	{
@@ -142,12 +140,12 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE MOTORS TURN ARE FLIPPED, SO TO 
 }
 
 bool ran = false; // Variable to ensure that Autonomous only runs once
-void Team1257Robot::AutonomousInit()
+void Team1257Robot::AutonomousInit()// Runs at AUTO start
 {
 	ran = false; // Makes sure that "ran" is set to false initially
 }
 
-void Team1257Robot::AutonomousPeriodic()
+void Team1257Robot::AutonomousPeriodic()// Runs throughout AUTO
 {
 	while(!ran) // Only run autonomous while the "ran" variable is false
 	{
@@ -210,26 +208,26 @@ void Team1257Robot::AutonomousPeriodic()
 	// After ran = true, although AutonomousPeriodic continues to run, nothing happens
 }
 
-void Team1257Robot::TestInit()
+void Team1257Robot::TestInit() // Test code
 {
 	angle.Reset();
 }
 
-bool Team1257Robot::TestAngle(int theta)
+bool Team1257Robot::TestAngle(int theta) // Returns false until the robot has completed a turn of measure "angle"
 {
-	float a = angle.GetAngle();
-	if((int)dAbs(a) < theta)
+	float a = angle.GetAngle(); //get angle from gyro
+	if((int)dAbs(a) < theta) //if the magnitude is less than the target angle, return true
 	{
  		return true;
 	}
 
-	else
+	else //if not
 	{
 		return false;
 	}
 }
 
-void Team1257Robot::TestPeriodic()
+void Team1257Robot::TestPeriodic() // (Test code) Runs upon entering Test Mode
 {
 	float a = angle.GetAngle();
 	if((int)dAbs(a) < 60)
@@ -247,8 +245,7 @@ void Team1257Robot::TestPeriodic()
 	SmartDashboard::PutString("DB/String 1", ToString((int)a));
 }
 
-
-double Team1257Robot::accel(Joystick& Stick, int axis, double& current, double sf, double inc)
+double Team1257Robot::accel(Joystick& Stick, int axis, double& current, double sf, double inc) //smoothly speed up to target speed
 {
 	double raw = Stick.GetRawAxis(axis);
 	if(raw > current && raw > 0) // If speeding up, increment it there, instead of sudden jerk
@@ -262,7 +259,7 @@ double Team1257Robot::accel(Joystick& Stick, int axis, double& current, double s
 	return (current * sf);
 }
 
-inline double Team1257Robot::dAbs(double x)
+inline double Team1257Robot::dAbs(double x) //absolute value for double
 {
 	if(x >= 0)
 		return x;
@@ -270,4 +267,4 @@ inline double Team1257Robot::dAbs(double x)
 		return -x;
 }
 
-START_ROBOT_CLASS(Team1257Robot);
+START_ROBOT_CLASS(Team1257Robot); //Actually run the robot
