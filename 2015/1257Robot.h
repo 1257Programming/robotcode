@@ -22,6 +22,8 @@ public:
 
 	Gyro angle; // ADW22307 Gyroscope sensor used to retrieve rotational angles in autonomous
 
+	DoubleSolenoid sLiftSolenoid;
+
 	Team1257Robot(); // Function Prototype of class constructor
 
 	void AutonomousInit(); // Runs at AUTO start

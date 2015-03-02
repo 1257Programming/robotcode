@@ -17,7 +17,8 @@ Team1257Robot::Team1257Robot(): // Initialization of objects based on connection
 	Stick1(0), Stick2(1), //Driver Station
 	dSolenoid(4, 5), // PCM
 	bottomlimit(0), toplimit(1), // Digital IO
-	angle(0) // Analog Input
+	angle(0), // Analog Input
+	sLiftSolenoid(6,7)
 {
 
 }
