@@ -1,2 +1,12 @@
--One tote get and set
--avoid other robots
+1:  Start with arms open, straddling container, in staging-zone without step blocking from auto-zone.
+	1. Close arms
+	2. Raise arms
+	3. Drive forward
+	4. Lower container onto yellow tote
+	5. Release container
+	6. Lower arms to level of bottom yellow tote
+	7. Close arms on yellow tote
+	8. Raise arms slightly
+	9. Pivot towards auto-zone
+	10. Drive forward
+	End result is one container and one yellow tote scored in auto-zone.
