@@ -141,17 +141,19 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 }
 
 bool ran = false; // Variable to ensure that Autonomous only runs once
+short AutoNum = 1; // Variable that defines what autonomous mode is used
 
 void Team1257Robot::AutonomousInit() //This runs once at the beginning of autonomous
 {
 	ran = false; // Makes sure that "ran" is set to false initially
+	AutoNum = 1; // Says which auto mode is used (1, 2)
 }
 
 void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous mode
 {
 	while(!ran) // Only run autonomous while the "ran" variable is false
 	{
-		if(!bottomlimit.Get() && !toplimit.Get()) // Makes sure that neither switch is tripped
+		if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 1) // Makes sure that neither switch is tripped and checks to see what auto mode to use
 		{
 			dSolenoid.Set(DoubleSolenoid::kReverse); // Close arms
 			Wait(.2); // Wait for .2 seconds
@@ -208,6 +210,18 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 	ran = true; // End loop after just one iteration
 	}
 	// After ran = true, although AutonomousPeriodic continues to run, nothing happens
+
+	if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 2) // Makes sure that neither switch is tripped and checks to see what auto mode to use
+	{
+		Right.Set(0); // Sets right motor to a speed of 0
+		Left.Set(0); // Sets left motor to a speed of 0
+		Lift.Set(0); // Sets elevator motor to a speed of 0
+		Center.Set(.5); // Sets center motor to a speed of .5 (half of full speed)
+		Wait(5); // Moves sideways for 5 seconds
+		Center.Set(0); // Sets center motor to a speed of 0
+	}
+	else
+		Lift.Set(0); // Make sure elevator is stopped
 }
 
 void Team1257Robot::TestInit() // Test code
