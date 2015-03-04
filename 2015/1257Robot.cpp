@@ -146,7 +146,19 @@ short AutoNum = 1; // Variable that defines what autonomous mode is used
 void Team1257Robot::AutonomousInit() //This runs once at the beginning of autonomous
 {
 	ran = false; // Makes sure that "ran" is set to false initially
-	AutoNum = 1; // Says which auto mode is used (1, 2)
+	AutoNum = 1; // Says which auto mode is used (1, 2, 3, 4)
+	/**
+	 * 1: Pick up container and put it ontop of the tote. Pick up the tote with the container on it and bring it to the auto zone
+	 * 		Robot set
+	 * 		Tote set
+	 * 		Container set
+	 * 2: Start in the area between the landfill and the auto zone. Strafe into the auto zone
+	 * 		Robot set
+	 * 3: Pick up container. Drive to auto zone.
+	 * 		Robot set
+	 * 		Container set
+	 * 4: Do nothing
+	 */
 }
 
 void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous mode
@@ -217,11 +229,54 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 		Left.Set(0); // Sets left motor to a speed of 0
 		Lift.Set(0); // Sets elevator motor to a speed of 0
 		Center.Set(.5); // Sets center motor to a speed of .5 (half of full speed)
-		Wait(5); // Moves sideways for 5 seconds
+		Wait(5); // Wait 5 seconds before stopping
 		Center.Set(0); // Sets center motor to a speed of 0
 	}
 	else
 		Lift.Set(0); // Make sure elevator is stopped
+
+	if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 3) // Makes sure that neither switch is tripped and checks to see what auto mode to use
+		{
+			Right.Set(0); // Sets right motor to a speed of 0
+			Left.Set(0); // Sets left motor to a speed of 0
+			Center.Set(0); // Sets center motor to a speed of 0
+			Lift.Set(0);  // Sets elevator motor to a speed of 0
+			dSolenoid.Set(DoubleSolenoid::kReverse); // Close the arms to grasp the container
+			Wait(.5); // Wait for 1/2 a second before lifting
+			Lift.Set(.3); // Lift at a speed of .3
+			Wait(.5); // Wait 1/2 a second before turning
+			while(TestAngle(60)) // Make a 90 degree turn, stopping the rotation after a 60-degree reading to account more momentum
+			{
+				Right.Set(-.5);
+				Left.Set(-.5);
+			}
+			Right.Set(-.65); // Move forward
+			Left.Set(.65); // Into AUTO Zone
+			Wait(1.6); // Hold high speed for 1.6 seconds
+			Right.Set(-0.5); // Reduce speed
+			Left.Set(0.5); // to .5 output
+			Wait(.3); // hold for just .3 seconds
+			Right.Set(-0.3); // Now reduce again
+			Left.Set(0.3); // to .3 output
+			Wait(.4); // Hold for .4 seconds
+			Right.Set(-0.1); // Slow again
+			Left.Set(0.1); // To .1 speed (may not actually move robot, just to help slow to a stop)
+			Wait(.5); // Hold for .5 seconds
+			Right.Set(0); // Stop the robot
+			Left.Set(0); // In the AUTO ZONE
+			Lift.Set(0); // AUTO is finished
+		}
+		else
+			Lift.Set(0); // Make sure elevator is stopped
+		if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 4) // Makes sure that neither switch is tripped and checks to see what auto mode to use
+		{
+			Right.Set(0); // Sets right motor to a speed of 0
+			Left.Set(0); // Sets left motor to a speed of 0
+			Lift.Set(0); // Sets elevator motor to a speed of 0
+			Center.Set(0); // Sets center motor to a speed of .5 (half of full speed)
+		}
+		else
+			Lift.Set(0); // Make sure elevator is stopped
 }
 
 void Team1257Robot::TestInit() // Test code
