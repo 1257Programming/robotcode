@@ -103,11 +103,11 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 
 	if(Stick2.GetRawButton(1))
 		lsignore = !lsignore;
-	if (Stick2.GetRawButton(6)) //Right bumper clicked
+	if (Stick2.GetRawButton(5)) //Left bumper clicked
 	{
 		dSolenoid.Set(DoubleSolenoid::kForward); //open the arms
 	}
-	else if(Stick2.GetRawButton(5)) //left bumper clicked
+	else if(Stick2.GetRawButton(6)) //Right bumper clicked
 	{
 		dSolenoid.Set(DoubleSolenoid::kReverse); //close the arms
 	}
