@@ -101,11 +101,11 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 
 	//2ND CONTROLLER
 
-	if (Stick2.GetRawButton(6)) //Right bumper clicked
+	if (Stick2.GetRawButton(5)) //Right bumper clicked
 	{
 		dSolenoid.Set(DoubleSolenoid::kForward); //open the arms
 	}
-	else if(Stick2.GetRawButton(5)) //left bumper clicked
+	else if(Stick2.GetRawButton(6)) //left bumper clicked
 	{
 		dSolenoid.Set(DoubleSolenoid::kReverse); //close the arms
 	}
@@ -148,16 +148,16 @@ void Team1257Robot::AutonomousInit() //This runs once at the beginning of autono
 	ran = false; // Makes sure that "ran" is set to false initially
 	AutoNum = 1; // Says which auto mode is used (1, 2, 3, 4)
 	/**
-	 * 1: Pick up container and put it ontop of the tote. Pick up the tote with the container on it and bring it to the auto zone
+	 * 1: Picks up container and puts it on top of the tote. Picks up the tote with the container on it and brings it to the auto zone
 	 * 		Robot set
 	 * 		Tote set
 	 * 		Container set
-	 * 2: Start in the area between the landfill and the auto zone. Strafe into the auto zone
+	 * 2: Starts in the area between the landfill and the auto zone. Strafes into the auto zone
 	 * 		Robot set
-	 * 3: Pick up container. Drive to auto zone.
+	 * 3: Picks up container. Drives to auto zone.
 	 * 		Robot set
 	 * 		Container set
-	 * 4: Do nothing
+	 * 4: Does nothing
 	 */
 }
 
@@ -165,6 +165,7 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 {
 	while(!ran) // Only run autonomous while the "ran" variable is false
 	{
+		// Autonomous mode 1
 		if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 1) // Makes sure that neither switch is tripped and checks to see what auto mode to use
 		{
 			dSolenoid.Set(DoubleSolenoid::kReverse); // Close arms
@@ -216,14 +217,10 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 			Right.Set(0); // Stop the robot
 			Left.Set(0); // In the AUTO ZONE
 			Lift.Set(0); // AUTO is finished
+			ran = true; // End loop after just one iteration
 		}
-	else
-		Lift.Set(0); // Make sure elevator is stopped
-	ran = true; // End loop after just one iteration
-	}
-	// After ran = true, although AutonomousPeriodic continues to run, nothing happens
 
-	if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 2) // Makes sure that neither switch is tripped and checks to see what auto mode to use
+	else if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 2) // Makes sure that neither switch is tripped and checks to see what auto mode to use
 	{
 		Right.Set(0); // Sets right motor to a speed of 0
 		Left.Set(0); // Sets left motor to a speed of 0
@@ -231,11 +228,10 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 		Center.Set(.5); // Sets center motor to a speed of .5 (half of full speed)
 		Wait(5); // Wait 5 seconds before stopping
 		Center.Set(0); // Sets center motor to a speed of 0
+		ran = true; // End loop after just one iteration
 	}
-	else
-		Lift.Set(0); // Make sure elevator is stopped
 
-	if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 3) // Makes sure that neither switch is tripped and checks to see what auto mode to use
+	else if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 3) // Makes sure that neither switch is tripped and checks to see what auto mode to use
 		{
 			Right.Set(0); // Sets right motor to a speed of 0
 			Left.Set(0); // Sets left motor to a speed of 0
@@ -265,18 +261,25 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 			Right.Set(0); // Stop the robot
 			Left.Set(0); // In the AUTO ZONE
 			Lift.Set(0); // AUTO is finished
+			ran = true; // End loop after just one iteration
+		}
+
+		else if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 4) // Makes sure that neither switch is tripped and checks to see what auto mode to use
+		{
+			Right.Set(0); // Sets right motor to a speed of 0
+			Left.Set(0); // Sets left motor to a speed of 0
+			Lift.Set(0); // Sets elevator motor to a speed of 0
+			Center.Set(0); // Sets center motor to a speed of .5 (half of full speed)
+			ran = true; // End loop after just one iteration
 		}
 		else
-			Lift.Set(0); // Make sure elevator is stopped
-		if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 4) // Makes sure that neither switch is tripped and checks to see what auto mode to use
 		{
 			Right.Set(0); // Sets right motor to a speed of 0
 			Left.Set(0); // Sets left motor to a speed of 0
 			Lift.Set(0); // Sets elevator motor to a speed of 0
 			Center.Set(0); // Sets center motor to a speed of .5 (half of full speed)
 		}
-		else
-			Lift.Set(0); // Make sure elevator is stopped
+	}
 }
 
 void Team1257Robot::TestInit() // Test code
