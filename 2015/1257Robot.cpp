@@ -101,20 +101,22 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 
 	//2ND CONTROLLER
 
-	if (Stick2.GetRawButton(5)) //Right bumper clicked
+	if(Stick2.GetRawButton(1))
+		lsignore = !lsignore;
+	if (Stick2.GetRawButton(5)) //Left bumper clicked
 	{
 		dSolenoid.Set(DoubleSolenoid::kForward); //open the arms
 	}
-	else if(Stick2.GetRawButton(6)) //left bumper clicked
+	else if(Stick2.GetRawButton(6)) //Right bumper clicked
 	{
 		dSolenoid.Set(DoubleSolenoid::kReverse); //close the arms
 	}
-	else //f neither
+	else //if neither
 		dSolenoid.Set(DoubleSolenoid::kOff); //DON'T DO ANYTHING!
 
 	double liftval = Stick2.GetRawAxis(3) - Stick2.GetRawAxis(2); //get the value of the left and right triggers together
 
-	if((!bottomlimit.Get() || liftval > 0) && (!toplimit.Get() || liftval < 0))
+	if(((!bottomlimit.Get() || liftval > 0) && (!toplimit.Get() || liftval < 0)) || lsignore)
 		/*
 		 * neither the top nor bottom limit switches are clicked
 		 * if it is at the bottom limit but wants to move up, allow it to move
