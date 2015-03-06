@@ -111,7 +111,7 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 	{
 		dSolenoid.Set(DoubleSolenoid::kReverse); //close the arms
 	}
-	else //f neither
+	else //if neither
 		dSolenoid.Set(DoubleSolenoid::kOff); //DON'T DO ANYTHING!
 
 	double liftval = Stick2.GetRawAxis(3) - Stick2.GetRawAxis(2); //get the value of the left and right triggers together
