@@ -14,6 +14,35 @@ std::string ToString(T t) //convert something else to a string
 
 Team1257Robot::Team1257Robot(): // Initialization of objects based on connection ports
 	Left(0), Right(1), Center(2), Lift(3), // PWM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	Stick1(0), Stick2(1), //Driver Station
 	dSolenoid(4, 5), // PCM
 	bottomlimit(0), toplimit(1), // Digital IO
@@ -102,7 +131,9 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 	//2ND CONTROLLER
 
 	if(Stick2.GetRawButton(1))
-		lsignore = !lsignore;
+		lsignore = true;
+	else if(Stick2.GetRawButton(2))
+		lsignore = false;
 	if (Stick2.GetRawButton(5)) //Left bumper clicked
 	{
 		dSolenoid.Set(DoubleSolenoid::kForward); //open the arms
@@ -143,12 +174,12 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 }
 
 bool ran = false; // Variable to ensure that Autonomous only runs once
-short AutoNum = 1; // Variable that defines what autonomous mode is used
+string AutoMode; // Variable that defines what autonomous mode is used
 
 void Team1257Robot::AutonomousInit() //This runs once at the beginning of autonomous
 {
 	ran = false; // Makes sure that "ran" is set to false initially
-	AutoNum = 1; // Says which auto mode is used (1, 2, 3, 4)
+	AutoMode = SmartDashboard::GetString("DB/String 0"); // Says which auto mode is used (ctrs, rs, crs, no)
 	/**
 	 * 1: Picks up container and puts it on top of the tote. Picks up the tote with the container on it and brings it to the auto zone
 	 * 		Robot set
@@ -168,7 +199,7 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 	while(!ran) // Only run autonomous while the "ran" variable is false
 	{
 		// Autonomous mode 1
-		if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 1) // Makes sure that neither switch is tripped and checks to see what auto mode to use
+		if(!bottomlimit.Get() && !toplimit.Get()) // Makes sure that neither switch is tripped and checks to see what auto mode to use
 		{
 			dSolenoid.Set(DoubleSolenoid::kReverse); // Close arms
 			Wait(.2); // Wait for .2 seconds
@@ -222,18 +253,18 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 			ran = true; // End loop after just one iteration
 		}
 
-	else if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 2) // Makes sure that neither switch is tripped and checks to see what auto mode to use
-	{
-		Right.Set(0); // Sets right motor to a speed of 0
-		Left.Set(0); // Sets left motor to a speed of 0
-		Lift.Set(0); // Sets elevator motor to a speed of 0
-		Center.Set(.5); // Sets center motor to a speed of .5 (half of full speed)
-		Wait(5); // Wait 5 seconds before stopping
-		Center.Set(0); // Sets center motor to a speed of 0
-		ran = true; // End loop after just one iteration
-	}
+		/*else if(!bottomlimit.Get() && !toplimit.Get() && AutoMode == "rs") // Makes sure that neither switch is tripped and checks to see what auto mode to use
+		{
+			Right.Set(0); // Sets right motor to a speed of 0
+			Left.Set(0); // Sets left motor to a speed of 0
+			Lift.Set(0); // Sets elevator motor to a speed of 0
+			Center.Set(.5); // Sets center motor to a speed of .5 (half of full speed)
+			Wait(5); // Wait 5 seconds before stopping
+			Center.Set(0); // Sets center motor to a speed of 0
+			ran = true; // End loop after just one iteration
+		}
 
-	else if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 3) // Makes sure that neither switch is tripped and checks to see what auto mode to use
+		else if(!bottomlimit.Get() && !toplimit.Get() && AutoMode == "crs") // Makes sure that neither switch is tripped and checks to see what auto mode to use
 		{
 			Right.Set(0); // Sets right motor to a speed of 0
 			Left.Set(0); // Sets left motor to a speed of 0
@@ -266,14 +297,14 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 			ran = true; // End loop after just one iteration
 		}
 
-		else if(!bottomlimit.Get() && !toplimit.Get() && AutoNum == 4) // Makes sure that neither switch is tripped and checks to see what auto mode to use
+		else if(!bottomlimit.Get() && !toplimit.Get() && AutoMode == "no") // Makes sure that neither switch is tripped and checks to see what auto mode to use
 		{
 			Right.Set(0); // Sets right motor to a speed of 0
 			Left.Set(0); // Sets left motor to a speed of 0
 			Lift.Set(0); // Sets elevator motor to a speed of 0
 			Center.Set(0); // Sets center motor to a speed of .5 (half of full speed)
 			ran = true; // End loop after just one iteration
-		}
+		}*/
 		else
 		{
 			Right.Set(0); // Sets right motor to a speed of 0
