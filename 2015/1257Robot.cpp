@@ -15,11 +15,12 @@ std::string ToString(T t) //convert something else to a string
 Team1257Robot::Team1257Robot(): // Initialization of objects based on connection ports
 	Left(0), Right(1), Center(2), Lift(3), // PWM
 	Stick1(0), Stick2(1), //Driver Station
-	dSolenoid(4, 5), // PCM
+	dSolenoid(4, 5), 
+	stepLiftSolenoid(0, 1),// PCM
 	bottomlimit(0), toplimit(1), // Digital IO
 	angle(0) // Analog Input
 {
-
+	
 }
 
 void Team1257Robot::TeleopInit() //This runs once at the beginning of teleop.
@@ -100,7 +101,17 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 	}
 
 	//2ND CONTROLLER
-
+	
+	if(Stick2.GetRawAxis(1) > 0.5)
+	{
+		stepLiftSolenoid.Set(DoubleSolenoid::kForward);
+	}
+	
+	else if(Stick2.GetRawAxis(1) < -0.5)
+	{
+		stepLiftSolenoid.Set(DoubleSolenoid::kReverse);
+	}
+	
 	if(Stick2.GetRawButton(1))
 		lsignore = true;
 	else if(Stick2.GetRawButton(2))
