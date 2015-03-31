@@ -16,7 +16,9 @@ public:
 	double strafe = 0; // Variable determining the current output value for drive Talon of the center
 	double turn = 0; // Variable determining the current output value for drive Talons of the left and right in rotation/pivoting
 	DoubleSolenoid dSolenoid; // The Solenoid valve connected to the Pneumatics Control Module
-
+	
+	DoubleSolenoid stepLiftSolenoid;
+	
 	DigitalInput bottomlimit; // A limit switch that is pressed as the elevator hits the bottom
 	DigitalInput toplimit; // A limit switch that is pressed as the elevator hits the bottom
 
