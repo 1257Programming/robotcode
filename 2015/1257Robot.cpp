@@ -127,21 +127,6 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 		Lift.Set(liftval); //move the lift
 	else
 		Lift.Set(0); //DON'T MOVE
-
-	//push values to the dashboard
-
-	SmartDashboard::PutString("DB/String 0", "Channel 12:");
-	SmartDashboard::PutString("DB/String 1", ToString(Pdp.GetCurrent(12)));
-
-	SmartDashboard::PutString("DB/String 2", "Channel 13:");
-	SmartDashboard::PutString("DB/String 3", ToString(Pdp.GetCurrent(13)));
-
-	SmartDashboard::PutString("DB/String 4", "Channel 14:");
-	SmartDashboard::PutString("DB/String 5", ToString(Pdp.GetCurrent(14)));
-
-	SmartDashboard::PutString("DB/String 6", "Channel 15:");
-	SmartDashboard::PutString("DB/String 7", ToString(Pdp.GetCurrent(15)));
-	// Monitor current drawn by motors by printing PDP current values through CAN
 }
 
 bool ran = false; // Variable to ensure that Autonomous only runs once
@@ -150,76 +135,126 @@ void Team1257Robot::AutonomousInit() //This runs once at the beginning of autono
 {
 	ran = false; // Makes sure that "ran" is set to false initially
 	angle.Reset();
+
+	auto_robot = SmartDashboard::GetBoolean("AUTO_ROBOT", true);
+	auto_tote = SmartDashboard::GetBoolean("AUTO_TOTE", false);
+	auto_container = SmartDashboard::GetBoolean("AUTO_CONTAINER", true);
+	auto_start = SmartDashboard::GetBoolean("AUTO_START", true);
 }
 #define GEARBOX_CHANGE .75
 void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous mode
 {
-	while(!ran) // Only run autonomous while the "ran" variable is false
+	if(!ran) // Only run autonomous while the "ran" variable is false
 	{
 		if(!bottomlimit.Get() && !toplimit.Get()) // Makes sure that neither switch is tripped
 		{
-			dSolenoid.Set(DoubleSolenoid::kReverse); // Close arms
-			Wait(.2); // Wait for .2 seconds
-			Lift.Set(.9 * GEARBOX_CHANGE); // Lift arms with containers grasped
-			//Wait(1.75); // Continue for 1.75 seconds
-			Wait(1);
-			Lift.Set(0);// Stop lifting; high enough
-			/*Right.Set(-.5); // Move forward
-			Left.Set(.5); // Move forward
-			Wait(.85); // Do so for .85 seconds
-			Right.Set(0); // STOP!
-			Left.Set(0); // STOP!
-			Lift.Set(-.55 * GEARBOX_CHANGE); // Set container down, then keep lowering to below tote
-			Wait(0.5); // Do so for .5 seconds
-			dSolenoid.Set(DoubleSolenoid::kForward); // Open the arms
-			Right.Set(.3); // Move backwards
-			Left.Set(-.3); // To avoid having the arms get caught on tote
-			Wait(.4); //keep going back for .4 seconds
-			Right.Set(0); // Stop moving forward
-			Left.Set(0); // Stop moving forward
-			Center.Set(-.5); // Slide into place to pick up tote
-			Wait(.5); // Do so for .5 seconds
-			Center.Set(0); // STOP
-			Left.Set(0); // THE
-			Right.Set(0); // DRIVE
-			Lift.Set(-.55 * GEARBOX_CHANGE); // Just a reminder that the elevator should STILL be going down
-			Wait(3); // JUST 3 MORE SECONDS
-			dSolenoid.Set(DoubleSolenoid::kReverse); // Close the arms to grasp the tote
-			Lift.Set(.35 * GEARBOX_CHANGE); // Move the elevator up to lift the tote and container just a bit
-			Wait(1); // A second should be long enough
-
-			while(TestAngle(60)) // Make a 90 degree turn, stopping the rotation after a 60-degree reading to account more momentum
+			if(auto_start)
 			{
-				Right.Set(-.5);
-				Left.Set(-.5);
+				if(auto_container || auto_tote)
+				{
+					dSolenoid.Set(DoubleSolenoid::kReverse); // Close arms
+					Wait(.2); // Wait for .2 seconds
+					Lift.Set(.9 * GEARBOX_CHANGE); // Lift arms with containers grasped
+					Wait(1.75); // Continue for 1.75 seconds
+					Wait(1);
+					Lift.Set(0);// Stop lifting; high enough
+				}
+				if(auto_tote && auto_container)
+				{
+					Right.Set(-.5); // Move forward
+					Left.Set(.5); // Move forward
+					Wait(.85); // Do so for .85 seconds
+					Right.Set(0); // STOP!
+					Left.Set(0); // STOP!
+					Lift.Set(-.55 * GEARBOX_CHANGE); // Set container down, then keep lowering to below tote
+					Wait(0.5); // Do so for .5 seconds
+					dSolenoid.Set(DoubleSolenoid::kForward); // Open the arms
+					Right.Set(.3); // Move backwards
+					Left.Set(-.3); // To avoid having the arms get caught on tote
+					Wait(.4); //keep going back for .4 seconds
+					Right.Set(0); // Stop moving forward
+					Left.Set(0); // Stop moving forward
+					Center.Set(-.5); // Slide into place to pick up tote
+					Wait(.5); // Do so for .5 seconds
+					Center.Set(0); // STOP
+					Left.Set(0); // THE
+					Right.Set(0); // DRIVE
+					Lift.Set(-.55 * GEARBOX_CHANGE); // Just a reminder that the elevator should STILL be going down
+					Wait(3); // JUST 3 MORE SECONDS
+					dSolenoid.Set(DoubleSolenoid::kReverse); // Close the arms to grasp the tote
+					Lift.Set(.35 * GEARBOX_CHANGE); // Move the elevator up to lift the tote and container just a bit
+					Wait(1); // A second should be long enough
+
+					PIDangle(0, 0, 0, 90, .5);
+				}
+				if(auto_robot)
+				{
+					Right.Set(-.65); // Move forward
+					Left.Set(.65); // Into AUTO Zone
+					Wait(2.2); // Hold high speed for 1.6 seconds
+					Right.Set(-0.5); // Reduce speed
+					Left.Set(0.5); // to .5 output
+					Wait(.3); // hold for just .3 seconds
+					Right.Set(-0.3); // Now reduce again
+					Left.Set(0.3); // to .3 output
+					Wait(.4); // Hold for .4 seconds
+					Right.Set(-0.1); // Slow again
+					Left.Set(0.1); // To .1 speed (may not actually move robot, just to help slow to a stop)
+					Wait(.5); // Hold for .5 seconds
+					Right.Set(0); // Stop the robot
+					Left.Set(0); // In the AUTO ZONE
+					Lift.Set(0); // AUTO is finished
+				}
 			}
-			*/
-			Right.Set(-.65); // Move forward
-			Left.Set(.65); // Into AUTO Zone
-			Wait(2.2); // Hold high speed for 1.6 seconds
-			Right.Set(-0.5); // Reduce speed
-			Left.Set(0.5); // to .5 output
-			Wait(.3); // hold for just .3 seconds
-			Right.Set(-0.3); // Now reduce again
-			Left.Set(0.3); // to .3 output
-			Wait(.4); // Hold for .4 seconds
-			Right.Set(-0.1); // Slow again
-			Left.Set(0.1); // To .1 speed (may not actually move robot, just to help slow to a stop)
-			Wait(.5); // Hold for .5 seconds
-			Right.Set(0); // Stop the robot
-			Left.Set(0); // In the AUTO ZONE
-			Lift.Set(0); // AUTO is finished
+
+			else if(!auto_start)
+			{
+				if(auto_container)
+				{
+					//Canburglar?
+				}
+				if(auto_robot)
+				{	Right.Set(-.65); // Move forward
+					Left.Set(.65); // Into AUTO Zone
+					Wait(2.2); // Hold high speed for 1.6 seconds
+					Right.Set(-0.5); // Reduce speed
+					Left.Set(0.5); // to .5 output
+					Wait(.3); // hold for just .3 seconds
+					Right.Set(-0.3); // Now reduce again
+					Left.Set(0.3); // to .3 output
+					Wait(.4); // Hold for .4 seconds
+					Right.Set(-0.1); // Slow again
+					Left.Set(0.1); // To .1 speed (may not actually move robot, just to help slow to a stop)
+					Wait(.5); // Hold for .5 seconds
+					Right.Set(0); // Stop the robot
+					Left.Set(0); // In the AUTO ZONE
+					Lift.Set(0); // AUTO is finished
+				}
+			}
 		}
 	else
 		Lift.Set(0); // Make sure elevator is stopped
 	ran = true; // End loop after just one iteration
 	}
 	// After ran = true, although AutonomousPeriodic continues to run, nothing happens
+	// This code is only in AutonomousPeriodic to separate it from sensor and automode initialization
 }
 
 void Team1257Robot::TestInit() // Test code
 {
 	angle.Reset();
+
+	SmartDashboard::PutBoolean("AUTO_ROBOT", true);
+	SmartDashboard::PutBoolean("AUTO_TOTE", false);
+	SmartDashboard::PutBoolean("AUTO_CONTAINER", true);
+	SmartDashboard::PutBoolean("AUTO_START", true);
+
+	PIDangle(0, 0, 0, 90, .5);
+}
+
+void Team1257Robot::TestPeriodic() //This runs in a loop during test mode.
+{
+
 }
 
 bool Team1257Robot::TestAngle(int theta) // Returns false until the robot has completed a turn of measure "angle"
@@ -237,26 +272,21 @@ bool Team1257Robot::TestAngle(int theta) // Returns false until the robot has co
 	}
 }
 
-void Team1257Robot::TestPeriodic() //This runs in a loop during test mode.
+void Team1257Robot::PIDangle(float p, float i, float d, float setpoint, float speedmax)
 {
-	float a = angle.GetAngle();//Get the current angle from the gyro and store it as a.
-	if((int)dAbs(a) < 60)//If the angle is less than 60 degrees
+	if(!p)
+		p = -(speedmax/setpoint) * 1.25;
+	angle.Reset();
+	PIDController angleturn(p, i, d, &angle, &Right);
+	angleturn.SetSetpoint(setpoint);
+	angleturn.Enable();
+	while(angleturn.GetError() > 15)
 	{
-		//Turn
-		Right.Set(-.5);
-		Left.Set(-.5);
-		//One of the motors is reversed polarity;
-		//It's easier to account in the code than to modify the motor
+		Left.Set(Right.Get());
 	}
-
-	else
-	{
-		//Stop
-		Right.Set(0);
-		Left.Set(0);
-	}
-
-	SmartDashboard::PutString("DB/String 1", ToString((int)a));//Print out the angle
+	angleturn.Disable();
+	angleturn.Reset();
+	angle.Reset();
 }
 
 double Team1257Robot::accel(Joystick& Stick, int axis, double& current, double sf, double inc) //smoothly speed up to target speed

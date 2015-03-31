@@ -24,6 +24,11 @@ public:
 
 	bool lsignore = false;
 
+	bool auto_robot = true;
+	bool auto_tote = false;
+	bool auto_container = true;
+	bool auto_start = true; //True for staging zone, false of by landfill
+
 	Team1257Robot(); // Function Prototype of class constructor
 
 	void AutonomousInit(); // Runs at AUTO start
@@ -33,6 +38,8 @@ public:
 	void TestInit(); // Runs upon entering Test Mode
 	void TestPeriodic(); // Test code
 	bool TestAngle(int angle); // Returns false until the robot has completed a turn of measure "angle"
+	void PIDangle(float p, float i, float d, float setpoint, float speedmax);
+
 	double accel(Joystick& stick, int axis, double& current, double sf, double inc = 0.5); // Function for managing sudden shifts in joystick values
 	inline double dAbs(double x); // Absolute value function
 };
