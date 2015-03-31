@@ -104,12 +104,12 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 	
 	if(Stick2.GetRawAxis(1) > 0.5)
 	{
-		stepLiftSolenoid.Set(DoubleSolenoid::kForward);
+		stepLiftSolenoid.Set(DoubleSolenoid::kReverse);
 	}
 	
 	else if(Stick2.GetRawAxis(1) < -0.5)
 	{
-		stepLiftSolenoid.Set(DoubleSolenoid::kReverse);
+		stepLiftSolenoid.Set(DoubleSolenoid::kForward);
 	}
 	
 	if(Stick2.GetRawButton(1))
