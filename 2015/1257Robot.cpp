@@ -15,7 +15,7 @@ std::string ToString(T t) //convert something else to a string
 Team1257Robot::Team1257Robot(): // Initialization of objects based on connection ports
 	Left(0), Right(1), Center(2), Lift(3), // PWM
 	Stick1(0), Stick2(1), //Driver Station
-	dSolenoid(4, 5), // PCM
+	dSolenoid(4, 5), canburglar(0, 1),// PCM
 	bottomlimit(0), toplimit(1), // Digital IO
 	angle(0) // Analog Input
 {
@@ -115,7 +115,15 @@ void Team1257Robot::TeleopPeriodic() //NOTE: THE RIGHT MOTOR IS FLIPPED, SO TO H
 	}
 	else //if neither
 		dSolenoid.Set(DoubleSolenoid::kOff); //DON'T DO ANYTHING!
-
+	if(Stick2.GetRawButton(4))
+	{
+		if(Stick2.GetRawAxis(1) < -.5)
+			canburglar.Set(DoubleSolenoid::kForward);
+		else if(Stick2.GetRawAxis(1) > .5)
+			canburglar.Set(DoubleSolenoid::kReverse);
+		else
+			canburglar.Set(DoubleSolenoid::kOff);
+	}
 	double liftval = Stick2.GetRawAxis(3) - Stick2.GetRawAxis(2); //get the value of the left and right triggers together
 
 	if(((!bottomlimit.Get() || liftval > 0) && (!toplimit.Get() || liftval < 0)) || lsignore)
@@ -146,8 +154,8 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 {
 	if(!ran) // Only run autonomous while the "ran" variable is false
 	{
-		if(!bottomlimit.Get() && !toplimit.Get()) // Makes sure that neither switch is tripped
-		{
+		//if(!bottomlimit.Get() && !toplimit.Get()) // Makes sure that neither switch is tripped
+		//{
 			if(auto_start)
 			{
 				if(auto_container || auto_tote)
@@ -185,7 +193,7 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 					Lift.Set(.35 * GEARBOX_CHANGE); // Move the elevator up to lift the tote and container just a bit
 					Wait(1); // A second should be long enough
 
-					PIDangle(0, 0, 0, 90, .5);
+					PIDangle(0, 0, 0, -90, .5);
 				}
 				if(auto_robot)
 				{
@@ -216,7 +224,7 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 				if(auto_robot)
 				{	Right.Set(-.65); // Move forward
 					Left.Set(.65); // Into AUTO Zone
-					Wait(2.2); // Hold high speed for 1.6 seconds
+					Wait(1.4); // Hold high speed for 1.6 seconds
 					Right.Set(-0.5); // Reduce speed
 					Left.Set(0.5); // to .5 output
 					Wait(.3); // hold for just .3 seconds
@@ -231,7 +239,7 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 					Lift.Set(0); // AUTO is finished
 				}
 			}
-		}
+		//}
 	else
 		Lift.Set(0); // Make sure elevator is stopped
 	ran = true; // End loop after just one iteration
@@ -274,15 +282,21 @@ bool Team1257Robot::TestAngle(int theta) // Returns false until the robot has co
 
 void Team1257Robot::PIDangle(float p, float i, float d, float setpoint, float speedmax)
 {
+	Timer timer;
+	timer.Start();
 	if(!p)
-		p = -(speedmax/setpoint) * 1.25;
+		p = (speedmax/setpoint) * 1.25;
+	if(setpoint < 0)
+		p *= -1;
 	angle.Reset();
 	PIDController angleturn(p, i, d, &angle, &Right);
 	angleturn.SetSetpoint(setpoint);
 	angleturn.Enable();
-	while(angleturn.GetError() > 15)
+	while(dAbs(angleturn.GetError()) > 15)
 	{
 		Left.Set(Right.Get());
+		if(timer.Get() > 5)
+			break;
 	}
 	angleturn.Disable();
 	angleturn.Reset();
