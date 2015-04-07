@@ -20,6 +20,7 @@ public:
 
 	DigitalInput bottomlimit; // A limit switch that is pressed as the elevator hits the bottom
 	DigitalInput toplimit; // A limit switch that is pressed as the elevator hits the bottom
+	DigitalInput burglarLimit; //limit switch for can burglar
 
 	Gyro angle; // ADW22307 Gyroscope sensor used to retrieve rotational angles in autonomous
 

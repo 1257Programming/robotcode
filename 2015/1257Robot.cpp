@@ -16,7 +16,7 @@ Team1257Robot::Team1257Robot(): // Initialization of objects based on connection
 	Left(0), Right(1), Center(2), Lift(3), // PWM
 	Stick1(0), Stick2(1), //Driver Station
 	dSolenoid(4, 5), canburglar(0, 1),// PCM
-	bottomlimit(0), toplimit(1), // Digital IO
+	bottomlimit(0), toplimit(1), burglarLimit(2), // Digital IO
 	angle(0) // Analog Input
 {
 
@@ -220,6 +220,26 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 				if(auto_container)
 				{
 					//Canburglar?
+					PIDangle(0, 0, 0, -90, 0.5);
+					Wait(1);
+					canburglar.Set(DoubleSolenoid::kForward);
+					Wait(1.5);
+
+					while(!burglarLimit.Get())
+					{
+						Right.Set(0.3);
+						Left.Set(-0.3);
+					}
+
+					Right.Set(0);
+					Left.Set(0);
+
+					canburglar.Set(DoubleSolenoid::kReverse);
+					Wait(1.5);
+
+					Right.Set(-0.6);
+					Left.Set(0.6);
+					Wait(2.5);
 				}
 				if(auto_robot)
 				{	Right.Set(-.65); // Move forward
