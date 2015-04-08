@@ -227,6 +227,10 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 
 					while(!burglarLimit.Get())
 					{
+						if(DriverStation::GetInstance()->GetMatchTime() >= 10) //this might mean that the robot is
+							//stuck or the switch isn't working, in which case we abort and hope for the best
+							break;
+
 						Right.Set(0.3);
 						Left.Set(-0.3);
 					}
@@ -239,7 +243,7 @@ void Team1257Robot::AutonomousPeriodic() //This runs in a loop during autonomous
 
 					Right.Set(-0.6);
 					Left.Set(0.6);
-					Wait(2.5);
+					Wait(2);
 				}
 				if(auto_robot)
 				{	Right.Set(-.65); // Move forward
