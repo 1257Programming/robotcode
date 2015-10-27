@@ -6,4 +6,4 @@ USBCamera1257.h and USBCamera1257.cpp contain the actual class declaration/defin
 <br>
 I tested this on TestBot and it worked (10/26/15@4:45PM)
 <br>
---N
+—N
