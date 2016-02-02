@@ -1,6 +1,6 @@
 #include "WPILib.h"
 
-// X-Box Controller Button IDs
+// X-Box Controller Button ID
 #define BUTTON_A 1
 #define BUTTON_B 2
 #define BUTTON_X 3
