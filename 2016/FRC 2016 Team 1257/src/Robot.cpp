@@ -92,9 +92,17 @@ public:
             {
             	moveVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
             }
+          	else
+          	{
+          		moveVal = 0;
+          	}
             if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
             {
                 turnVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+            }
+            else
+            {
+            	turnVal = 0;
             }
           	driveTrain.ArcadeDrive(moveVal, turnVal, false);
         }
@@ -104,9 +112,17 @@ public:
             { 
                 moveVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
             }
+        	else
+        	{
+        		moveVal = 0;
+        	}
             if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
             { 
                 turnVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+            }
+            else
+            {
+            	turnVal = 0;
             }
             driveTrain.ArcadeDrive(moveVal, turnVal, false);
         }
@@ -116,9 +132,17 @@ public:
             { 
                 moveVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
             }
+        	else
+        	{
+        		moveVal = 0;
+        	}
             if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
             { 
                 turnVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+            }
+            else
+            {
+            	turnVal = 0;
             }
             driveTrain.ArcadeDrive(moveVal, turnVal, false);
         }
@@ -170,7 +194,7 @@ public:
         }
       	else 
         {
-            bottonArmHinge.Set(0);
+            bottomArmHinge.Set(0);
       	}
         if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y))) // If the left stick is moved vertically, rotate the top hinge
         {
