@@ -1,216 +1,254 @@
-#include "WPILib.h"
-
-// X-Box Controller Button IDs
-#define BUTTON_A 1
-#define BUTTON_B 2
-#define BUTTON_X 3
-#define BUTTON_Y 4
-#define BUTTON_LB 5
-#define BUTTON_RB 6
-#define BUTTON_BACK 7
-#define BUTTON_START 8
-#define BUTTON_ANALOG_CLICK_LEFT 9
-#define BUTTON_ANALOG_CLICK_RIGHT 10
-
-// X-Box Controller Axis IDs
-#define AXIS_ANALOG_LEFT_X 0
-#define AXIS_ANALOG_LEFT_Y 1
-#define AXIS_TRIGGER_LEFT 2
-#define AXIS_TRIGGER_RIGHT 3
-#define AXIS_ANALOG_RIGHT_X 4
-#define AXIS_ANALOG_RIGHT_Y 5
+#include "Robot.h"
 
 //Global Functions
-inline double dabs(double d) { return d > 0.0 ? d : -d; } // Absolute value of a double precision floating point number
-inline bool isReasonable(double axisVal) { return dabs(axisVal) > 0.2; } // Ensures the axis is intentionally engaged
-			
-class Robot: public IterativeRobot
-{
-  	//Object Definitions
-  	CANTalon frontLeftDrive;
-  	CANTalon backLeftDrive;
-  	CANTalon frontRightDrive;
-    CANTalon backRightDrive;
-  	CANTalon intakePivot;
-  	Talon intakeSpin;
-  	CANTalon bottomArmHinge;
-  	CANTalon topArmHinge;
-  	RobotDrive driveTrain;
-  	Joystick Driver;
-  	Joystick Operator;
-  
-  	//Variable Definitions
-  	double moveVal = 0;
-	double turnVal = 0;  
 
-//RobotDrive (SpeedController &frontLeftMotor, SpeedController &rearLeftMotor, SpeedController &frontRightMotor, SpeedController &rearRightMotor)
-public:
-  	Robot() :
-        frontLeftDrive(0), 
-        backLeftDrive(1),
-        frontRightDrive(2), 
-        backRightDrive(3), 
-		intakePivot(4),
-		intakeSpin(5),
-		bottomArmHinge(6),
-		topArmHinge(7),
-        driveTrain(frontLeftDrive, backLeftDrive, frontRightDrive, backRightDrive),
+//inline double dabs(double d) { return d > 0.0 ? d : -d; } // Absolute value of a double precision floating point number
+//inline bool isReasonable(double axisVal) { return dabs(axisVal) > 0.2; } // Ensures the axis is intentionally engaged
+			
+
+Robot::Robot() :
+		frontLeftDrive(3),
+        backLeftDrive(4),
+        frontRightDrive(5),
+        backRightDrive(1),
+		intakePivot(2),
+		intakeSpin(0),
+		bottomArmHinge(0),
+		topArmHinge(6),
+		gyro(),
+		encDriveLeft(4, 5),
+		encDriveRight(2, 3),
+		encBottomHinge(8, 9),
+		encTopHinge(6, 7),
         Driver(0),
         Operator(1)
-  	{
-  		 
-  	}
+{
+
+}
 	
-	void RobotInit()
-	{
-    	
-	}
+void Robot::RobotInit()
+{
+	int AMTRes = 1; // TEST TO FIND OUT!!!
+	encBottomHinge.SetDistancePerPulse(360.0/497.0); // Degrees
+	encTopHinge.SetDistancePerPulse(360.0/497.0); 	 // Degrees
+	encDriveLeft.SetDistancePerPulse((2 * PI * 8.0) / AMTRes); // res pulses per 1 rev, 1 rev = 2 pi rad
+	encDriveRight.SetDistancePerPulse((2 * PI * 8.0) / AMTRes); // inches (8 in. outer wheel diameter?)
+}
 
   	
-	void AutonomousInit()
-	{
-    	
-	}
+void Robot::AutonomousInit()
+{
 
-	void AutonomousPeriodic()
-	{
-		
-	}
+}
 
-	void TeleopInit()
-	{
+void Robot::AutonomousPeriodic()
+{
+
+}
+
+void Robot::TeleopInit()
+{
     	//set all the motor values to 0
         
+}
+
+void Robot::TeleopPeriodic()
+{
+      	//Driver Code
+	if (Driver.GetRawButton(BUTTON_A)) //If the 'A' button is pressed
+	{
+		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
+        {
+            moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
+        }
+        else
+        {
+            moveVal = 0;
+        }
+
+		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
+        {
+			turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+        }
+
+		else
+        {
+            turnVal = 0;
+        }
+
+		ArcadeDrive(moveVal, turnVal, false);
 	}
 
-	void TeleopPeriodic()
+	else if (Driver.GetRawButton(BUTTON_LB)) //If the left bumper is pressed
     {
-      	//Driver Code
-        if (Driver.GetRawButton(BUTTON_A)) //If the 'A' button is pressed
-        {	
-          	if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-            {
-            	moveVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-            }
-          	else
-          	{
-          		moveVal = 0;
-          	}
-            if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-            {
-                turnVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-            }
-            else
-            {
-            	turnVal = 0;
-            }
-          	driveTrain.ArcadeDrive(moveVal, turnVal, false);
-        }
-        else if (Driver.GetRawButton(BUTTON_LB)) //If the left bumper is pressed
+        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
         {
-        	if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-            { 
-                moveVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-            }
-        	else
-        	{
-        		moveVal = 0;
-        	}
-            if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-            { 
-                turnVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-            }
-            else
-            {
-            	turnVal = 0;
-            }
-            driveTrain.ArcadeDrive(moveVal, turnVal, false);
+        	moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
         }
-      	else if (Driver.GetRawButton(BUTTON_RB)) //If the right bumper is pressed
-        {
-        	if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-            { 
-                moveVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-            }
-        	else
-        	{
-        		moveVal = 0;
-        	}
-            if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-            { 
-                turnVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-            }
-            else
-            {
-            	turnVal = 0;
-            }
-            driveTrain.ArcadeDrive(moveVal, turnVal, false);
-        }
-      	else
+        else
         {
         	moveVal = 0;
-          	turnVal = 0;
-          	driveTrain.SetLeftRightMotorOutputs(0, 0);
         }
-      	
-      	//Operator Code
-      	if (Operator.GetRawButton(BUTTON_A)) //If 'A' is being pressed, spin the intake inwards 
+        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X)))
         {
-        	intakeSpin.Set(1);
+            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X);
         }
-        else if (Operator.GetRawButton(BUTTON_B)) //If 'B' is being pressed, spin the intake outwards
+        else
         {
-        	intakeSpin.Set(-1);
-        }
-        else if (Operator.GetRawButton(BUTTON_X)) //If 'X' is pressed, spin the intake inwards slowly
-        {
-         	intakeSpin.Set(0.5); 
-        }
-        else if (Operator.GetRawButton(BUTTON_Y)) //If 'Y' is pressed, spin the intake outwards slowly
-        {
-            intakeSpin.Set(-0.5);
-        }
-      	else
-        {
-        	intakeSpin.Set(0);  
+            turnVal = 0;
         }
 
-        if (Operator.GetRawAxis(AXIS_TRIGGER_RIGHT)) //If the right trigger is pressed, lift the intake
+        ArcadeDrive(moveVal, turnVal, false);
+    }
+	else if (Driver.GetRawButton(BUTTON_RB)) //If the right bumper is pressed
+    {
+		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y)))
+		{
+			moveVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y);
+		}
+        else
         {
-            intakePivot.Set(Operator.GetRawAxis(AXIS_TRIGGER_RIGHT));
+        	moveVal = 0;
         }
-      	else if (Operator.GetRawAxis(AXIS_TRIGGER_LEFT)) //If the left trigger is pressed, lower the intake
+        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
         {
-            intakePivot.Set(-Operator.GetRawAxis(AXIS_TRIGGER_LEFT));
+            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
         }
-      	else 
+        else
         {
-            intakePivot.Set(0);
+            turnVal = 0;
         }
-                
-        if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y))) // If the right stick is moved vertically, rotate the bottom hinge 
-        {
-            bottomArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y));
-        }
-      	else 
-        {
-            bottomArmHinge.Set(0);
-      	}
-        if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y))) // If the left stick is moved vertically, rotate the top hinge
-        {
-            topArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
-        }
-      	else 
-        {
-            topArmHinge.Set(0);
-      	}
+        ArcadeDrive(moveVal, turnVal, false);
     }
 
-	void TestPeriodic()
+	else
 	{
-    	
+        moveVal = 0;
+        turnVal = 0;
+        SetDriveMotors(0, 0);
 	}
-};
+      	
+      	//Operator Code
+	if (Operator.GetRawButton(BUTTON_A)) //If 'A' is being pressed, spin the intake inwards
+	{
+		intakeSpin.Set(1);
+	}
+	else if (Operator.GetRawButton(BUTTON_B)) //If 'B' is being pressed, spin the intake outwards
+	{
+		intakeSpin.Set(-1);
+	}
+	else if (Operator.GetRawButton(BUTTON_X)) //If 'X' is pressed, spin the intake inwards slowly
+	{
+		intakeSpin.Set(0.5);
+	}
+	else if (Operator.GetRawButton(BUTTON_Y)) //If 'Y' is pressed, spin the intake outwards slowly
+	{
+		intakeSpin.Set(-0.5);
+	}
+	else
+	{
+		intakeSpin.Set(0);
+	}
 
-START_ROBOT_CLASS(Robot)//the truth is out there
+	if (Operator.GetRawAxis(AXIS_TRIGGER_LEFT)) //If the right trigger is pressed, lift the intake
+	{
+		intakePivot.Set(Operator.GetRawAxis(AXIS_TRIGGER_LEFT));
+	}
+	else if (Operator.GetRawAxis(AXIS_TRIGGER_RIGHT)) //If the left trigger is pressed, lower the intake
+	{
+		intakePivot.Set(-Operator.GetRawAxis(AXIS_TRIGGER_RIGHT));
+	}
+	else
+	{
+		intakePivot.Set(0);
+	}
+
+	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y))) // If the right stick is moved vertically, rotate the bottom hinge
+	{
+		bottomArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y));
+	}
+	else
+	{
+		bottomArmHinge.Set(0);
+	}
+
+	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y))) // If the left stick is moved vertically, rotate the top hinge
+	{
+		topArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
+	}
+	else
+	{
+		topArmHinge.Set(0);
+	}
+}
+
+void Robot::SetDriveMotors(float left, float right)
+{
+	frontLeftDrive.Set(left);
+	backLeftDrive.Set(left);
+	frontRightDrive.Set(right);
+	backLeftDrive.Set(right);
+}
+
+void Robot::ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs)
+{
+// local variables to hold the computed PWM values for the motors
+  float leftMotorOutput;
+  float rightMotorOutput;
+
+  if (squaredInputs)
+  {
+	// square the inputs (while preserving the sign) to increase fine control
+	// while permitting full power
+	if (moveValue >= 0.0)
+	{
+		moveValue = (moveValue * moveValue);
+	}
+	else
+	{
+		moveValue = -(moveValue * moveValue);
+	}
+
+	if (rotateValue >= 0.0)
+	{
+		rotateValue = (rotateValue * rotateValue);
+	}
+	else
+	{
+		rotateValue = -(rotateValue * rotateValue);
+	}
+  }
+
+  if (moveValue > 0.0)
+  {
+	  if (rotateValue > 0.0)
+	  {
+		  leftMotorOutput = moveValue - rotateValue;
+		  rightMotorOutput = std::max(moveValue, rotateValue);
+	  }
+	  else
+	  {
+		leftMotorOutput = std::max(moveValue, -rotateValue);
+		rightMotorOutput = moveValue + rotateValue;
+	  }
+  }
+  else
+  {
+	  if (rotateValue > 0.0)
+	  {
+		  leftMotorOutput = -std::max(-moveValue, rotateValue);
+		  rightMotorOutput = moveValue + rotateValue;
+	  }
+	  else
+	  {
+		  leftMotorOutput = moveValue - rotateValue;
+		  rightMotorOutput = -std::max(-moveValue, -rotateValue);
+	  }
+  }
+
+  SetDriveMotors(leftMotorOutput, rightMotorOutput);
+}
+
+
+START_ROBOT_CLASS(Robot)
 
