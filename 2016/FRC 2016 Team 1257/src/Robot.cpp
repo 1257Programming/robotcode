@@ -249,6 +249,126 @@ void Robot::ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs)
   SetDriveMotors(leftMotorOutput, rightMotorOutput);
 }
 
+//New Untested Functions:
+bool isOverextended()
+{
+	if (BOTTOM_ARM_LENGTH * cos(bottomHingeAngle) >= 14.5)
+	{
+		return true;  
+	}
+	return BOTTOM_ARM_LENGTH * cos(bottomHingeAngle) + TOP_ARM_LENGTH * cos(topHingeAngle) >= 14.5;
+}
+// Read a value from the encoder and finds the angle with the horizontal line that the arm makes for both hinges
+void setHingeAngles()
+{
+topHingeAngle = TOP_HINGE_START - encTopArm.GetDistance(); // We might need to flip the signs after testing
+bottomHingeAngle = BOTTOM_HINGE_START - encBottomArm.GetDistance();
+}
+
+// Member functions for autonomous mode positions - SKELETON
+void position1()
+{
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,-1); // Turn right
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
+}
+void position2()
+{
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,-1); // Turn right
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
+}
+void position3()
+{
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(-1,1); // Turn left
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,-1); // Turn right
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
+}
+void position4()
+{
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,-1); // Turn right
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(-1,1); // Turn left
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
+}
+void position5()
+{
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(-1,1); // Turn left
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	Wait(1);
+	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal  
+}
+
+void portcullis()
+{
+
+}
+void chevalDeFrise()
+{
+        
+}
+void moat()
+{
+    driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+    Wait(1);
+    driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
+}
+void ramparts()
+{
+      
+}
+void drawbridge()
+{
+        
+}
+void sallyPort()
+{
+     
+}
+void rockWall()
+{
+    driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+    Wait(1);
+    driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
+}
+void roughTerrain()
+{
+    driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+    Wait(1);
+    driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
+}
+void lowBar()
+{
+    driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+    Wait(1);
+    driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
+}
 
 START_ROBOT_CLASS(Robot)
 
