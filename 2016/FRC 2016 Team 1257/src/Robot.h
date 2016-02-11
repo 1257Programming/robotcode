@@ -33,7 +33,7 @@ public:
   	CANTalon frontLeftDrive;
   	CANTalon backLeftDrive;
   	CANTalon frontRightDrive;
-    CANTalon backRightDrive;
+    	CANTalon backRightDrive;
   	CANTalon intakePivot;
   	Talon intakeSpin;
   	CANTalon bottomArmHinge;
@@ -51,6 +51,9 @@ public:
   	//Variable Definitions
   	double moveVal = 0;
 	double turnVal = 0;
+	double bottomHingeAngle = 0;
+	double topHingeAngle = 0;
+	bool hasRun = false;
 
 	Robot();
 	void RobotInit();
@@ -60,4 +63,25 @@ public:
 	void TeleopPeriodic();
 	void SetDriveMotors(float left, float right);
 	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
+	
+	//New Functions
+	bool isOverextended();
+	void setHingeAngles();
+	
+	//Autonomous Functions
+	void position1();
+	void position2();
+	void position3();
+	void position4();
+	void position5();
+	void portcullis();
+	void chevalDeFrise();
+	void moat();
+	void ramparts();
+	void drawbridge();
+	void sallyPort();
+	void rockWall();
+	void rougherrain();
+	void lowBar();
+	
 };
