@@ -4,22 +4,22 @@
 
 //inline double dabs(double d) { return d > 0.0 ? d : -d; } // Absolute value of a double precision floating point number
 //inline bool isReasonable(double axisVal) { return dabs(axisVal) > 0.2; } // Ensures the axis is intentionally engaged
-			
+
 
 Robot::Robot() :
-		frontLeftDrive(3),
+	frontLeftDrive(3),
         backLeftDrive(4),
         frontRightDrive(5),
         backRightDrive(1),
-		intakePivot(2),
-		intakeSpin(0),
-		bottomArmHinge(0),
-		topArmHinge(6),
-		gyro(),
-		encDriveLeft(4, 5),
-		encDriveRight(2, 3),
-		encBottomHinge(8, 9),
-		encTopHinge(6, 7),
+	intakePivot(2),
+	intakeSpin(0),
+	bottomArmHinge(0),
+	topArmHinge(6),
+	gyro(),
+	encDriveLeft(4, 5),
+	encDriveRight(2, 3),
+	encBottomHinge(8, 9),
+	encTopHinge(6, 7),
         Driver(0),
         Operator(1)
 {
@@ -58,23 +58,23 @@ void Robot::TeleopPeriodic()
 	if (Driver.GetRawButton(BUTTON_A)) //If the 'A' button is pressed
 	{
 		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-        {
-            moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-        }
-        else
-        {
-            moveVal = 0;
-        }
+        	{
+        		moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
+        	}
+        	else
+        	{
+        		moveVal = 0;
+        	}
 
 		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-        {
+        	{
 			turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-        }
+        	}
 
 		else
-        {
-            turnVal = 0;
-        }
+        	{
+        		turnVal = 0;
+        	}
 
 		ArcadeDrive(moveVal, turnVal, false);
 	}
@@ -250,7 +250,7 @@ void Robot::ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs)
 }
 
 //New Untested Functions:
-bool isOverextended()
+bool Robot::isOverextended()
 {
 	if (BOTTOM_ARM_LENGTH * cos(bottomHingeAngle) >= 14.5)
 	{
@@ -259,14 +259,14 @@ bool isOverextended()
 	return BOTTOM_ARM_LENGTH * cos(bottomHingeAngle) + TOP_ARM_LENGTH * cos(topHingeAngle) >= 14.5;
 }
 // Read a value from the encoder and finds the angle with the horizontal line that the arm makes for both hinges
-void setHingeAngles()
+void Robot::setHingeAngles()
 {
 topHingeAngle = TOP_HINGE_START - encTopArm.GetDistance(); // We might need to flip the signs after testing
 bottomHingeAngle = BOTTOM_HINGE_START - encBottomArm.GetDistance();
 }
 
 // Member functions for autonomous mode positions - SKELETON
-void position1()
+void Robot::position1()
 {
 	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
 	Wait(1);
@@ -276,7 +276,7 @@ void position1()
 	Wait(1);
 	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
 }
-void position2()
+void Robot::position2()
 {
 	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
 	Wait(1);
@@ -286,7 +286,7 @@ void position2()
 	Wait(1);
 	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
 }
-void position3()
+void Robot::position3()
 {
 	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
 	Wait(1);
@@ -300,7 +300,7 @@ void position3()
 	Wait(1);
 	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
 }
-void position4()
+void Robot::position4()
 {
 	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
 	Wait(1);
@@ -314,7 +314,7 @@ void position4()
 	Wait(1);
 	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
 }
-void position5()
+void Robot::position5()
 {
 	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
 	Wait(1);
@@ -325,45 +325,45 @@ void position5()
 	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal  
 }
 
-void portcullis()
+void Robot::portcullis()
 {
 
 }
-void chevalDeFrise()
+void Robot::chevalDeFrise()
 {
         
 }
-void moat()
+void Robot::moat()
 {
     driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
     Wait(1);
     driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
 }
-void ramparts()
+void Robot::ramparts()
 {
       
 }
-void drawbridge()
+void Robot::drawbridge()
 {
         
 }
-void sallyPort()
+void Robot::sallyPort()
 {
      
 }
-void rockWall()
+void Robot::rockWall()
 {
     driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
     Wait(1);
     driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
 }
-void roughTerrain()
+void Robot::roughTerrain()
 {
     driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
     Wait(1);
     driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
 }
-void lowBar()
+void Robot::lowBar()
 {
     driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
     Wait(1);
