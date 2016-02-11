@@ -25,7 +25,7 @@ Robot::Robot() :
 {
 
 }
-	
+
 void Robot::RobotInit()
 {
 	int AMTRes = 1; // TEST TO FIND OUT!!!
@@ -35,7 +35,7 @@ void Robot::RobotInit()
 	encDriveRight.SetDistancePerPulse((2 * PI * 8.0) / AMTRes); // inches (8 in. outer wheel diameter?)
 }
 
-  	
+
 void Robot::AutonomousInit()
 {
 
@@ -49,7 +49,7 @@ void Robot::AutonomousPeriodic()
 void Robot::TeleopInit()
 {
     	//set all the motor values to 0
-        
+
 }
 
 void Robot::TeleopPeriodic()
@@ -127,7 +127,7 @@ void Robot::TeleopPeriodic()
         turnVal = 0;
         SetDriveMotors(0, 0);
 	}
-      	
+
       	//Operator Code
 	if (Operator.GetRawButton(BUTTON_A)) //If 'A' is being pressed, spin the intake inwards
 	{
@@ -254,75 +254,75 @@ bool Robot::isOverextended()
 {
 	if (BOTTOM_ARM_LENGTH * cos(bottomHingeAngle) >= 14.5)
 	{
-		return true;  
+		return true;
 	}
 	return BOTTOM_ARM_LENGTH * cos(bottomHingeAngle) + TOP_ARM_LENGTH * cos(topHingeAngle) >= 14.5;
 }
 // Read a value from the encoder and finds the angle with the horizontal line that the arm makes for both hinges
 void Robot::setHingeAngles()
 {
-topHingeAngle = TOP_HINGE_START - encTopArm.GetDistance(); // We might need to flip the signs after testing
-bottomHingeAngle = BOTTOM_HINGE_START - encBottomArm.GetDistance();
+topHingeAngle = TOP_HINGE_START - encTopHinge.GetDistance(); // We might need to flip the signs after testing
+bottomHingeAngle = BOTTOM_HINGE_START - encBottomHinge.GetDistance();
 }
 
 // Member functions for autonomous mode positions - SKELETON
 void Robot::position1()
 {
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,-1); // Turn right
+	SetDriveMotors(1,-1); // Turn right
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
+	SetDriveMotors(0,0); // Stop when you reach the low goal
 }
 void Robot::position2()
 {
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,-1); // Turn right
+	SetDriveMotors(1,-1); // Turn right
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
+	SetDriveMotors(0,0); // Stop when you reach the low goal
 }
 void Robot::position3()
 {
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(-1,1); // Turn left
+	SetDriveMotors(-1,1); // Turn left
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,-1); // Turn right
+	SetDriveMotors(1,-1); // Turn right
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
+	SetDriveMotors(0,0); // Stop when you reach the low goal
 }
 void Robot::position4()
 {
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,-1); // Turn right
+	SetDriveMotors(1,-1); // Turn right
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(-1,1); // Turn left
+	SetDriveMotors(-1,1); // Turn left
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
+	SetDriveMotors(0,0); // Stop when you reach the low goal
 }
 void Robot::position5()
 {
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(-1,1); // Turn left
+	SetDriveMotors(-1,1); // Turn left
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+	SetDriveMotors(1,1); // Move forward
 	Wait(1);
-	driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal  
+	SetDriveMotors(0,0); // Stop when you reach the low goal
 }
 
 void Robot::portcullis()
@@ -331,44 +331,43 @@ void Robot::portcullis()
 }
 void Robot::chevalDeFrise()
 {
-        
+
 }
 void Robot::moat()
 {
-    driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+    SetDriveMotors(1,1); // Move forward
     Wait(1);
-    driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
+    SetDriveMotors(0,0); // Stop when you reach the other side
 }
 void Robot::ramparts()
 {
-      
+
 }
 void Robot::drawbridge()
 {
-        
+
 }
 void Robot::sallyPort()
 {
-     
+
 }
 void Robot::rockWall()
 {
-    driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+    SetDriveMotors(1,1); // Move forward
     Wait(1);
-    driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
+    SetDriveMotors(0,0); // Stop when you reach the other side
 }
 void Robot::roughTerrain()
 {
-    driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+    SetDriveMotors(1,1); // Move forward
     Wait(1);
-    driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
+    SetDriveMotors(0,0); // Stop when you reach the other side
 }
 void Robot::lowBar()
 {
-    driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
+    SetDriveMotors(1,1); // Move forward
     Wait(1);
-    driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
+    SetDriveMotors(0,0); // Stop when you reach the other side
 }
 
 START_ROBOT_CLASS(Robot)
-
