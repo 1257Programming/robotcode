@@ -40,7 +40,7 @@ public:
   	CANTalon frontLeftDrive;
   	CANTalon backLeftDrive;
   	CANTalon frontRightDrive;
-    	CANTalon backRightDrive;
+    CANTalon backRightDrive;
   	CANTalon intakePivot;
   	Talon intakeSpin;
   	CANTalon bottomArmHinge;
@@ -70,11 +70,11 @@ public:
 	void TeleopPeriodic();
 	void SetDriveMotors(float left, float right);
 	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
-	
+
 	//New Functions
 	bool isOverextended();
 	void setHingeAngles();
-	
+
 	//Autonomous Functions
 	void position1();
 	void position2();
@@ -88,7 +88,7 @@ public:
 	void drawbridge();
 	void sallyPort();
 	void rockWall();
-	void rougherrain();
+	void roughTerrain();
 	void lowBar();
-	
+
 };
