@@ -20,6 +20,13 @@
 #define AXIS_ANALOG_RIGHT_X 4
 #define AXIS_ANALOG_RIGHT_Y 5
 
+// Arm Hinge Constants
+#define ARM_DISTANCE_PER_PULSE 0.72434607645
+#define BOTTOM_HINGE_START 2
+#define TOP_HINGE_START 2
+#define BOTTOM_ARM_LENGTH 19.0
+#define TOP_ARM_LENGTH 18.0
+
 #define PI 3.14159265358979323
 
 //Global Functions
