@@ -165,7 +165,10 @@ void Robot::TeleopPeriodic()
 
 	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y))) // If the right stick is moved vertically, rotate the bottom hinge
 	{
-		bottomArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y));
+      		if(Operator.getRawAxis(AXIS_ANALOG_RIGHT_Y) < 0 || !isOverextended)
+        	{
+			bottomArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y));
+        	}
 	}
 	else
 	{
@@ -174,7 +177,10 @@ void Robot::TeleopPeriodic()
 
 	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y))) // If the left stick is moved vertically, rotate the top hinge
 	{
-		topArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
+      		if(Operator.getRawAxis(AXIS_ANALOG_LEFT_Y) < 0 || !isOverextended)
+        	{
+			topArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
+        	}
 	}
 	else
 	{
