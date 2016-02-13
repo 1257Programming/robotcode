@@ -1,4 +1,5 @@
 #include "WPILib.h"
+#include <cmath>
 
 // X-Box Controller Button IDs
 #define BUTTON_A 1
@@ -20,14 +21,13 @@
 #define AXIS_ANALOG_RIGHT_X 4
 #define AXIS_ANALOG_RIGHT_Y 5
 
-// Arm Hinge Constants
-#define ARM_DISTANCE_PER_PULSE 0.72434607645
-#define BOTTOM_HINGE_START 2
-#define TOP_HINGE_START 2
-#define BOTTOM_ARM_LENGTH 19.0
-#define TOP_ARM_LENGTH 18.0
-
 #define PI 3.14159265358979323
+#define AMTRES 2048 // 2048 PPR
+#define WHEEL_DIAMETER 7.625
+#define BOTTOM_ARM_LENGTH 16.5 // INCHES
+#define TOP_ARM_LENGTH 17.875 // INCHES
+#define BOTTOM_ARM_START_ANGLE 0.00001 //TODO:
+#define TOP_ARM_START_ANGLE 0.00001    //Define these starting angles ASAP
 
 //Global Functions
 inline double dabs(double d) { return d > 0.0 ? d : -d; } // Absolute value of a double precision floating point number
@@ -56,11 +56,12 @@ public:
   	Joystick Operator;
 
   	//Variable Definitions
+
+  	double bottomhorizangle = 0;
+  	double tophorizangle = 0;
+
   	double moveVal = 0;
 	double turnVal = 0;
-	double bottomHingeAngle = 0;
-	double topHingeAngle = 0;
-	bool hasRun = false;
 
 	Robot();
 	void RobotInit();
@@ -68,27 +69,9 @@ public:
 	void AutonomousPeriodic();
 	void TeleopInit();
 	void TeleopPeriodic();
+
 	void SetDriveMotors(float left, float right);
 	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
-
-	//New Functions
-	bool isOverextended();
-	void setHingeAngles();
-
-	//Autonomous Functions
-	void position1();
-	void position2();
-	void position3();
-	void position4();
-	void position5();
-	void portcullis();
-	void chevalDeFrise();
-	void moat();
-	void ramparts();
-	void drawbridge();
-	void sallyPort();
-	void rockWall();
-	void roughTerrain();
-	void lowBar();
-
+	bool isArmOverextended();
+	double degtorad(double deg);
 };
