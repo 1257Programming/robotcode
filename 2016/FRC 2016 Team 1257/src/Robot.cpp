@@ -19,7 +19,7 @@ Robot::Robot() :
 {
 
 }
-	
+
 void Robot::RobotInit()
 {
 	encBottomHinge.SetDistancePerPulse(360.0/497.0); // Degrees
@@ -28,7 +28,7 @@ void Robot::RobotInit()
 	encDriveRight.SetDistancePerPulse(PI * WHEEL_DIAMETER / AMTRES); // inches (7.625 in. outer wheel diameter?)
 }
 
-  	
+
 void Robot::AutonomousInit()
 {
 	encDriveLeft.Reset();
@@ -43,12 +43,13 @@ void Robot::AutonomousPeriodic()
 void Robot::TeleopInit()
 {
     	//set all the motor values to 0
-        
+
 }
+
 
 void Robot::TeleopPeriodic()
 {
-	      	//Driver Code
+    //Driver Code
 	if (Driver.GetRawButton(BUTTON_A)) //If the 'A' button is pressed
 	{
 		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
@@ -57,17 +58,17 @@ void Robot::TeleopPeriodic()
         }
         else
         {
-            moveVal = 0;
+        	moveVal = 0;
         }
 
 		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
         {
-			turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+		    turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
         }
 
 		else
         {
-            turnVal = 0;
+        	turnVal = 0;
         }
 
 		ArcadeDrive(moveVal, turnVal, false);
@@ -121,10 +122,8 @@ void Robot::TeleopPeriodic()
         turnVal = 0;
         SetDriveMotors(0, 0);
 	}
-      	
-	bottomhorizangle = encBottomHinge.GetDistance() + BOTTOM_ARM_START_ANGLE;
-	tophorizangle = encTopHinge.GetDistance() + TOP_ARM_START_ANGLE;
-      	//Operator Code
+
+    //Operator Code
 	if (Operator.GetRawButton(BUTTON_A)) //If 'A' is being pressed, spin the intake inwards
 	{
 		intakeSpin.Set(1);
@@ -161,7 +160,10 @@ void Robot::TeleopPeriodic()
 
 	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y))) // If the right stick is moved vertically, rotate the bottom hinge
 	{
-		bottomArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y));
+      	if(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y) < 0 || !isOverextended())
+        {
+			bottomArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y)/2);
+        }
 	}
 	else
 	{
@@ -170,7 +172,10 @@ void Robot::TeleopPeriodic()
 
 	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y))) // If the left stick is moved vertically, rotate the top hinge
 	{
-		topArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
+      	if(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y) < 0 || !isOverextended())
+        {
+			topArmHinge.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)/2);
+        }
 	}
 	else
 	{
@@ -245,14 +250,21 @@ void Robot::ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs)
   SetDriveMotors(leftMotorOutput, -rightMotorOutput);
 }
 
-bool Robot::isArmOverextended()
+
+//New Untested Functions:
+bool Robot::isOverextended()
 {
-	if(BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle)) >= 14.5)
+	if (BOTTOM_ARM_LENGTH * cos(bottomHingeAngle) >= 14.5)
 	{
 		return true;
 	}
-
-	return ((BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle))) + (TOP_ARM_LENGTH * cos(degtorad(tophorizangle)))) >= 14.5;
+	return BOTTOM_ARM_LENGTH * cos(bottomHingeAngle) + TOP_ARM_LENGTH * cos(topHingeAngle) >= 14.5;
+}
+// Read a value from the encoder and finds the angle with the horizontal line that the arm makes for both hinges
+void Robot::setHingeAngles()
+{
+	topHingeAngle = TOP_HINGE_START - encTopHinge.GetDistance(); // We might need to flip the signs after testing
+	bottomHingeAngle = BOTTOM_HINGE_START - encBottomHinge.GetDistance();
 }
 
 double Robot::degtorad(double deg)
@@ -262,4 +274,3 @@ double Robot::degtorad(double deg)
 
 
 START_ROBOT_CLASS(Robot)
-
