@@ -1,382 +1,470 @@
-#include "WPILib.h"
-#include "math.h"
+#include "Robot.h"
 
-//Important Constants
-#define PI 3.141592653589793238462643383279
-
-// X-Box Controller Button IDs
-#define BUTTON_A 1
-#define BUTTON_B 2
-#define BUTTON_X 3
-#define BUTTON_Y 4
-#define BUTTON_LB 5
-#define BUTTON_RB 6
-#define BUTTON_BACK 7
-#define BUTTON_START 8
-#define BUTTON_ANALOG_CLICK_LEFT 9
-#define BUTTON_ANALOG_CLICK_RIGHT 10
-
-// X-Box Controller Axis IDs
-#define AXIS_ANALOG_LEFT_X 0
-#define AXIS_ANALOG_LEFT_Y 1
-#define AXIS_TRIGGER_LEFT 2
-#define AXIS_TRIGGER_RIGHT 3
-#define AXIS_ANALOG_RIGHT_X 4
-#define AXIS_ANALOG_RIGHT_Y 5
-
-// Arm Hinge Constants
-#define ARM_DISTANCE_PER_PULSE 0.72434607645
-#define BOTTOM_HINGE_START 2
-#define TOP_HINGE_START 2
-#define BOTTOM_ARM_LENGTH 19.0
-#define TOP_ARM_LENGTH 18.0
-
-
-
-// Global Functions
-inline double toDegrees(double radians) { return radians * 180.0 / PI; }
-inline double toRadians(double degrees) { return degrees * PI / 180.0; }
-
-class Robot: public IterativeRobot
-{
-    // Object Definitions
-    CANTalon frontLeftDrive;
-    CANTalon backLeftDrive;
-    CANTalon frontRightDrive;
-    CANTalon backRightDrive;
-    CANTalon intakePivot;
-    Talon intakeSpin;
-    CANTalon bottomArmMotor;
-    CANTalon topArmMotor;
-    // PIDController turning;
-    // PIDController bottomArmPID;
-    // PIDController topArmPID;
-    RobotDrive driveTrain;
-    Joystick Driver;
-    Joystick Operator;
-    Encoder encBottomArm;
-    Encoder encTopArm;
-    Encoder encLeftDrive;
-    Encoder encRightDrive;
-    
-    // Variable Definitions
-    double moveVal = 0;
-    double turnVal = 0;
-    double bottomHingeAngle = 0;
-    double topHingeAngle = 0;
-    bool hasRun = false;
-      
-public:
-    // Public Member Functions
-  
-    // Ensures the axis is being intentionally engaged
-    inline bool isGoodAxisVal(double axisVal) { return fabs(axisVal) > 0.2; }
-  
-    // Returns true if the arms ever extend 15 inches past the robot perimeter
-    bool isOverextended()
-    {
-        if (BOTTOM_ARM_LENGTH * cos(bottomHingeAngle) >= 14.5)
-        {
-            return true;  
-        }
-        return BOTTOM_ARM_LENGTH * cos(bottomHingeAngle) + TOP_ARM_LENGTH * cos(topHingeAngle) >= 14.5;
-    }
-    // Read a value from the encoder and finds the angle with the horizontal line that the arm makes for both hinges
-    void setHingeAngles()
-    {
-        topHingeAngle = TOP_HINGE_START - encTopArm.GetDistance(); // We might need to flip the signs after testing
-        bottomHingeAngle = BOTTOM_HINGE_START - encBottomArm.GetDistance();
-    }
-  
-    // Member functions for autonomous mode positions - SKELETON
-    void position1()
-    {
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,0); // Turn right
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
-    }
-    void position2()
-    {
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,0); // Turn right
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
-    }
-    void position3()
-    {
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,1); // Turn left
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,0); // Turn right
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
-    }
-    void position4()
-    {
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,0); // Turn right
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,1); // Turn left
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal
-    }
-    void position5()
-    {
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward 
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,1); // Turn left
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the low goal  
-    }
-  
-    void portcullis()
-    {
-        
-    }
-    void chevalDeFrise()
-    {
-        
-    }
-    void moat()
-    {
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
-    }
-    void ramparts()
-    {
-        
-    }
-    void drawbridge()
-    {
-        
-    }
-    void sallyPort()
-    {
-        
-    }
-    void rockWall()
-    {
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
-    }
-    void roughTerrain()
-    {
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
-    }
-    void lowBar()
-    {
-        driveTrain.SetLeftRightMotorOutputs(1,1); // Move forward
-        Wait(1);
-        driveTrain.SetLeftRightMotorOutputs(0,0); // Stop when you reach the other side
-    }
-  
-    Robot():
-        frontLeftDrive(0), 
-        backLeftDrive(1),
-        frontRightDrive(2), 
-        backRightDrive(3), 
-        intakePivot(4),
-        intakeSpin(5),
-        bottomArmMotor(6),
-        topArmMotor(7),
-        // turning(),  P, I, D, Source, Output
-        // bottomArmPID(), 
-        // topArmPID(),
-        driveTrain(frontLeftDrive, backLeftDrive, frontRightDrive, backRightDrive),
+Robot::Robot() :
+		frontLeftDrive(3),
+        backLeftDrive(4),
+        frontRightDrive(5),
+        backRightDrive(1),
+		intakePivot(2),
+		intakeSpin(0),
+		bottomArmHinge(0),
+		topArmHinge(6),
+		gyro(),
+		encDriveLeft(4, 5, false),
+		encDriveRight(2, 3, true),
+		encBottomHinge(6, 7, false),
+		encTopHinge(8, 9, true),
+		breakBeam(1),
+		biAccel(),
         Driver(0),
         Operator(1),
-        encBottomArm(0, 1),
-        encTopArm(2, 3),
-        encLeftDrive(4, 5),
-        encRightDrive(6, 7)
+		pidGyro((0.9/90.0), 0.0002, 0, &gyro, &frontLeftDrive),
+		pidIntake(0, 0, 0, &intakePivot, &intakePivot)
+{
+
+}
+	
+void Robot::RobotInit()
+{
+	encBottomHinge.SetDistancePerPulse(360.0/497.0); // Degrees
+	encTopHinge.SetDistancePerPulse(360.0/497.0); 	 // Degrees
+	encDriveLeft.SetDistancePerPulse(PI * WHEEL_DIAMETER / AMTRES); // res pulses per 1 rev, 1 rev = 2 pi rad
+	encDriveRight.SetDistancePerPulse(PI * WHEEL_DIAMETER / AMTRES); // inches (7.625 in. outer wheel diameter?)
+}
+
+  	
+void Robot::AutonomousInit() // jet fuel can't melt steel beams
+{
+	//encDriveLeft.Reset();
+	gyro.Reset();
+	pidGyro.Reset();
+	pidGyro.Disable();
+
+	SetDriveMotors(-.5, .5);
+	pidGyro.SetSetpoint(0);
+	pidGyro.SetAbsoluteTolerance(1.0);
+	pidGyro.Enable();
+	backLeftDrive.Set(frontLeftDrive.Get());
+	frontRightDrive.Set(frontLeftDrive.Get());
+	backRightDrive.Set(frontLeftDrive.Get());
+	SmartDashboard::PutNumber("GYRO ERROR:", pidGyro.GetError());
+
+	//pidIntake.Reset();
+	//pidIntake.Disable();
+	//intakePivot.ControlMode = intakePivot.ControlMode::kPosition;
+}
+
+void Robot::AutonomousPeriodic()
+{
+	SmartDashboard::PutNumber("GYRO ERROR:", pidGyro.GetError());
+	SetDriveMotors(frontLeftDrive.Get(), .5);
+	backLeftDrive.Set(1 - frontLeftDrive.Get());
+	frontLeftDrive.Set(backLeftDrive.Get());
+	// pidIntake.SetSetpoint(3240);
+	// pidIntake.Enable();
+	// SmartDashboard::PutNumber("INTAKE ERROR:", pidIntake.GetError());
+	// SmartDashboard::PutNumber("Z ACCEL:", biAccel.GetZ());
+
+}
+
+void Robot::TeleopInit()
+{
+    //set all the motor values to 0
+	pidGyro.Disable();
+}
+
+void Robot::TeleopPeriodic()
+{
+    // Driver Code
+    // Sends information about the robot to SmartDashboard
+	SmartDashboard::PutNumber("INTAKE PIVOT:", intakePivot.GetPulseWidthPosition());
+	SmartDashboard::PutNumber("OVEREXTENDED?", (int)isArmOverextended());
+	SmartDashboard::PutNumber("BOTTOM DIST:", BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle)));
+	SmartDashboard::PutNumber("TOP DIST:", ((BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle))) + (TOP_ARM_LENGTH * cos(degtorad(tophorizangle)))));
+	SmartDashboard::PutNumber("BOTTOM ANGLE:", bottomhorizangle);
+	SmartDashboard::PutNumber("TOP ANGLE:", tophorizangle);
+	SmartDashboard::PutNumber("BREAKBEAM:", (int)breakBeam.Get());
+	SmartDashboard::PutNumber("Z ACCEL:", biAccel.GetZ());
+
+	if (Driver.GetRawButton(BUTTON_A)) //If the 'A' button is pressed
+	{
+		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
+        {
+            moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
+        }
+        else
+        {
+            moveVal = 0;
+        }
+
+		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
+        {
+			turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+        }
+		else
+        {
+            turnVal = 0;
+        }
+
+		ArcadeDrive(moveVal, turnVal, false);
+	}
+
+	else if (Driver.GetRawButton(BUTTON_LB)) //If the left bumper is pressed
     {
-        // Encoder Setup
-        encBottomArm.SetDistancePerPulse(ARM_DISTANCE_PER_PULSE);
-        encTopArm.SetDistancePerPulse(ARM_DISTANCE_PER_PULSE);
+        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
+        {
+        	moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
+        }
+        else
+        {
+        	moveVal = 0;
+        }
+        
+        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X)))
+        {
+            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X);
+        }
+        else
+        {
+            turnVal = 0;
+        }
+
+        ArcadeDrive(moveVal, turnVal, false);
+    }
+	else if (Driver.GetRawButton(BUTTON_RB)) //If the right bumper is pressed
+    {
+		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y)))
+		{
+			moveVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y);
+		}
+        else
+        {
+        	moveVal = 0;
+        }
+        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
+        {
+            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+        }
+        else
+        {
+            turnVal = 0;
+        }
+        ArcadeDrive(moveVal, turnVal, false);
     }
 
-    void RobotInit()
-    {
-        // Sets up options in SmartDashboard for all of the possible autonomous positions
-        chooserDefense = new SendableChooser; // SendableChooser for the autonomous defenses
-        SmartDashboard::PutData("Autonomous Starting Position:\n", chooserPosition);
-        chooserDefense.AddObject("Portcullis",  portcullis);
-        chooserDefense.AddObject("Cheval de Frise", chevalDeFrise);
-        chooserDefense.AddObject("Moat", moat);
-        chooserDefense.AddObject("Ramparts", ramparts);
-        chooserDefense.AddObject("Drawbridge", drawbridge);
-        chooserDefense.AddObject("Sally Port", sallyPort);
-        chooserDefense.AddObject("Rock Wall", rockWall);
-        chooserDefense.AddObject("Rough Terrain", roughTerrain);
-        chooserDefense.AddObject("Low Bar", lowBar);
-        
-        chooserPosition = new SendableChooser; // SendableChooser for the autonomous starting position
-        SmartDashboard.PutData("Autonomous Starting Defense:\n", chooserDefense);
-        chooserPosition.AddObject("Position 1", position1);
-        chooserPosition.AddObject("Position 2", position2);
-        chooserPosition.AddObject("Position 3", position3);
-        chooserPosition.AddObject("Position 4", position4);
-        chooserPosition.AddObject("Position 5", position5);
-    }
-  
-    void AutonomousInit()
-    {
-        hasRun = false; // Makes sure this autonomous code only runs once
-          
-    }
+	else
+	{
+        moveVal = 0;
+        turnVal = 0;
+        SetDriveMotors(0, 0);
+	}
+      	
+	bottomhorizangle = encBottomHinge.GetDistance() + BOTTOM_ARM_START_ANGLE;
+	tophorizangle = encTopHinge.GetDistance() + TOP_ARM_START_ANGLE;
     
-    void AutonomousPeriodic()
+  //Operator Code
+	if (Operator.GetRawButton(BUTTON_A) && (!breakbeamenabled || breakBeam.Get())) //If 'A' is being pressed, spin the intake inwards
+	{
+		intakeSpin.Set(1);
+	}
+	else if (Operator.GetRawButton(BUTTON_B)) //If 'B' is being pressed, spin the intake outwards
+	{
+		intakeSpin.Set(-1);
+	}
+	else
+	{
+		intakeSpin.Set(0);
+	}
+
+	if(Operator.GetRawButton(BUTTON_X))
+	{
+		breakbeamenabled = true;
+	}
+
+	else if(Operator.GetRawButton(BUTTON_Y))
+	{
+		breakbeamenabled = false;
+	}
+
+	if (Operator.GetRawAxis(AXIS_TRIGGER_LEFT)) //If the right trigger is pressed, lift the intake
+	{
+		intakePivot.Set(Operator.GetRawAxis(AXIS_TRIGGER_LEFT));
+	}
+	else if (Operator.GetRawAxis(AXIS_TRIGGER_RIGHT)) //If the left trigger is pressed, lower the intake
+	{
+		intakePivot.Set(-Operator.GetRawAxis(AXIS_TRIGGER_RIGHT));
+	}
+	else
+	{
+		intakePivot.Set(0);
+	}
+
+	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y)) && ((!isArmOverextended() && ((bottomhorizangle > 45))) || Operator.GetRawAxis(5) > 0)) // If the right stick is moved vertically, rotate the bottom hinge
+	{
+		bottomArmHinge.Set(.75 * Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y));
+	}
+	else
+	{
+		bottomArmHinge.Set(0);
+	}
+
+	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y))) // If the left stick is moved vertically, rotate the top hinge
+	{
+		if(!isArmOverextended())
+		{
+			topArmHinge.Set(.75 * Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
+		}
+
+		else if(((tophorizangle < 0) && (Operator.GetRawAxis(1) > 0)) || ((tophorizangle > 0) && (Operator.GetRawAxis(1) < 0)))
+		{
+			topArmHinge.Set(.75 * Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
+		}
+
+		else
+		{
+			topArmHinge.Set(0);
+		}
+	}
+	else
+	{
+		topArmHinge.Set(0);
+	}
+}
+
+void Robot::SetDriveMotors(float left, float right)
+{
+	frontLeftDrive.Set(left);
+	backLeftDrive.Set(left);
+	frontRightDrive.Set(right);
+	backRightDrive.Set(right);
+}
+
+void Robot::ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs)
+{
+// Local variables to hold the computed PWM values for the motors
+  float leftMotorOutput;
+  float rightMotorOutput;
+
+  if (squaredInputs)
+  {
+	// Square the inputs (while preserving the sign) to increase fine control
+	// While permitting full power
+	if (moveValue >= 0.0)
+	{
+		moveValue = (moveValue * moveValue);
+	}
+	else
+	{
+		moveValue = -(moveValue * moveValue);
+	}
+
+	if (rotateValue >= 0.0)
+	{
+		rotateValue = (rotateValue * rotateValue);
+	}
+	else
+	{
+		rotateValue = -(rotateValue * rotateValue);
+	}
+  }
+
+  if (moveValue > 0.0)
+  {
+	  if (rotateValue > 0.0)
+	  {
+		  leftMotorOutput = moveValue - rotateValue;
+		  rightMotorOutput = std::max(moveValue, rotateValue);
+	  }
+	  else
+	  {
+          leftMotorOutput = std::max(moveValue, -rotateValue);
+      rightMotorOutput = moveValue + rotateValue;
+	  }
+  }
+  else
+  {
+	  if (rotateValue > 0.0)
+	  {
+		  leftMotorOutput = -std::max(-moveValue, rotateValue);
+		  rightMotorOutput = moveValue + rotateValue;
+	  }
+	  else
+	  {
+		  leftMotorOutput = moveValue - rotateValue;
+		  rightMotorOutput = -std::max(-moveValue, -rotateValue);
+	  }
+  }
+
+  SetDriveMotors(leftMotorOutput, -rightMotorOutput);
+}
+
+bool Robot::isArmOverextended()
+{
+	if(BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle)) >= 14.0)
+	{
+		return true;
+	}
+
+	return (((BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle))) + (TOP_ARM_LENGTH * cos(degtorad(tophorizangle)))) >= 14.0);
+}
+
+double Robot::degtorad(double deg)
+{
+	return (deg * PI / 180.0);
+}
+
+double Robot::avg(double firstValue, double secondValue) // Outputs average of two values
+{
+    return ((firstValue + secondValue) / 2);
+}
+
+// Autonomous Functions
+void Robot::driveToDefense() // Drives from the starting position up to the defense
+{
+  	driveForward(DIST_TO_DEFENSE, true);
+}
+
+// Position 1-5 functions will drive the robot from the defenses to the low goal
+void Robot::position1()
+{
+    const double dist1 = 1; // Define the distances and angles as constants
+    const double dist2 = 1;
+    const double angle1 = 1;
+  
+  	driveForward(dist1, true); // Drive forward, turn, and then drive forward again
+  	turn(angle1);
+    driveForward(dist2, true);
+}
+void Robot::position2()
+{
+  	const double dist1 = 1; // Define the distances and angles as constants
+    const double dist2 = 1;
+    const double angle1 = 1;
+  
+    driveForward(dist1, true); // Drive forward, turn, and then drive forward again
+  	turn(angle1);
+    driveForward(dist2, true);
+}
+void Robot::position3()
+{
+  	const double dist1 = 1; // Define the distances and angles as constants
+    const double dist2 = 1;
+  	const double dist3 = 1;
+    const double angle1 = 1;
+    const double angle2 = 1;
+  
+    driveForward(dist1, true); // Drive forward, turn, and then drive forward again
+  	turn(angle1);
+    driveForward(dist2, true);
+  	turn(angle2);
+    driveForward(dist3, true);
+}
+void Robot::position4()
+{
+  	const double dist1 = 1; // Define the distances and angles as constants
+    const double dist2 = 1;
+    const double dist3 = 1;
+    const double angle1 = 1;
+    const double angle2 = 1;
+  
+    driveForward(dist1, true); // Drive forward, turn, and then drive forward again
+  	turn(angle1);
+    driveForward(dist2, true);
+    turn(angle2);
+    driveForward(dist3, true);
+}
+void Robot::position5()
+{
+  	const double dist1 = 1; // Define the distances and angles as constants
+    const double dist2 = 1;
+    const double angle1 = 1;
+  
+  	driveForward(dist1, true); // Drive forward, turn, and then drive forward again
+  	turn(angle1);
+    driveForward(dist2, true);
+}
+
+// These functions will cross the specified defense
+void Robot::lowBar()
+{
+  	driveForward(DIST_LOW_BAR, false);
+}
+void Robot::portcullis()
+{
+    // Yep, we totally know how to do this
+	// Robot.UseMagic();
+}
+void Robot::chevalDeFrise()
+{
+  	driveForward(12, false); // Drive up to the top of the ramp
+    // Use the intake to push it down
+    driveForward(DIST_CHEVAL_DE_FRISE, false);
+}
+void Robot::moat()
+{
+    driveForward(DIST_MOAT, false); //TODO 
+}
+void Robot::ramparts()
+{
+    driveForward(DIST_RAMPARTS, false);
+}
+void Robot::drawbridge()
+{
+    // Yep, we totally know how to do this
+  	// Robot.UseMagic();
+}
+void Robot::sallyPort()
+{
+    // Yep, we totally know how to do this
+  	// Robot.UseMagic();
+}
+void Robot::rockWall()
+{
+    driveForward(DIST_ROCK_WALL, true); //TODO
+}
+void Robot::roughTerrain()
+{
+    driveForward(DIST_ROUGH_TERRAIN, false); //TODO
+}
+
+void Robot::driveForward(double distance, bool isFast) // Drives forward for the distance specified
+{	
+  	double speed = 0.4; // Sets the default speed to 0.4
+  	if (isFast) // If isFast is true, then change the speed to 0.9
     {
-        if(!hasRun) // Makes sure this autonomous code only runs once
-        {
-            // Autonomous code that only runs once goes here
-            hasRun = true;
-        }
+        speed = 0.9;
     }
 
-    void TeleopInit()
+  	while(avg(encDriveLeft.GetDistance(), encDriveRight.GetDistance()) < distance)
     {
-        // Sets all the motor speeds to 0
-        frontLeftDrive.Set(0); 
-        backLeftDrive.Set(0);
-        frontRightDrive.Set(0); 
-        backRightDrive.Set(0); 
-        intakePivot.Set(0);
-        intakeSpin.Set(0);
-        bottomArmMotor.Set(0);
-        topArmMotor.Set(0);
+    	SetDriveMotors(speed, speed); // Keeps driving the robot forward until the robot has traveled far enough
     }
-    
-    void TeleopPeriodic()
-        {
-        setHingeAngles(); // Calculates the hinge angles from the encoder values
-      
-        // Driver Code
-        if (Driver.GetRawButton(BUTTON_A)) // If the 'A' button is pressed, use Arcade Drive
-        {
-            if (isGoodAxisVal(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y))) 
-            {
-                moveVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y); 
-            }
-            if (isGoodAxisVal(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-            {
-                turnVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-            }
-            driveTrain.ArcadeDrive(moveVal, turnVal, false);
-        }
-        else if (Driver.GetRawButton(BUTTON_LB)) // If the left bumper is pressed, use Arcade Drive
-        {
-            if (isGoodAxisVal(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-            { 
-                moveVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-            }
-            if (isGoodAxisVal(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-            { 
-                turnVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-            }
-            driveTrain.ArcadeDrive(moveVal, turnVal, false);
-        }
-        else if (Driver.GetRawButton(BUTTON_RB)) // If the right bumper is pressed, use Arcade Drive
-        {
-            if (isGoodAxisVal(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-                { 
-                    moveVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-                }
-                if (isGoodAxisVal(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-                { 
-                    turnVal = Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-                }
-                driveTrain.ArcadeDrive(moveVal, turnVal, false);
-            }
-        else // If nothing is being pressed, don't move
-            {
-                moveVal = 0;
-                turnVal = 0;
-                driveTrain.SetLeftRightMotorOutputs(0, 0);
-            } 
-          
-        // Operator Code
-        if (Operator.GetRawButton(BUTTON_A)) // If 'A' is being pressed, spin the intake inwards quickly
-        {
-            intakeSpin.Set(1);
-        }
-        else if (Operator.GetRawButton(BUTTON_B)) // If 'B' is being pressed, spin the intake outwards quickly
-        {
-            intakeSpin.Set(-1);
-        }
-        else if (Operator.GetRawButton(BUTTON_X)) // If 'X' is pressed, spin the intake inwards slowly
-        {
-            intakeSpin.Set(0.5); 
-        }
-        else if (Operator.GetRawButton(BUTTON_Y)) // If 'Y' is pressed, spin the intake outwards slowly
-        {
-            intakeSpin.Set(-0.5);
-        }
-        else // If nothing is being pressed, do not spin the intake
-        {
-            intakeSpin.Set(0);  
-        }
-    
-        if (Operator.GetRawAxis(AXIS_TRIGGER_RIGHT)) // If the right trigger is pressed, lift the intake
-        {
-            intakePivot.Set(Operator.GetRawAxis(AXIS_TRIGGER_RIGHT));
-        }
-        else if (Operator.GetRawAxis(AXIS_TRIGGER_LEFT)) // If the left trigger is pressed, lower the intake
-        {
-            intakePivot.Set(-Operator.GetRawAxis(AXIS_TRIGGER_LEFT));
-        }
-        else // If no trigger is being pressed, then don't pivot the intake
-        {
-            intakePivot.Set(0);
-        }
-                    
-        if (isGoodAxisVal(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y)) && !isOverextended()) // If the right stick is moved vertically, rotate the bottom arm hinge 
-        {
-            bottomArmMotor.Set(0.4 * pow(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y), 2)); // Scale factor is 0.4
-        }
-        else // If the right stick is not being pressed, then not rotate the bottom arm hinge
-        {
-            bottomArmMotor.Set(0);
-        }
-            
-        if (isGoodAxisVal(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)) && !isOverextended()) // If the left stick is moved vertically, rotate the top arm hinge
-        {
-            topArmMotor.Set(0.4 * pow(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y), 2)); // Scale factor is 0.4
-        }
-        else // If the left stick is not being engaged, do not rotate the top arm hinge
-        {
-            topArmMotor.Set(0);
-        }
-    }
-    
-    void TestPeriodic()
+  	SetDriveMotors(0, 0); // Stops the robot and resets the encoders
+ 	encDriveLeft.Reset();
+ 	encDriveRight.Reset();
+}
+
+void Robot::turn(double endAngle) // Turns for the specified angle
+{
+ 	// Positive angle is clockwise turn, negative angle is counterclockwise turn
+  	double startAngle = gyro.GetAngle(); // Assumes the angle during autonomous will never exceed 360 deg
+  	if (startAngle > endAngle)
     {
-        
+        while (gyro.GetAngle() > endAngle)
+        {
+            SetDriveMotors(-0.9, 0.9);
+        }
     }
-};
-  
+    else if (gyro.GetAngle() < endAngle)
+    {
+        while (gyro.GetAngle() < endAngle)
+        {
+            SetDriveMotors(0.9, -0.9);
+        }
+    }
+ 	SetDriveMotors(0, 0);
+ 	encDriveLeft.Reset();
+ 	encDriveRight.Reset();
+}
+
 START_ROBOT_CLASS(Robot)
-// You can never have too many comments
