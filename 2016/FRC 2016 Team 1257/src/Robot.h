@@ -24,20 +24,10 @@
 #define PI 3.14159265358979323
 #define AMTRES 2048 // 2048 PPR
 #define WHEEL_DIAMETER 7.625
-
-/* Stuff that Brian added
 #define BOTTOM_ARM_LENGTH 16.5 // INCHES
 #define TOP_ARM_LENGTH 17.875 // INCHES
-#define BOTTOM_ARM_START_ANGLE 0.00001 //TODO:
-#define TOP_ARM_START_ANGLE 0.00001    //Define these starting angles ASAP
-*/
-
-// Arm Hinge Constants
-#define ARM_DISTANCE_PER_PULSE 0.72434607645
-#define BOTTOM_HINGE_START 2 //TODO
-#define TOP_HINGE_START 2    //Must define these values accurately
-#define BOTTOM_ARM_LENGTH 19.0
-#define TOP_ARM_LENGTH 18.0
+#define BOTTOM_ARM_START_ANGLE 169 //DEG
+#define TOP_ARM_START_ANGLE 2.7 //GREES
 
 //Global Functions
 inline double dabs(double d) { return d > 0.0 ? d : -d; } // Absolute value of a double precision floating point number
@@ -50,7 +40,7 @@ public:
   	CANTalon frontLeftDrive;
   	CANTalon backLeftDrive;
   	CANTalon frontRightDrive;
-    CANTalon backRightDrive;
+  	CANTalon backRightDrive;
   	CANTalon intakePivot;
   	Talon intakeSpin;
   	CANTalon bottomArmHinge;
@@ -61,9 +51,14 @@ public:
   	Encoder encDriveRight;
   	Encoder encBottomHinge;
   	Encoder encTopHinge;
+  	DigitalInput breakBeam;
+  	BuiltInAccelerometer biAccel;
 
   	Joystick Driver;
   	Joystick Operator;
+
+  	PIDController pidGyro;
+  	PIDController pidIntake;
 
   	//Variable Definitions
 
@@ -72,8 +67,8 @@ public:
 
   	double moveVal = 0;
 	double turnVal = 0;
-	double bottomHingeAngle = 0;
-	double topHingeAngle = 0;
+
+	bool breakbeamenabled = false;
 
 	Robot();
 	void RobotInit();
@@ -84,9 +79,6 @@ public:
 
 	void SetDriveMotors(float left, float right);
 	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
+	bool isArmOverextended();
 	double degtorad(double deg);
-
-	//New Functions
-	bool isOverextended();
-	void setHingeAngles();
 };
