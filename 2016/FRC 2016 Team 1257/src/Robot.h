@@ -32,7 +32,7 @@
 // Autonomous Values (All Units in Inches)
 #define DIST_TO_DEFENSE 40 // INCHES, ROBOT LENGTH SUBTRACTED (74 - 34)
 #define DIST_LOW_BAR 82 // INCHES, ROBOT LENGTH ADDED (48 + 34)
-//Distances to get
+// Distances to get
 #define DIST_MOAT 80
 #define DIST_RAMPARTS 80
 #define DIST_ROCK_WALL 80
@@ -46,36 +46,36 @@ inline bool isReasonable(double axisVal) { return dabs(axisVal) > 0.2; } // Ensu
 class Robot: public IterativeRobot 
 {
 public:
-  	// Object Definitions
-  	CANTalon frontLeftDrive;
-  	CANTalon backLeftDrive;
-  	CANTalon frontRightDrive;
-  	CANTalon backRightDrive;
-  	CANTalon intakePivot;
-  	Talon intakeSpin;
-  	CANTalon bottomArmHinge;
-  	CANTalon topArmHinge;
+	// Object Definitions
+	CANTalon frontLeftDrive;
+	CANTalon backLeftDrive;
+	CANTalon frontRightDrive;
+	CANTalon backRightDrive;
+	CANTalon intakePivot;
+	Talon intakeSpin;
+	CANTalon bottomArmHinge;
+	CANTalon topArmHinge;
 
-  	ADXRS450_Gyro gyro;
-  	Encoder encDriveLeft;
-  	Encoder encDriveRight;
-  	Encoder encBottomHinge;
-  	Encoder encTopHinge;
-  	DigitalInput breakBeam;
-  	BuiltInAccelerometer biAccel;
+	ADXRS450_Gyro gyro;
+	Encoder encDriveLeft;
+	Encoder encDriveRight;
+	Encoder encBottomHinge;
+	Encoder encTopHinge;
+	DigitalInput breakBeam;
+	BuiltInAccelerometer biAccel;
 
-  	Joystick Driver;
-  	Joystick Operator;
+	Joystick Driver;
+	Joystick Operator;
 
-  	PIDController pidGyro;
-  	PIDController pidIntake;
+	PIDController pidGyro;
+	PIDController pidIntake;
 
-  	//Variable Definitions
+	// Variable Definitions
 
-  	double bottomhorizangle = 0;
-  	double tophorizangle = 0;
+	double bottomhorizangle = 0;
+	double tophorizangle = 0;
 
-  	double moveVal = 0;
+	double moveVal = 0;
 	double turnVal = 0;
 
 	bool breakbeamenabled = false;
@@ -91,25 +91,25 @@ public:
 	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
 	bool isArmOverextended();
 	double degtorad(double deg);
-    double avg(double firstValue, double secondValue);
-  
-  	// Autonomous Code
-  	void drivetoDefense();
-  	void position1();
-    void position2();
-    void position3();
-    void position4();
-    void position5();
-    void portcullis();
-    void chevalDeFrise();
-    void moat();
-    void ramparts();
-    void drawbridge();
-    void sallyPort();
-    void rockWall();
-    void roughTerrain();
-    void lowBar();
-    void driveToDefense();
-  	void driveForward(double distance, bool isFast);
-  	void turn(double endAngle);
+	double avg(double firstValue, double secondValue);
+
+	// Autonomous Code
+	void drivetoDefense();
+	void position1();
+	void position2();
+	void position3();
+	void position4();
+	void position5();
+	void portcullis();
+	void chevalDeFrise();
+	void moat();
+	void ramparts();
+	void drawbridge();
+	void sallyPort();
+	void rockWall();
+	void roughTerrain();
+	void lowBar();
+	void driveToDefense();
+	void driveForward(double distance, bool isFast);
+	void turn(double endAngle);
 };
