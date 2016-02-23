@@ -70,6 +70,18 @@ public:
 	PIDController pidGyro;
 	PIDController pidIntake;
 
+	// Functions for lights
+	void LEDRaveMode();
+	void LEDIntakeOutBlue();
+	void LEDIntakeOutRed();
+	void LEDIntakeInBlue();
+	void LEDIntakeInRed();
+	void LEDTeleopWithBallBlue();
+	void LEDTeleopWithBallRed();
+	void LEDTeleopIdleBlue();
+	void LEDTeleopIdleRed();
+	void IdleAutonomous();
+	
 	// Variable Definitions
 
 	double bottomhorizangle = 0;
