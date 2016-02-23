@@ -69,6 +69,11 @@ public:
 
 	PIDController pidGyro;
 	PIDController pidIntake;
+	
+	PWM pwmOne(1); 
+	PWM pwmTwo(2); 
+	PWM pwmThree(3); 
+	PWM pwmFour(4); 
 
 	// Functions for lights
 	void LEDRaveMode();
