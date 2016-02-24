@@ -66,6 +66,8 @@ public:
 
 	Joystick Driver;
 	Joystick Operator;
+	
+	DriverStation dStation = DriverStation.GetInstance();
 
 	PIDController pidGyro;
 	PIDController pidIntake;
