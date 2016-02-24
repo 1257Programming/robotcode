@@ -35,6 +35,8 @@ void Robot::RobotInit()
 	
 void Robot::AutonomousInit() 
 {
+	LEDAutonomousIdle(); // Set light for autonomous mode
+	
 	// encDriveLeft.Reset();
 	gyro.Reset();
 	pidGyro.Reset();
@@ -69,12 +71,49 @@ void Robot::AutonomousPeriodic()
 
 void Robot::TeleopInit()
 {
+	switch (dStation.GetAlliance()) // Initialize LEDs to begin the teleop period
+	{
+		case kRed:
+			LEDTeleopIdleRed();
+			break;
+		case kBlue:
+			LEDTeleopIdleBlue();
+			break;
+	}
+	
 	// Set all the motor values to 0
 	pidGyro.Disable();
 }
 
 void Robot::TeleopPeriodic()
 {
+	// Breakbeam light
+	if (breakBeam.Get()) // There is a ball in the intake
+	{
+		switch (dStation.GetAlliance())
+		{
+			case kRed:
+				LEDTeleopWithBallRed();
+				break;
+			case kBlue:
+				LEDTeleopWithBallBlue();
+				break;
+		}
+	}
+	
+	else // There is no ball in the intake
+	{
+		switch (dStation.GetAlliance())
+		{
+			case kRed:
+				LEDTeleopIdleRed();
+				break;
+			case kBlue:
+				LEDTeleopIdleBlue();
+				break;
+		}
+	}
+	
 	// Driver Code
 	// Send information about the robot to SmartDashboard
 	SmartDashboard::PutNumber("INTAKE PIVOT:", intakePivot.GetPulseWidthPosition());
@@ -170,10 +209,30 @@ void Robot::TeleopPeriodic()
 	if (Operator.GetRawButton(BUTTON_A) && (!breakbeamenabled || breakBeam.Get())) // If 'A' is being pressed, spin the intake inwards
 	{
 		intakeSpin.Set(1);
+		
+		switch (dStation.GetAlliance()) // LED for intake in
+		{
+			case kRed:
+				LEDIntakeInRed();
+				break;
+			case kBlue:
+				LEDIntakeInBlue();
+				break;
+		}
 	}
 	else if (Operator.GetRawButton(BUTTON_B)) // If 'B' is being pressed, spin the intake outwards
 	{
 		intakeSpin.Set(-1);
+		
+		switch (dStation.GetAlliance()) // LED for intake out
+		{
+			case kRed:
+				LEDIntakeOutRed();
+				break;
+			case kBlue:
+				LEDIntakeOutBlue();
+				break;
+		}
 	}
 	else // If neither is being pressed, do not spin the intake
 	{
