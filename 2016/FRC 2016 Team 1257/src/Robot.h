@@ -74,6 +74,9 @@ public:
 	PWM pwmTwo(2); 
 	PWM pwmThree(3); 
 	PWM pwmFour(4); 
+	
+	// Break beam in ball intake
+	DigitalInput breakBeam(1);
 
 	// Functions for lights
 	void LEDRaveMode();
