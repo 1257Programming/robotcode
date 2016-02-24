@@ -72,7 +72,7 @@ void Robot::LEDTeleopIdleRed()
   pwmFour.SetRaw(0);
 }
 
-void Robot::IdleAutonomous()
+void Robot::LEDAutonomousIdle()
 {
   pwmOne.SetRaw(1);
   pwmTwo.SetRaw(1);
