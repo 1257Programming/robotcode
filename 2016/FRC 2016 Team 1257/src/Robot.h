@@ -24,10 +24,12 @@
 #define PI 3.14159265358979323
 #define AMTRES 2048 // 2048 PPR
 #define WHEEL_DIAMETER 7.625
-#define BOTTOM_ARM_LENGTH 16.5 // INCHES
-#define TOP_ARM_LENGTH 17.875 // INCHES
-#define BOTTOM_ARM_START_ANGLE 169 //DEG
-#define TOP_ARM_START_ANGLE 2.7 //GREES
+//#define BOTTOM_ARM_LENGTH 16.5 // INCHES
+//#define TOP_ARM_LENGTH 21 // INCHES
+#define BOTTOM_WEDGE_START_ANGLE 149 //DEG
+//#define TOP_ARM_START_ANGLE 2.7 //GREES
+#define INTAKE_HIGH_PWM 3800
+#define INTAKE_LOW_PWM 2900
 
 //Global Functions
 inline double dabs(double d) { return d > 0.0 ? d : -d; } // Absolute value of a double precision floating point number
@@ -43,14 +45,20 @@ public:
   	CANTalon backRightDrive;
   	CANTalon intakePivot;
   	Talon intakeSpin;
-  	CANTalon bottomArmHinge;
-  	CANTalon topArmHinge;
+  	CANTalon wedgeHinge;
+//  	CANTalon bottomArmHinge;
+//  	CANTalon topArmHinge;
+  	PWM pwmOne;
+  	PWM pwmTwo;
+  	PWM pwmThree;
+  	PWM pwmFour;
 
+  	USBCamera Lifecam;
   	ADXRS450_Gyro gyro;
   	Encoder encDriveLeft;
   	Encoder encDriveRight;
   	Encoder encBottomHinge;
-  	Encoder encTopHinge;
+//  	Encoder encTopHinge;
   	DigitalInput breakBeam;
   	BuiltInAccelerometer biAccel;
 
@@ -62,23 +70,49 @@ public:
 
   	//Variable Definitions
 
-  	double bottomhorizangle = 0;
-  	double tophorizangle = 0;
+  	double wedgehorizangle = 0;
+  	long intakestart = 0;
+  	long intakebottom = 0;
 
   	double moveVal = 0;
 	double turnVal = 0;
 
-	bool breakbeamenabled = false;
+	bool breakbeamenabled = true;
+	bool haveball = false;
+	bool autoran = false;
 
 	Robot();
+	void DisabledInit();
 	void RobotInit();
 	void AutonomousInit();
 	void AutonomousPeriodic();
 	void TeleopInit();
 	void TeleopPeriodic();
+	void TestInit();
+	void TestPeriodic();
 
 	void SetDriveMotors(float left, float right);
 	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
-	bool isArmOverextended();
+//	bool isArmOverextended();
 	double degtorad(double deg);
+	void intakeAdjust(bool pos); // true to raise, false to lower
+	void wedgeAdjust(bool pos); //same argument
+	void stopIntake();
+	void reach();
+	void scorepath();
+	void forcross();
+	void backcross();
+	void portcullis();
+	void cheval();
+
+	void LEDRaveMode();
+	void LEDIntakeOutBlue();
+	void LEDIntakeOutRed();
+	void LEDIntakeInBlue();
+	void LEDIntakeInRed();
+	void LEDTeleopWithBallBlue();
+	void LEDTeleopWithBallRed();
+	void LEDTeleopIdleBlue();
+	void LEDTeleopIdleRed();
+	void LEDAutonomousIdle();
 };
