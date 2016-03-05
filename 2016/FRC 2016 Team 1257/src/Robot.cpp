@@ -1,30 +1,30 @@
 #include "Robot.h"
 
 Robot::Robot() :
-		frontLeftDrive(3),
+	frontLeftDrive(3),
         backLeftDrive(4),
         frontRightDrive(5),
         backRightDrive(1),
-		intakePivot(2),
-		intakeSpin(0),
-		wedgeHinge(0),
-//		topArmHinge(6),
-		pwmOne(1),
-		pwmTwo(2),
-		pwmThree(3),
-		pwmFour(4),
-		Lifecam("cam0", false),
-		gyro(),
-		encDriveLeft(4, 5, false),
-		encDriveRight(2, 3, true),
-		encBottomHinge(6, 7, false),
-//		encTopHinge(8, 9, true),
-		breakBeam(1),
-		biAccel(),
+	intakePivot(2),
+	intakeSpin(0),
+	wedgeHinge(0),
+//	topArmHinge(6),
+	pwmOne(1),
+	pwmTwo(2),
+	pwmThree(3),
+	pwmFour(4),
+	Lifecam("cam0", false),
+	gyro(),
+	encDriveLeft(4, 5, false),
+	encDriveRight(2, 3, true),
+	encBottomHinge(6, 7, false),
+//	encTopHinge(8, 9, true),
+	breakBeam(1),
+	biAccel(),
         Driver(0),
         Operator(1),
-		pidGyro((.9/90.0), .0002, 0, &gyro, &frontLeftDrive),
-		pidIntake(0, 0, 0, &intakePivot, &intakePivot)
+	pidGyro((.9/90.0), .0002, 0, &gyro, &frontLeftDrive),
+	pidIntake(0, 0, 0, &intakePivot, &intakePivot)
 {
 	Lifecam.OpenCamera();
 	Lifecam.SetBrightness(0);
@@ -152,7 +152,7 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-	      	//Driver Code
+	 //Driver Code
 	SmartDashboard::PutNumber("INTAKE PIVOT:", intakePivot.GetPulseWidthPosition());
 //	SmartDashboard::PutNumber("OVEREXTENDED?", (int)isArmOverextended());
 //	SmartDashboard::PutNumber("BOTTOM DIST:", BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle)));
@@ -167,74 +167,72 @@ void Robot::TeleopPeriodic()
 	if (Driver.GetRawButton(BUTTON_A)) //If the 'A' button is pressed
 	{
 		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-        {
-            moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-        }
-        else
-        {
-            moveVal = 0;
-        }
-
+        	{
+            		moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
+        	}
+        	else
+        	{
+            		moveVal = 0;
+        	}
 		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-        {
+        	{
 			turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-        }
-
+        	}
 		else
-        {
-            turnVal = 0;
-        }
+        	{
+            		turnVal = 0;
+        	}
 
 		ArcadeDrive(moveVal, turnVal, false);
 	}
 
 	else if (Driver.GetRawButton(BUTTON_LB)) //If the left bumper is pressed
-    {
-        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-        {
-        	moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-        }
-        else
-        {
-        	moveVal = 0;
-        }
-        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X)))
-        {
-            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X);
-        }
-        else
-        {
-            turnVal = 0;
-        }
+    	{
+	        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
+	        {
+	        	moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
+	        }
+	        else
+	        {
+	        	moveVal = 0;
+	        }
+	        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X)))
+	        {
+	            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X);
+	        }
+	        else
+	        {
+	            turnVal = 0;
+	        }
 
-        ArcadeDrive(moveVal, turnVal, false);
-    }
+        	ArcadeDrive(moveVal, turnVal, false);
+    	}
 	else if (Driver.GetRawButton(BUTTON_RB)) //If the right bumper is pressed
-    {
+    	{
 		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y)))
 		{
 			moveVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y);
 		}
-        else
-        {
-        	moveVal = 0;
-        }
-        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-        {
-            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-        }
-        else
-        {
-            turnVal = 0;
-        }
-        ArcadeDrive(moveVal, turnVal, false);
-    }
-
-	else
+	        else
+	        {
+	        	moveVal = 0;
+	        }
+	        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
+	        {
+	            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+	        }
+	        else
+	        {
+	            	turnVal = 0;
+	        }
+	        
+        	ArcadeDrive(moveVal, turnVal, false);
+    	}
+    	else
 	{
-        moveVal = 0;
-        turnVal = 0;
-        SetDriveMotors(0, 0);
+        	moveVal = 0;
+        	turnVal = 0;
+        	SetDriveMotors(0, 0);
 	}
       	
 	wedgehorizangle = encBottomHinge.GetDistance() + BOTTOM_WEDGE_START_ANGLE;
@@ -341,7 +339,7 @@ void Robot::TeleopPeriodic()
 	{
 		wedgeHinge.Set(0);
 	}
-//
+
 //	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y))) // If the left stick is moved vertically, rotate the top hinge
 //	{
 //		if(!isArmOverextended())
