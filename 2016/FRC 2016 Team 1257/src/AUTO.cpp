@@ -14,35 +14,39 @@ void Robot::forcross()
 {
 	Timer timeout;
 	timeout.Start();
-	while(encDriveLeft.GetDistance() < (13 * 12) || encDriveRight.GetDistance() < (13 * 12))
+
+	double autospeed = .85;
+	double autoturn = 0;
+	while(true)
 	{
-		if(gyro.GetAngle() < -5 && !pidGyro.IsEnabled())
+		if(gyro.GetAngle() < -5)
 		{
-			SetDriveMotors(.85, -.80);
+			autoturn -= .001;
 		}
-		else if(gyro.GetAngle() > 5 && !pidGyro.IsEnabled())
+
+		else if(gyro.GetAngle() > 5)
 		{
-			SetDriveMotors(.80, -.85);
+			autoturn += .001;
 		}
-	/*	else if(dabs(gyro.GetAngle()) > 20)
-		{
-			pidGyro.Enable();
-		} */
-		else
-		{
-			SetDriveMotors(.85, -.85);
-			pidGyro.Disable();
-		}
+
+		ArcadeDrive(-autospeed, autoturn, false);
+
 
 		if(IsDisabled())
 		{
 			break;
 		}
 
-		if(timeout.Get() > 7)
+		if(timeout.Get() > 2.5)
 		{
 			break;
 		}
+
+	//	if(encDriveLeft.GetDistance() > (9 * 12) || encDriveRight.GetDistance() > (9 * 12))
+	//	{
+	//		break;
+	//	}
+
 	}
 	SetDriveMotors(0, 0);
 	std::cout<<"Going Forward"<<std::endl;
@@ -53,30 +57,40 @@ void Robot::backcross()
 	Timer timeout;
 	timeout.Start();
 
-	while(encDriveLeft.GetDistance() > -(5 * 12) || encDriveRight.GetDistance() > -(5 * 12))
+	double autospeed = .55;
+	double autoturn = 0;
+
+	while(true)
 	{
+		dashstatus();
+		SmartDashboard::PutNumber("AUTO_TIMEOUT", timeout.Get());
+
 		if(gyro.GetAngle() < -5)
 		{
-			SetDriveMotors(-.85, .80);
+			autoturn -= .001;
 		}
+
 		else if(gyro.GetAngle() > 5)
 		{
-			SetDriveMotors(-.80, .85);
+			autoturn += .001;
 		}
-		else
-		{
-			SetDriveMotors(-.85, .85);
-		}
+
+		ArcadeDrive(-autospeed, autoturn, false);
 
 		if(IsDisabled())
 		{
 			break;
 		}
 
-		if(timeout.Get() > 7)
+		if(timeout.Get() > .75)
 		{
 			break;
 		}
+
+		//if(encDriveLeft.GetDistance() < -(2.5 * 12) || encDriveRight.GetDistance() < -(2.5 * 12))
+		//{
+//
+//		}
 	}
 	SetDriveMotors(0, 0);
 	timeout.Stop();
@@ -87,30 +101,37 @@ void Robot::backcross()
 
 	timeout.Start();
 
-	while(encDriveLeft.GetDistance() > -(10 * 12) || encDriveRight.GetDistance() > -(10 * 12))
+	while(true)
 	{
+		dashstatus();
+		SmartDashboard::PutNumber("AUTO_TIMEOUT", timeout.Get());
+
 		if(gyro.GetAngle() < -5)
 		{
-			SetDriveMotors(-.55, .50);
+			autoturn -= .001;
 		}
+
 		else if(gyro.GetAngle() > 5)
 		{
-			SetDriveMotors(-.50, .55);
+			autoturn += .001;
 		}
-		else
-		{
-			SetDriveMotors(-.55, .55);
-		}
+
+		ArcadeDrive(-autospeed, autoturn, false);
 
 		if(IsDisabled())
 		{
 			break;
 		}
 
-		if(timeout.Get() > 7)
+		if(timeout.Get() > 2)
 		{
 			break;
 		}
+
+		//if(encDriveLeft.GetDistance() < -(7 * 12) || encDriveRight.GetDistance() < -(7 * 12))
+		//{
+		//	break;
+		//}
 	}
 	SetDriveMotors(0, 0);
 	std::cout<<"Going Backward"<<std::endl;
