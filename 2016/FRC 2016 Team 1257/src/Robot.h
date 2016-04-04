@@ -68,6 +68,9 @@ public:
   	PIDController pidGyro;
   	PIDController pidIntake;
 
+  	std::thread* dashcam = NULL;
+  	Image* dashframe = NULL;
+
   	//Variable Definitions
 
   	double wedgehorizangle = 0;
@@ -80,6 +83,7 @@ public:
 	bool breakbeamenabled = true;
 	bool haveball = false;
 	bool autoran = false;
+	bool feedenabled = false;
 
 	Robot();
 	void DisabledInit();
@@ -104,6 +108,9 @@ public:
 	void backcross();
 	void portcullis();
 	void cheval();
+
+	void dashstatus();
+	void dashcamera();
 
 	void LEDRaveMode();
 	void LEDIntakeOutBlue();
