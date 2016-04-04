@@ -1,43 +1,45 @@
 #include "Robot.h"
 
 Robot::Robot() :
-	frontLeftDrive(3),
-        backLeftDrive(4),
-        frontRightDrive(5),
-        backRightDrive(1),
-	intakePivot(2),
-	intakeSpin(0),
-	wedgeHinge(0),
-//	topArmHinge(6),
-	pwmOne(1),
-	pwmTwo(2),
-	pwmThree(3),
-	pwmFour(4),
-	Lifecam("cam0", false),
-	gyro(),
-	encDriveLeft(4, 5, false),
-	encDriveRight(2, 3, true),
-	encBottomHinge(6, 7, false),
-//	encTopHinge(8, 9, true),
-	breakBeam(1),
-	biAccel(),
-        Driver(0),
-        Operator(1),
-	pidGyro((.9/90.0), .0002, 0, &gyro, &frontLeftDrive),
-	pidIntake(0, 0, 0, &intakePivot, &intakePivot)
+		frontLeftDrive(3),
+        	backLeftDrive(4),
+        	frontRightDrive(5),
+        	backRightDrive(1),
+		intakePivot(2),
+		intakeSpin(0),
+		wedgeHinge(0),
+		pwmOne(1),
+		pwmTwo(2),
+		pwmThree(3),
+		pwmFour(4),
+		Lifecam("cam0", false),
+		gyro(),
+		encDriveLeft(4, 5, false),
+		encDriveRight(2, 3, true),
+		encBottomHinge(6, 7, false),
+		breakBeam(1),
+		biAccel(),
+        	Driver(0),
+        	Operator(1),
+		pidGyro((.9/90.0), .0002, 0, &gyro, &frontLeftDrive),
+		pidIntake(0, 0, 0, &intakePivot, &intakePivot)
 {
-	Lifecam.OpenCamera();
-	Lifecam.SetBrightness(0);
+	dashframe = imaqCreateImage(IMAQ_IMAGE_RGB, 0);
 }
 	
 void Robot::RobotInit()
 {
 	encBottomHinge.SetDistancePerPulse(360.0/497.0); // Degrees
-//	encTopHinge.SetDistancePerPulse(360.0/497.0); 	 // Degrees
 	encDriveLeft.SetDistancePerPulse(PI * WHEEL_DIAMETER / AMTRES); // res pulses per 1 rev, 1 rev = 2 pi rad
 	encDriveRight.SetDistancePerPulse(PI * WHEEL_DIAMETER / AMTRES); // inches (7.625 in. outer wheel diameter?)
 	intakestart = intakePivot.GetPulseWidthPosition();
 	intakebottom = intakestart - 1759;
+	gyro.Reset();
+
+	Lifecam.OpenCamera();
+	Lifecam.StartCapture();
+	Lifecam.SetBrightness(0);
+	Lifecam.SetExposureManual(1);
 }
 
 void Robot::DisabledInit()
@@ -51,7 +53,6 @@ void Robot::DisabledInit()
 	SmartDashboard::PutString("DB/String 5", "Defense Position");
 	SmartDashboard::PutString("DB/String 6", "Adjust By Entry Field");
 	SmartDashboard::PutString("DB/String 7", "0 for No Ball");
-	SmartDashboard::PutString("DB/String 8", "DON'T FORGET CAMERA");
 }
 
 void Robot::AutonomousInit()
@@ -68,12 +69,13 @@ void Robot::AutonomousInit()
 	autoran = false;
 	LEDAutonomousIdle();
 	gyro.Reset();
-	pidGyro.Reset();
-	pidGyro.SetSetpoint(0);
+	//pidGyro.Reset();
+	//pidGyro.SetSetpoint(0);
 }
 
 void Robot::AutonomousPeriodic()
 {
+
 	if(!autoran)
 	{
 		if(SmartDashboard::GetBoolean("DB/Button 0", false))
@@ -152,87 +154,108 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-	 //Driver Code
-	SmartDashboard::PutNumber("INTAKE PIVOT:", intakePivot.GetPulseWidthPosition());
-//	SmartDashboard::PutNumber("OVEREXTENDED?", (int)isArmOverextended());
-//	SmartDashboard::PutNumber("BOTTOM DIST:", BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle)));
-//	SmartDashboard::PutNumber("TOP DIST:", ((BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle))) + (TOP_ARM_LENGTH * cos(degtorad(tophorizangle)))));
-	SmartDashboard::PutNumber("WEDGE ANGLE:", wedgehorizangle);
-//	SmartDashboard::PutNumber("TOP ANGLE:", tophorizangle);
-	SmartDashboard::PutNumber("BREAKBEAM:", (int)breakBeam.Get());
-	SmartDashboard::PutNumber("Z ACCEL:", biAccel.GetZ());
-	SmartDashboard::PutNumber("LEFT INCHES", encDriveLeft.GetDistance());
-	SmartDashboard::PutNumber("RIGHT INCHES", encDriveRight.GetDistance());
+	      	//Driver Code
+	dashstatus();
 
 	if (Driver.GetRawButton(BUTTON_A)) //If the 'A' button is pressed
 	{
 		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-        	{
-            		moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-        	}
-        	else
-        	{
-            		moveVal = 0;
-        	}
+        {
+            moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
+        }
+        else
+        {
+            moveVal = 0;
+        }
+
 		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-        	{
+        {
 			turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-        	}
+        }
+
 		else
-        	{
-            		turnVal = 0;
-        	}
+        {
+            turnVal = 0;
+        }
 
 		ArcadeDrive(moveVal, turnVal, false);
 	}
 
 	else if (Driver.GetRawButton(BUTTON_LB)) //If the left bumper is pressed
-    	{
-	        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-	        {
-	        	moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-	        }
-	        else
-	        {
-	        	moveVal = 0;
-	        }
-	        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X)))
-	        {
-	            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X);
-	        }
-	        else
-	        {
-	            turnVal = 0;
-	        }
+    {
+        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
+        {
+        	moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
+        }
+        else
+        {
+        	moveVal = 0;
+        }
+        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X)))
+        {
+            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X);
+        }
+        else
+        {
+            turnVal = 0;
+        }
 
-        	ArcadeDrive(moveVal, turnVal, false);
-    	}
+        ArcadeDrive(moveVal, turnVal, false);
+    }
 	else if (Driver.GetRawButton(BUTTON_RB)) //If the right bumper is pressed
-    	{
+    {
 		if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y)))
 		{
 			moveVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y);
 		}
-	        else
-	        {
-	        	moveVal = 0;
-	        }
-	        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-	        {
-	            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-	        }
-	        else
-	        {
-	            	turnVal = 0;
-	        }
-	        
-        	ArcadeDrive(moveVal, turnVal, false);
-    	}
-    	else
-	{
+        else
+        {
         	moveVal = 0;
-        	turnVal = 0;
-        	SetDriveMotors(0, 0);
+        }
+        if (isReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
+        {
+            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+        }
+        else
+        {
+            turnVal = 0;
+        }
+        ArcadeDrive(moveVal, turnVal, false);
+    }
+
+	else
+	{
+        moveVal = 0;
+        turnVal = 0;
+        SetDriveMotors(0, 0);
+	}
+
+	if(Driver.GetRawAxis(2) > .5 || Driver.GetRawAxis(3) > .5)
+	{
+		feedenabled = true;
+	}
+
+	else
+	{
+		feedenabled = false;
+	}
+
+	if(feedenabled)
+	{
+		if(dashcam == NULL)
+		{
+			dashcam = new std::thread(&Robot::dashcamera, this);
+			dashcam->detach();
+		}
+	}
+
+	else
+	{
+		if(dashcam != NULL)
+		{
+			delete dashcam;
+			dashcam = NULL;
+		}
 	}
       	
 	wedgehorizangle = encBottomHinge.GetDistance() + BOTTOM_WEDGE_START_ANGLE;
@@ -326,11 +349,11 @@ void Robot::TeleopPeriodic()
 		intakePivot.Set(0);
 	}
 
-	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y))/* && ((!isArmOverextended() && ((bottomhorizangle > 45))) || Operator.GetRawAxis(5) > 0)*/) // If the right stick is moved vertically, rotate the bottom hinge
+	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
 	{
-		if((Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y) < 0 && wedgehorizangle > 5) || (Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y) > 0 && wedgehorizangle < 140))
+		if((Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y) < 0 && wedgehorizangle > 5) || (Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y) > 0 && wedgehorizangle < 140))
 		{
-			wedgeHinge.Set(.75 * Operator.GetRawAxis(AXIS_ANALOG_RIGHT_Y));
+			wedgeHinge.Set(.75 * Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
 		}
 		else
 			wedgeHinge.Set(0);
@@ -340,31 +363,11 @@ void Robot::TeleopPeriodic()
 		wedgeHinge.Set(0);
 	}
 
-//	if (isReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y))) // If the left stick is moved vertically, rotate the top hinge
-//	{
-//		if(!isArmOverextended())
-//		{
-//			topArmHinge.Set(.75 * Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
-//		}
-//
-//		else if(((tophorizangle < 0) && (Operator.GetRawAxis(1) > 0)) || ((tophorizangle > 0) && (Operator.GetRawAxis(1) < 0)))
-//		{
-//			topArmHinge.Set(.75 * Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
-//		}
-//
-//		else
-//		{
-//			topArmHinge.Set(0);
-//		}
-//	}
-//	else
-//	{
-//		topArmHinge.Set(0);
-//	}
 }
 
 void Robot::TestInit()
 {
+	intakeAdjust(false);
 	wedgeAdjust(false);
 }
 
@@ -516,21 +519,31 @@ void Robot::stopIntake()
 	haveball = true;
 }
 
-//bool Robot::isArmOverextended()
-//{
-//	if(BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle)) >= 14.0)
-//	{
-//		return true;
-//	}
-//
-//	return (((BOTTOM_ARM_LENGTH * cos(degtorad(bottomhorizangle))) + (TOP_ARM_LENGTH * cos(degtorad(tophorizangle)))) >= 14.0);
-//}
 
 double Robot::degtorad(double deg)
 {
 	return (deg * PI / 180.0);
 }
 
+
+void Robot::dashstatus()
+{
+	SmartDashboard::PutNumber("INTAKE PIVOT:", intakePivot.GetPulseWidthPosition());
+	SmartDashboard::PutNumber("WEDGE ANGLE:", wedgehorizangle);
+	SmartDashboard::PutNumber("BREAKBEAM:", (int)breakBeam.Get());
+	SmartDashboard::PutNumber("Z ACCEL:", biAccel.GetZ());
+	SmartDashboard::PutNumber("LEFT INCHES", encDriveLeft.GetDistance());
+	SmartDashboard::PutNumber("RIGHT INCHES", encDriveRight.GetDistance());
+}
+
+void Robot::dashcamera()
+{
+	while(feedenabled)
+	{
+		Lifecam.GetImage(dashframe);
+		CameraServer::GetInstance()->SetImage(dashframe);
+	}
+}
 
 START_ROBOT_CLASS(Robot)
 
