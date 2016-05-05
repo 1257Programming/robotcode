@@ -1,5 +1,5 @@
 #include <Servo.h>
-
+#include <cmath>
 const int servoL = 3;
 const int servoR = 10;
 const int joyLR = 3;
