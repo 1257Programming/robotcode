@@ -19,6 +19,11 @@ void setup() {
   Serial.begin(9600);
 }
 
+void setLeftRightMotorOutputs(double left, double right) {
+  servoLeft.write((left + 1.0)*90);
+  servoRight.write((right + 1.0)*90);
+}
+
 void loop() {
   servoValH = analogRead(joyLR);
   servoValH = map(servoValH, 0, 1023, 0, 180); 
