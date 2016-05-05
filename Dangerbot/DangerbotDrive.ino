@@ -19,34 +19,72 @@ void setup() {
   Serial.begin(9600);
 }
 
-void setLeftRightMotorOutputs(double left, double right) {
+void SetDriveMotors(double left, double right) {
   servoLeft.write((left + 1.0)*90);
   servoRight.write((right + 1.0)*90);
 }
+void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs)
+{
+// local variables to hold the computed PWM values for the motors
+  float leftMotorOutput;
+  float rightMotorOutput;
 
+  if (squaredInputs)
+  {
+	// square the inputs (while preserving the sign) to increase fine control
+	// while permitting full power
+	if (moveValue >= 0.0)
+	{
+		moveValue = (moveValue * moveValue);
+	}
+	else
+	{
+		moveValue = -(moveValue * moveValue);
+	}
+
+	if (rotateValue >= 0.0)
+	{
+		rotateValue = (rotateValue * rotateValue);
+	}
+	else
+	{
+		rotateValue = -(rotateValue * rotateValue);
+	}
+  }
+
+  if (moveValue > 0.0)
+  {
+	  if (rotateValue > 0.0)
+	  {
+		  leftMotorOutput = moveValue - rotateValue;
+		  rightMotorOutput = std::max(moveValue, rotateValue);
+	  }
+	  else
+	  {
+		leftMotorOutput = std::max(moveValue, -rotateValue);
+		rightMotorOutput = moveValue + rotateValue;
+	  }
+  }
+  else
+  {
+	  if (rotateValue > 0.0)
+	  {
+		  leftMotorOutput = -std::max(-moveValue, rotateValue);
+		  rightMotorOutput = moveValue + rotateValue;
+	  }
+	  else
+	  {
+		  leftMotorOutput = moveValue - rotateValue;
+		  rightMotorOutput = -std::max(-moveValue, -rotateValue);
+	  }
+  }
+
+  SetDriveMotors(leftMotorOutput, -rightMotorOutput);
+}
 void loop() {
   servoValH = analogRead(joyLR);
   servoValH = map(servoValH, 0, 1023, 0, 180); 
   servoValV = analogRead(joyUD);
   servoValV = map(servoValV, 0, 1023, 0, 180)
-   
-}
-
-void forward() {
-  servoLeft.write(180);
-  servoRight.write(180);
-}
-
-void reverse() {
-  servoLeft.write(0);
-  servoRight.write(0);
-}
-
-void turnRight() {
-  servoLeft.write(180);
-  servoRight.write(0);
-}
-void turnLeft() {
-  servoLeft.write(0);
-  servoRight.write(180);
+  ArcadeDrive(servoValV, servoValH, true);
 }
