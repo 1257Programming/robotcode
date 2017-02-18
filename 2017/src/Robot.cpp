@@ -3,17 +3,17 @@
 
 Robot::Robot() :
 	FrontLeftDrive(1), // CAN
-    BackLeftDrive(2), // CAN
-    FrontRightDrive(3), // CAN
-    BackRightDrive(4), // CAN
+	BackLeftDrive(2), // CAN
+	FrontRightDrive(3), // CAN
+	BackRightDrive(4), // CAN
 	DriveTrain(FrontLeftDrive, BackLeftDrive, FrontLeftDrive, BackRightDrive),
 	GearSlide(5), // CAN
 	ClimbMotor(6), // CAN
 	LeftFlap(7, 3), // PCM
 	RightFlap(0, 1), // PCM
 	ClimbRelease(0),
-    Driver(0),
-    Operator(1),
+	Driver(0),
+	Operator(1),
 	GearEnc(4, 5),
 	LeftBreakBeam(1),
 	RightBreakBeam(1),
@@ -67,10 +67,11 @@ void Robot::DisabledInit()
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 
-	SmartDashboard::PutString("DB/String 0", "Left Gear");
-	SmartDashboard::PutString("DB/String 1", "Center Gear");
-	SmartDashboard::PutString("DB/String 2", "Right Gear");
-	SmartDashboard::PutString("DB/String 3", "Cross Baseline");
+	SmartDashboard::PutString("DB/String 0", "Left Peg");
+	SmartDashboard::PutString("DB/String 1", "Center Peg Red");
+	SmartDashboard::PutString("DB/String 2", "Center Peg Blue");
+	SmartDashboard::PutString("DB/String 3", "Right Peg");
+	SmartDashboard::PutString("DB/String 4", "Cross Baseline");
 }
 
 void Robot::AutonomousInit()
@@ -81,21 +82,71 @@ void Robot::AutonomousInit()
 
 	ClimbRelease.SetAngle(180);
 
+	// Score in left peg, then cross baseline
 	if(SmartDashboard::GetBoolean("DB/Button 0", false))
 	{
-		// Score gear on left peg
+		DriveRobot(178.6);
+		TurnRobot(120);
+		DriveRobot(39.84);
+
+		ScoringSequence();
+
+		DriveRobot(-66.07);
+		TurnRobot(-120);
+		DriveRobot(194.6);
 	}
+	// Score in center peg on red alliance, then cross baseline
 	else if(SmartDashboard::GetBoolean("DB/Button 1", false))
 	{
-		// Score gear on center peg
+		DriveRobot(24.00);
+		TurnRobot(-30);
+		DriveRobot(26.75);
+		TurnRobot(30);
+		DriveRobot(24.71);
+
+		ScoringSequence();
+
+		DriveRobot(-24.71);
+		TurnRobot(-90);
+		DriveRobot(107.3);
+		TurnRobot(90);
+		DriveRobot(339.1);
 	}
+	// Score in center peg on blue alliance, then cross baseline
 	else if(SmartDashboard::GetBoolean("DB/Button 2", false))
 	{
-		// Score gear on right peg
+		DriveRobot(24.00);
+		TurnRobot(30);
+		DriveRobot(26.75);
+		TurnRobot(-30);
+		DriveRobot(24.71);
+
+		ScoringSequence();
+
+		DriveRobot(-24.71);
+		TurnRobot(-90);
+		DriveRobot(107.3);
+		TurnRobot(90);
+		DriveRobot(339.1);
 	}
+	// Score in right peg, then cross baseline
 	else if(SmartDashboard::GetBoolean("DB/Button 3", false))
 	{
-		// Cross baseline
+		DriveRobot(176.7);
+		TurnRobot(-120);
+		DriveRobot(36.07);
+
+		ScoringSequence();
+
+		DriveRobot(-51.35);
+		TurnRobot(75);
+		DriveRobot(285.6);
+		TurnRobot(45);
+	}
+	// Cross baseline
+	else if(SmartDashboard::GetBoolean("DB/Button 4", false))
+	{
+		DriveRobot(378.3);
 	}
 	else
 	{
@@ -107,13 +158,11 @@ void Robot::AutonomousInit()
 
 void Robot::AutonomousPeriodic()
 {
-  //Init motors/gear
+	//Init motors/gear
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
-	//TODO use encoders better, implement SmartDashboard for choices, and find out about squared inputs
-	//WIP NavX code here lol it doesn't work
-	ScoringSequence();
+	//TODO use encoders better, and find out about squared inputs
 }
 
 void Robot::TeleopInit()
@@ -126,128 +175,130 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-    // Driver
-    if (Driver.GetRawButton(BUTTON_A))
-    {
-        if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-        {
-            moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-        }
-        else
-        {
-            moveVal = 0;
-        }
+	// Driver
+	if (Driver.GetRawButton(BUTTON_A))
+	{
+		if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
+		{
+			moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
+		}
+		else
+		{
+			moveVal = 0;
+		}
 
-        if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-        {
-            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-        }
-        else
-        {
-            turnVal = 0;
-        }
+		if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
+		{
+			turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+		}
+		else
+		{
+		turnVal = 0;
+		}
 
-        ArcadeDrive(moveVal, turnVal, false);
-    }
-    else if (Driver.GetRawButton(BUTTON_LB))
-    {
-        if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-        {
-            moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
-        }
-        else
-        {
-            moveVal = 0;
-        }
+		ArcadeDrive(moveVal, turnVal, false);
+	}
+	else if (Driver.GetRawButton(BUTTON_LB))
+	{
+		if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
+		{
+			moveVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_Y);
+		}
+		else
+		{
+			moveVal = 0;
+		}
 
-        if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X)))
-        {
-            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X);
-        }
-        else
-        {
-            turnVal = 0;
-        }
+		if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X)))
+		{
+			turnVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_X);
+		}
+		else
+		{
+			turnVal = 0;
+		}
 
-        ArcadeDrive(moveVal, turnVal, false);
-    }
-    else if (Driver.GetRawButton(BUTTON_RB))
-    {
-        if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y)))
-        {
-            moveVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y);
-        }
-        else
-        {
-            moveVal = 0;
-        }
-        if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
-        {
-            turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
-        }
-        else
-        {
-            turnVal = 0;
-        }
-        ArcadeDrive(moveVal, turnVal, false);
-    }
-    else
-    {
-        moveVal = 0;
-        turnVal = 0;
-        SetDriveMotors(0, 0);
-    }
+		ArcadeDrive(moveVal, turnVal, false);
+	}
+	else if (Driver.GetRawButton(BUTTON_RB))
+	{
+		if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y)))
+		{
+			moveVal = -Driver.GetRawAxis(AXIS_ANALOG_RIGHT_Y);
+		}
+		else
+		{
+			moveVal = 0;
+		}
+		
+		if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
+		{
+			turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
+		}
+		else
+		{
+			turnVal = 0;
+		}
+		
+		ArcadeDrive(moveVal, turnVal, false);
+	}
+	else
+	{
+		moveVal = 0;
+		turnVal = 0;
+		SetDriveMotors(0, 0);
+	}
 
-    // Operator
-    gearVal = Operator.GetRawAxis(AXIS_TRIGGER_LEFT) - Operator.GetRawAxis(AXIS_TRIGGER_RIGHT);
-    if (LeftLimit.Get() && gearVal < 0)
-    {
-    	GearSlide.Set(gearVal);
-    	// reset some encoder values
-    }
-    else if (RightLimit.Get() && gearVal > 0)
-    {
-    	GearSlide.Set(gearVal);
-    	// reset some encoder values
-    }
-    else
-    {
-    	GearSlide.Set(gearVal);
-    }
+	// Operator
+	gearVal = Operator.GetRawAxis(AXIS_TRIGGER_LEFT) - Operator.GetRawAxis(AXIS_TRIGGER_RIGHT);
+	if (LeftLimit.Get() && gearVal < 0)
+	{
+		GearSlide.Set(gearVal);
+		// reset some encoder values
+	}
+	else if (RightLimit.Get() && gearVal > 0)
+	{
+		GearSlide.Set(gearVal);
+		// reset some encoder values
+	}
+	else
+	{
+		GearSlide.Set(gearVal);
+	}
 
-    if (Operator.GetRawButton(BUTTON_A))
-    {
-    	LeftFlap.Set(DoubleSolenoid::kForward);
-    	RightFlap.Set(DoubleSolenoid::kForward);
-    	LeftFlapState = true;
-    	RightFlapState = true;
-    }
-    else if (Operator.GetRawButton(BUTTON_B))
-    {
-     	RightFlap.Set(DoubleSolenoid::kReverse);
-     	LeftFlap.Set(DoubleSolenoid::kReverse);
-     	LeftFlapState = false;
-     	LeftFlapState = false;
-    }
-    else if (Operator.GetRawButton(BUTTON_LB))
-    {
-    	if (!LBPrevState)
-    	{
-    		if (LeftFlapState)
-    		{
-    			LeftFlap.Set(DoubleSolenoid::kReverse);
-    			LeftFlapState = false;
-    		}
-    		else
-    		{
-    			LeftFlap.Set(DoubleSolenoid::kForward);
-    			LeftFlapState = true;
-    		}
+	if (Operator.GetRawButton(BUTTON_A))
+	{
+		LeftFlap.Set(DoubleSolenoid::kForward);
+		RightFlap.Set(DoubleSolenoid::kForward);
+		LeftFlapState = true;
+		RightFlapState = true;
+	}
+	else if (Operator.GetRawButton(BUTTON_B))
+	{
+		RightFlap.Set(DoubleSolenoid::kReverse);
+		LeftFlap.Set(DoubleSolenoid::kReverse);
+		LeftFlapState = false;
+		LeftFlapState = false;
+	}
+	else if (Operator.GetRawButton(BUTTON_LB))
+	{
+		if (!LBPrevState)
+		{
+			if (LeftFlapState)
+			{
+				LeftFlap.Set(DoubleSolenoid::kReverse);
+				LeftFlapState = false;
+			}
+			else
+			{
+				LeftFlap.Set(DoubleSolenoid::kForward);
+				LeftFlapState = true;
+			}
 
-    		LBPrevState = true;
-    	}
-    }
-    else if (Operator.GetRawButton(BUTTON_RB))
+			LBPrevState = true;
+		}
+	}
+	else if (Operator.GetRawButton(BUTTON_RB))
 	{
 		if (!RBPrevState)
 		{
@@ -265,46 +316,46 @@ void Robot::TeleopPeriodic()
 			RBPrevState = true;
 		}
 	}
-    else
-    {
-    	LeftFlap.Set(DoubleSolenoid::kOff);
-    	RightFlap.Set(DoubleSolenoid::kOff);
-    	LBPrevState = false;
-    	RBPrevState = false;
-    }
+	else
+	{
+		LeftFlap.Set(DoubleSolenoid::kOff);
+		RightFlap.Set(DoubleSolenoid::kOff);
+		LBPrevState = false;
+		RBPrevState = false;
+	}
 
-    if (Operator.GetRawButton(BUTTON_Y) && IsReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
-    {
-    	ClimbMotor.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
-    }
-    else
-    {
-    	ClimbMotor.Set(0);
-    }
+	if (Operator.GetRawButton(BUTTON_Y) && IsReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
+	{
+		ClimbMotor.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
+	}
+	else
+	{
+		ClimbMotor.Set(0);
+	}
 
-    // Automation
-    if (Operator.GetRawButton(BUTTON_Y) && !YPrevState)
-    {
-    	if (Automation)
-    	{
-    		Automation = false;
-    		SmartDashboard::PutString("DB/String 6", "Sensors ignored");
-    	}
-    	else
-    	{
-    		Automation = true;
-    		SmartDashboard::PutString("DB/String 6", "Sensors used");
-    	}
+	// Automation
+	if (Operator.GetRawButton(BUTTON_Y) && !YPrevState)
+	{
+		if (Automation)
+		{
+			Automation = false;
+			SmartDashboard::PutString("DB/String 6", "Sensors ignored");
+		}
+		else
+		{
+			Automation = true;
+			SmartDashboard::PutString("DB/String 6", "Sensors used");
+		}
 
-    	YPrevState = true;
-    }
-    else
-    {
-    	YPrevState = false;
-    }
+		YPrevState = true;
+	}
+	else
+	{
+		YPrevState = false;
+	}
 
-    if (Automation)
-    {
+	if (Automation)
+	{
 		// Automation flaps
 		if (!ActuateFlaps.Get())
 		{
@@ -321,9 +372,8 @@ void Robot::TeleopPeriodic()
 			LeftFlapState = true;
 			RightFlapState = true;
 		}
-
-    }
-    // Vision
+	}
+	// Vision
 
 }
 
@@ -385,45 +435,58 @@ void Robot::TestPeriodic()
 	}
 }
 
-// NavX Helper Functions: THESE DO NOT WORK YET
+// NavX Helper Functions
 double Robot::DistanceTraveled()
 {
 	return sqrt(static_cast<double>(square(NavX.GetDisplacementX()) + square(NavX.GetDisplacementY())));
 }
 
-void Robot::DriveForward(double distance)
+// Drive forward, distance is in inches
+void Robot::DriveRobot(double distance)
 {
 	NavX.ResetDisplacement();
-	// if we need to we can repeatedly store the displacement for more accuracy
-	// tell it to drive forward
-	while(DistanceTraveled() < distance)
-    {
-		DriveTrain.ArcadeDrive(.85, 0, false);
+	// If needed, store the displacement for more accuracy
+	// Convert distance to meters
+	distance *= 0.0254;
+	// + distance means drive forward, - distance means drive backward
+	if(distance > 0)
+	{
+		while(DistanceTraveled() < distance)
+		{
+			DriveTrain.ArcadeDrive(.85, 0, false);
+		}
 	}
-	DriveTrain.ArcadeDrive(0, 0, false);
+	else if(distance < 0)
+	{
+		while(DistanceTraveled() < -distance)
+		{
+			DriveTrain.ArcadeDrive(-.85, 0, false);
+		}
+	}
+	SetDriveMotors(0, 0);
 }
 
-// TODO: Turn
+// Turn, angle is from -180 to 180 degrees
 void Robot::TurnRobot(double angle)
 {
 	NavX.ZeroYaw();
 	// - angle means turn counterclockwise, + angle means turn clockwise
 	if(angle < 0)
-    {
+	{
 		while (NavX.GetYaw() > angle)
-        {
+		{
 			DriveTrain.ArcadeDrive(0, -.85, false);
 		}
 
 	}
-  else if (angle > 0)
-    {
+	else if (angle > 0)
+	{
 		while (NavX.GetYaw() < angle)
-        {
+		{
 			DriveTrain.ArcadeDrive(0, .85, false);
 		}
 	}
-	DriveTrain.ArcadeDrive(0, 0, false);
+	SetDriveMotors(0, 0);
 }
 
 START_ROBOT_CLASS(Robot)
