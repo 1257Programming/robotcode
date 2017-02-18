@@ -4,7 +4,7 @@
 #include "WPILib.h"
 #include "CANTalon.h"
 #include <cmath>
-//#include <AHRS.h>
+#include <AHRS.h>
 
 // X-Box Controller Button IDs
 #define BUTTON_A 1
@@ -29,9 +29,10 @@
 // Global Functions
 inline double dabs(double d) { return d > 0.0 ? d : -d; } // Absolute value of a double precision floating point number
 inline bool IsReasonable(double axisVal) { return dabs(axisVal) > 0.2; } // Ensures the axis is intentionally engaged
+inline float square(double num) { return num * num; } //Return the square of the the given number
 
 // Constants
-const double WHEEL_DIAMETER = 1; //TODO: find wheel diameter
+//const double WHEEL_DIAMETER = 6;
 
 class Robot: public IterativeRobot
 {
@@ -56,34 +57,32 @@ private:
     DigitalInput ActuateFlaps;
     DigitalInput LeftLimit;
     DigitalInput RightLimit;
-    //AHRS NavX;
+    AHRS NavX;
     Ultrasonic FrontDist;
 
-    cs::UsbCamera LifeCam;        //TODO: Constructor
+    cs::UsbCamera LifeCam;
     cs::CvSink VisionSink;
 
     double moveVal;
     double turnVal;
     double gearVal;
 
-    bool gearAtLeftEdge; //TODO: Add values to these to RobotInit
-	bool gearAtRightEdge;
-	bool blockedOnTheRight;
-	bool blockedOnTheLeft;
-	bool isCentered;
+	bool isGearCentered;
+	bool isGearScored;
+	bool gearBlockedOnLeft;
+	bool gearBlockedOnRight;
 
-	bool isScoringSequenceEnabled;
-	bool prevXButtonVal;
+	bool isVisionEnabled;
+	bool XPrevState;
 
-	bool LeftFlapState = false;
-	bool RightFlapState = false;
-	bool LBPrevState = false;
-	bool RBPrevState = false;
-	bool TargetInSight = false;
-	bool Automation = true;
-	bool YPrevState = false;
+	bool LeftFlapState;
+	bool RightFlapState;
+	bool LBPrevState;
+	bool RBPrevState;
+	bool targetInSight;
+	bool Automation;
+	bool YPrevState;
 
-    bool noVision = false; // True if no vision target for the peg is in sight
 public:
     Robot();
     void DisabledInit();

@@ -21,33 +21,39 @@ Robot::Robot() :
 	ActuateFlaps(1), // DIO
 	LeftLimit(2), // DIO
 	RightLimit(3), // DIO
-	//TODO find encoder channels from Alan
-	//NavX(/*SPI or I2C*/), //NavX Micro Sensor
+	NavX(1), //NavX Micro Sensor //TODO FIX PORT NUM
 	FrontDist(6, 7),
 	LifeCam(),
 	VisionSink()
-
 {
-	FrontDist.SetAutomaticMode(true);
-	gearAtLeftEdge = false; //TODO: Add values to these to RobotInit
-	gearAtRightEdge = false;
-	blockedOnTheRight = false;
-	blockedOnTheLeft = false;
-	isCentered = false;
-	isScoringSequenceEnabled = false;
-	prevXButtonVal = false;
 	moveVal = 0;
 	turnVal = 0;
 	gearVal = 0;
+
+	isGearCentered = false;
+	isGearScored = false;
+	gearBlockedOnLeft = false;
+	gearBlockedOnRight = false;
+	isVisionEnabled = false;
+	XPrevState = false;
+	LeftFlapState = false;
+	RightFlapState = false;
+	LBPrevState = false;
+	RBPrevState = false;
+	targetInSight = false;
+	Automation = true;
+	YPrevState = false;
 }
 
 void Robot::RobotInit()
 {
-	DriveTrain.SetLeftRightMotorOutputs(0, 0); //Motor Init
-	GearSlide.Set(0); // Gear Init
-	ClimbMotor.Set(0); //Climb motor Init
-	//Camera
-	LifeCam = CameraServer::GetInstance()->StartAutomaticCapture();
+	FrontDist.SetAutomaticMode(true);
+	DriveTrain.SetInvertedMotor(RobotDrive::kFrontRightMotor, true); //Drive Motor Init
+	DriveTrain.SetInvertedMotor(RobotDrive::kRearRightMotor, true);
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	GearSlide.Set(0);												 //Gear Init
+	ClimbMotor.Set(0);												 //Climb Motor Init
+	LifeCam = CameraServer::GetInstance()->StartAutomaticCapture();  //Camera Init
 	LifeCam.SetResolution(640, 480);
 	LifeCam.SetExposureManual(0);
 	LifeCam.SetBrightness(5);
@@ -66,7 +72,7 @@ void Robot::DisabledInit()
 	SmartDashboard::PutString("DB/String 2", "Right Gear");
 	SmartDashboard::PutString("DB/String 3", "Cross Baseline");
 }
-//Init Motors/Gear
+
 void Robot::AutonomousInit()
 {
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
@@ -97,7 +103,6 @@ void Robot::AutonomousInit()
 		GearSlide.Set(0);
 		ClimbMotor.Set(0);
 	}
-	ScoringSequence();
 }
 
 void Robot::AutonomousPeriodic()
@@ -309,7 +314,7 @@ void Robot::TeleopPeriodic()
 			LeftFlapState = false;
 		}
 
-		if (!TargetInSight && FrontDist.GetRangeInches() <= 20)
+		if (!targetInSight && FrontDist.GetRangeInches() <= 20)
 		{
 			LeftFlap.Set(DoubleSolenoid::kForward);
 			RightFlap.Set(DoubleSolenoid::kForward);
@@ -379,16 +384,11 @@ void Robot::TestPeriodic()
 		ClimbRelease.SetAngle(0);
 	}
 }
-/*
-void Robot::DriveForward(double distance)
-{
-
-}
 
 // NavX Helper Functions: THESE DO NOT WORK YET
 double Robot::DistanceTraveled()
 {
-	return sqrt(static_cast<double>(NavX.GetDisplacementX() * NavX.GetDisplacementX() + NavX.GetDisplacementY() * NavX.GetDisplacementY()));
+	return sqrt(static_cast<double>(square(NavX.GetDisplacementX()) + square(NavX.GetDisplacementY())));
 }
 
 void Robot::DriveForward(double distance)
@@ -406,7 +406,7 @@ void Robot::DriveForward(double distance)
 // TODO: Turn
 void Robot::TurnRobot(double angle)
 {
-	NavX.ResetYaw();
+	NavX.ZeroYaw();
 	// - angle means turn counterclockwise, + angle means turn clockwise
 	if(angle < 0)
     {
@@ -425,5 +425,5 @@ void Robot::TurnRobot(double angle)
 	}
 	DriveTrain.ArcadeDrive(0, 0, false);
 }
-*/
+
 START_ROBOT_CLASS(Robot)

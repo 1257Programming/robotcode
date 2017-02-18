@@ -10,74 +10,75 @@ using namespace cv;
 using namespace std;
 
 void findTargets(Mat& rawImage, vector<vector<Point> >& contours);
-bool isGearCentered(int pegLocationX, int imageCenterX);
+bool isCentered(int pegLocationX, int imageCenterX);
 int getPegLocation(vector<vector<Point> > contours );
-bool isGearCentered(int pegLocationX, int imageCenterX);
+bool isCentered(int pegLocationX, int imageCenterX);
 double getMotorVelocity(int pegLocation, int imageWidth);
 void adjustThreshold(Scalar& threshold);
 
+// Scores a gear from a position close to the peg
 void Robot::ScoringSequence()
 {
-	// TODO: set camera exposure really really really low
-	// put in robotInit?
-	//CameraServer.getInstance().startAutomaticCapture();
-	//CvSink cvSink = CameraServer.getInstance().getVideo();
-	//UsbCamera usbCamera = new UsbCamera("USB Camera 0", 0);
-
-	bool isCentered = false;
-	vector<vector<Point> > contours;
+	//Grab an image from the camera
 	Mat rawImage;
-	while(!isCentered)
+	VisionSink.GrabFrame(rawImage);
+	vector<vector<Point> > contours;
+
+	//Try to find the contours in the image
+	try
 	{
-		  VisionSink.GrabFrame(rawImage);
-		  int attempts = 0;
-		  bool exceptionThrown = true;
-		  while(attempts < 4 && exceptionThrown)
-		  {
-			  exceptionThrown = false;
-			  try
-			  {
-				   findTargets(rawImage, contours);
-			  }
-			  catch(char const* error)
-			  {
-				  SmartDashboard::PutString("Scoring Sequence Info", error);
-				  exceptionThrown = true;
-			  }
-			  attempts++;
-		  }
-		  if(exceptionThrown)
-		  {
-			  SmartDashboard::PutString("Scoring Sequence Info", "Robot not in range of targets");
-			  return; //TODO: MAYBE BAD IDEA
-		  } else {
-			  SmartDashboard::PutString("Scoring Sequence Info", "Targets Identified");
-		  }
-
-		  int imageCenterX = rawImage.cols / 2;
-		  int pegLocationX = getPegLocation(contours);
-		  bool isCentered = isGearCentered(pegLocationX, imageCenterX);
-
-		  SmartDashboard::PutNumber("Peg Location", pegLocationX);
-		  SmartDashboard::PutBoolean("Peg Centered", isCentered);
-		  if(!isCentered)
-		  {
-			  float velocity = getMotorVelocity(pegLocationX, rawImage.cols);
-			  SmartDashboard::PutNumber("Bagel Slicer Velocity", velocity);
-			  GearSlide.Set(velocity);
-		  }
-		  else
-		  {
-			  GearSlide.Set(0);
-		  }
+	   findTargets(rawImage, contours);
+	   SmartDashboard::PutString("Scoring Sequence Status", "Targets Identified");
 	}
-	SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
-	SmartDashboard::PutString("ScoringSequence Info", "Bagel slicer in position");
+	//If findTargets throws an exception, print it to the smartDashboard and exit the function
+	catch(char const* error)
+	{
+	  SmartDashboard::PutString("Scoring Sequence Status", error);
+	  return;
+	}
+
+	//Get image constants from the contours
+	int imageCenterX = rawImage.cols / 2;
+	int pegLocationX = getPegLocation(contours);
+	isGearCentered = isCentered(pegLocationX, imageCenterX);
+	SmartDashboard::PutBoolean("Peg Centered", isGearCentered);
+
+	//Check the current position of the bagel slicer
+	gearBlockedOnLeft = LeftLimit.Get();
+	gearBlockedOnRight = RightLimit.Get();
+
+	if(!isGearCentered)
+	{
+		float velocity = getMotorVelocity(pegLocationX, rawImage.cols);
+		//If the slicer is blocked in the direction it's trying to go
+		bool slicerCantMove = (gearBlockedOnLeft && velocity < 0) || (gearBlockedOnRight && velocity > 0);
+		if(slicerCantMove)
+		{
+			GearSlide.Set(0);
+			DriveTrain.SetLeftRightMotorOutputs(-velocity, velocity);
+			SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
+		}
+		else
+		{
+			GearSlide.Set(velocity);
+			DriveTrain.SetLeftRightMotorOutputs(0, 0);
+			SmartDashboard::PutNumber("Bagel Slicer Velocity", velocity);
+		}
+	}
+	else
+	{
+		GearSlide.Set(0);
+		DriveToPeg();
+		SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
+		SmartDashboard::PutString("Scoring Sequence Status", "Bagel slicer in position");
+		GearSlide.Set(0);
+		isVisionEnabled = false;
+	}
 }
 
 
-// Takes in an image of the field, and filters it for green light.
-// Also modifies contours based on this processed image
+// Takes in an image from the robot's camera, and filters it for green light.
+// Also searches for contours in this processed image
 void findTargets(Mat& image, vector<vector<Point> >& contours)
 {
 	// How many more times the function is willing to adjust the thresholds
@@ -88,7 +89,7 @@ void findTargets(Mat& image, vector<vector<Point> >& contours)
 	Scalar maxGreen = Scalar(100, 255, 20);
 
 	// Filter the image for noise
-	GaussianBlur(image, image, Size(15, 15), 0); //TODO: test if needed
+	GaussianBlur(image, image, Size(15, 15), 0);
 
 	while(adjustmentsUntilFailure > 0)
 	{
@@ -102,7 +103,7 @@ void findTargets(Mat& image, vector<vector<Point> >& contours)
 		//Create a 2D array of points to store the various contours
 		findContours(image, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
-		//If you can't see at least 2 contours, adjust the thresholds and decrement the counter
+		//If you can't see at least 1 target, adjust the thresholds and decrement the counter
 		if(contours.size() < 1)
 		{
 			adjustThreshold(minGreen);
@@ -118,9 +119,10 @@ void findTargets(Mat& image, vector<vector<Point> >& contours)
 }
 
 // Checks whether the difference between the peg location and the image center is in a range
-inline bool isGearCentered(int pegLocationX, int imageCenterX)
+inline bool isCentered(int pegLocationX, int imageCenterX)
 {
-	return abs(pegLocationX - imageCenterX) < 50;
+	int imageWidth = 2 * imageCenterX;
+	return abs(pegLocationX - imageCenterX) < (imageWidth / 7);
 }
 
 int getPegLocation(vector<vector<Point> > contours )
@@ -178,16 +180,16 @@ inline void adjustThreshold(Scalar& threshold)
 	threshold.val[1] -= 5;
 }
 
+// Drive forward until you get to the peg's location
 void Robot::DriveToPeg()
 {
+	//TODO: Set a timer to ensure you're not accidentally driving too far
 	const int pegLength = 10; //Really 10.5", but trivial for coding purposes
-	if(FrontDist.GetRangeInches() > pegLength)
+	double forwardSpeed = 0.6;
+
+	while(FrontDist.GetRangeInches() > pegLength)
 	{
-		DriveTrain.ArcadeDrive(0.85, 0);
+		DriveTrain.ArcadeDrive(forwardSpeed, 0);
 	}
-	else
-	{
-		DriveTrain.SetLeftRightMotorOutputs(0, 0);
-	}
-}
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 }
