@@ -51,12 +51,8 @@ private:
 	Joystick Driver;
 	Joystick Operator;
 	Encoder GearEnc;
-	DigitalInput LeftBreakBeam;
-	DigitalInput RightBreakBeam;
 	DigitalInput HaveGear;
 	DigitalInput ActuateFlaps;
-	DigitalInput LeftLimit;
-	DigitalInput RightLimit;
 	AHRS NavX;
 	Ultrasonic FrontDist;
 
@@ -69,8 +65,6 @@ private:
 
 	bool isGearCentered;
 	bool isGearScored;
-	bool gearBlockedOnLeft;
-	bool gearBlockedOnRight;
 
 	bool isVisionEnabled;
 	bool XPrevState;
