@@ -70,8 +70,6 @@ private:
 
 	bool isGearCentered;
 	bool isGearScored;
-	bool gearBlockedOnLeft;
-	bool gearBlockedOnRight;
 
 	bool isVisionEnabled;
 	bool XPrevState;
