@@ -81,7 +81,7 @@ void Robot::TeleopPeriodic()
 		}
 		else
 		{
-		turnVal = 0;
+			turnVal = 0;
 		}
 
 		DriveTrain.ArcadeDrive(moveVal, turnVal, false);

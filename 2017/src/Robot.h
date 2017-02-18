@@ -88,7 +88,6 @@ public:
 
 	void SetDriveMotors(float left, float right);
 	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
-	void CylinderStateChange(DoubleSolenoid DS, short ID, bool ran);
 
 	//Autonomous scoring with the camera
   	void ScoringSequence();
