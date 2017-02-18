@@ -17,7 +17,7 @@ Robot::Robot() :
 	GearEnc(4, 5),
 	HaveGear(0), // DIO
 	ActuateFlaps(1), // DIO
-	NavX(1), //NavX Micro Sensor //TODO FIX PORT NUM
+	NavX(SerialPort::Port::kUSB), //NavX Micro Sensor
 	FrontDist(6, 7),
 	LifeCam(),
 	VisionSink(),
@@ -29,7 +29,6 @@ Robot::Robot() :
 
 	isGearCentered = false;
 	isGearScored = false;
-	isVisionEnabled = false;
 	XPrevState = false;
 	LeftFlapState = false;
 	RightFlapState = false;
@@ -263,6 +262,14 @@ void Robot::TeleopPeriodic()
 	{
 		GearSlide.Set(gearVal);
 	}
+
+	//Vision
+	if(Operator.GetRawButton(BUTTON_X))
+	{
+		XPrevState = true;
+		ScoringSequence(); //The function checks if it should be switched off after every one of its loops
+	}
+
 }
 
 void Robot::TestInit()

@@ -52,17 +52,16 @@ private:
     Joystick Operator;
   	Encoder GearEnc;
   	DigitalInput LeftBreakBeam;
-  	DigitalInput RightBreakBeam;
+  	DigitalInput RightBreakBeam; //Troublesome line. If deleted, the code flips out.
     DigitalInput HaveGear;
     DigitalInput ActuateFlaps;
     DigitalInput LeftLimit;
     DigitalInput RightLimit;
     AHRS NavX;
     Ultrasonic FrontDist;
-    Timer RobotTimer;
-
     cs::UsbCamera LifeCam;
     cs::CvSink VisionSink;
+    Timer RobotTimer;
 
     double moveVal;
     double turnVal;
@@ -70,8 +69,6 @@ private:
 
 	bool isGearCentered;
 	bool isGearScored;
-
-	bool isVisionEnabled;
 	bool XPrevState;
 
 	bool LeftFlapState;
