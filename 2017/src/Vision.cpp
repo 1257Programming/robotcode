@@ -16,80 +16,11 @@ bool isCentered(int pegLocationX, int imageCenterX);
 double getMotorVelocity(int pegLocation, int imageWidth);
 void adjustThreshold(Scalar& threshold);
 
-// Scores a gear from a position close to the peg
-void Robot::ScoringSequence()
+// Decrease the green value of a given BGR threshold by 5
+inline void adjustThreshold(Scalar& threshold)
 {
-	//Create the function-wide variables for the image and contours
-	Mat videoFrame;
-	vector<vector<Point> > contours;
-
-	//If the gear isn't center
-	while(!isGearCentered && !isGearScored)
-	{
-		//Code for toggling this function
-		if(Operator.GetRawButton(BUTTON_X))
-		{
-			if(!XPrevState)
-			{
-				SmartDashboard::PutString("Scoring Sequence Status", "Scoring sequence cancelled");
-				return;
-			}
-		}
-		else
-		{
-			XPrevState = false;
-		}
-
-		VisionSink.GrabFrame(videoFrame);
-		//Try to find the contours in the image
-		try
-		{
-			findTargets(videoFrame, contours);
-			SmartDashboard::PutString("Scoring Sequence Status", "Targets Identified");
-		}
-		//If findTargets throws an exception, print it to the smartDashboard and exit the function
-		catch(char const* error)
-		{
-			SmartDashboard::PutString("Scoring Sequence Status", error);
-			return;
-		}
-
-		//Get image constants from the contours
-		int imageCenterX = videoFrame.cols / 2;
-		int pegLocationX = getPegLocation(contours);
-		isGearCentered = isCentered(pegLocationX, imageCenterX);
-		SmartDashboard::PutBoolean("Peg Centered", isGearCentered);
-
-		if(!isGearCentered)
-		{
-			float velocity = getMotorVelocity(pegLocationX, videoFrame.cols);
-			//If the slicer is blocked in the direction it's trying to go
-			bool slicerCantMove = (GearSlide.IsFwdLimitSwitchClosed() && velocity < 0) || (GearSlide.IsRevLimitSwitchClosed() && velocity > 0);
-			if(slicerCantMove)
-			{
-				GearSlide.Set(0);
-				DriveTrain.SetLeftRightMotorOutputs(-velocity, velocity);
-				SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
-			}
-			else
-			{
-				GearSlide.Set(velocity);
-				DriveTrain.SetLeftRightMotorOutputs(0, 0);
-				SmartDashboard::PutNumber("Bagel Slicer Velocity", velocity);
-			}
-		}
-		else
-		{
-			GearSlide.Set(0);
-			DriveTrain.SetLeftRightMotorOutputs(0, 0);
-			SmartDashboard::PutString("Scoring Sequence Status", "Gear centered. Moving forward to peg.");
-		}
-	}
-	DriveToPeg();
-	SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
-	SmartDashboard::PutString("Scoring Sequence Status", "Bagel slicer in position");
+	threshold.val[1] -= 5;
 }
-
 
 // Takes in an image from the robot's camera, and filters it for green light.
 // Also searches for contours in this processed image
@@ -188,12 +119,6 @@ double getMotorVelocity(int pegLocation, int imageWidth)
 	}
 }
 
-// Decrease the green value of a given BGR threshold by 5
-inline void adjustThreshold(Scalar& threshold)
-{
-	threshold.val[1] -= 5;
-}
-
 // Drive forward until you get to the peg's location
 void Robot::DriveToPeg()
 {
@@ -208,4 +133,78 @@ void Robot::DriveToPeg()
 	}
 	RobotTimer.Stop();
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+}
+
+// Scores a gear from a position close to the peg
+void Robot::ScoringSequence()
+{
+	//Create the function-wide variables for the image and contours
+	Mat videoFrame;
+	vector<vector<Point> > contours;
+
+	//If the gear isn't center
+	while(!isGearCentered && !isGearScored)
+	{
+		//Code for toggling this function
+		if(Operator.GetRawButton(BUTTON_X))
+		{
+			if(!XPrevState)
+			{
+				SmartDashboard::PutString("Scoring Sequence Status", "Scoring sequence cancelled");
+				return;
+			}
+		}
+		else
+		{
+			XPrevState = false;
+		}
+
+		VisionSink.GrabFrame(videoFrame);
+		//Try to find the contours in the image
+		try
+		{
+			findTargets(videoFrame, contours);
+			SmartDashboard::PutString("Scoring Sequence Status", "Targets Identified");
+		}
+		//If findTargets throws an exception, print it to the smartDashboard and exit the function
+		catch(char const* error)
+		{
+			SmartDashboard::PutString("Scoring Sequence Status", error);
+			return;
+		}
+
+		//Get image constants from the contours
+		int imageCenterX = videoFrame.cols / 2;
+		int pegLocationX = getPegLocation(contours);
+		isGearCentered = isCentered(pegLocationX, imageCenterX);
+		SmartDashboard::PutBoolean("Peg Centered", isGearCentered);
+
+		if(!isGearCentered)
+		{
+			float velocity = getMotorVelocity(pegLocationX, videoFrame.cols);
+			//If the slicer is blocked in the direction it's trying to go
+			bool slicerCantMove = (GearSlide.IsFwdLimitSwitchClosed() && velocity < 0) || (GearSlide.IsRevLimitSwitchClosed() && velocity > 0);
+			if(slicerCantMove)
+			{
+				GearSlide.Set(0);
+				DriveTrain.SetLeftRightMotorOutputs(-velocity, velocity);
+				SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
+			}
+			else
+			{
+				GearSlide.Set(velocity);
+				DriveTrain.SetLeftRightMotorOutputs(0, 0);
+				SmartDashboard::PutNumber("Bagel Slicer Velocity", velocity);
+			}
+		}
+		else
+		{
+			GearSlide.Set(0);
+			DriveTrain.SetLeftRightMotorOutputs(0, 0);
+			SmartDashboard::PutString("Scoring Sequence Status", "Gear centered. Moving forward to peg.");
+		}
+	}
+	DriveToPeg();
+	SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
+	SmartDashboard::PutString("Scoring Sequence Status", "Bagel slicer in position");
 }
