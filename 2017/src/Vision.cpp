@@ -43,15 +43,11 @@ void Robot::ScoringSequence()
 	isGearCentered = isCentered(pegLocationX, imageCenterX);
 	SmartDashboard::PutBoolean("Peg Centered", isGearCentered);
 
-	//Check the current position of the bagel slicer
-	gearBlockedOnLeft = LeftLimit.Get();
-	gearBlockedOnRight = RightLimit.Get();
-
 	if(!isGearCentered)
 	{
 		float velocity = getMotorVelocity(pegLocationX, rawImage.cols);
 		//If the slicer is blocked in the direction it's trying to go
-		bool slicerCantMove = (gearBlockedOnLeft && velocity < 0) || (gearBlockedOnRight && velocity > 0);
+		bool slicerCantMove = (GearSlide.IsFwdLimitSwitchClosed() && velocity < 0) || (GearSlide.IsRevLimitSwitchClosed() && velocity > 0);
 		if(slicerCantMove)
 		{
 			GearSlide.Set(0);
