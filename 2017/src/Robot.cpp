@@ -15,12 +15,8 @@ Robot::Robot() :
 	Driver(0),
 	Operator(1),
 	GearEnc(4, 5),
-	LeftBreakBeam(1),
-	RightBreakBeam(1),
 	HaveGear(0), // DIO
 	ActuateFlaps(1), // DIO
-	LeftLimit(2), // DIO
-	RightLimit(3), // DIO
 	NavX(1), //NavX Micro Sensor //TODO FIX PORT NUM
 	FrontDist(6, 7),
 	LifeCam(),
@@ -32,8 +28,6 @@ Robot::Robot() :
 
 	isGearCentered = false;
 	isGearScored = false;
-	gearBlockedOnLeft = false;
-	gearBlockedOnRight = false;
 	isVisionEnabled = false;
 	XPrevState = false;
 	LeftFlapState = false;
@@ -230,7 +224,7 @@ void Robot::TeleopPeriodic()
 		{
 			moveVal = 0;
 		}
-		
+
 		if (IsReasonable(Driver.GetRawAxis(AXIS_ANALOG_LEFT_X)))
 		{
 			turnVal = -Driver.GetRawAxis(AXIS_ANALOG_LEFT_X);
@@ -239,7 +233,7 @@ void Robot::TeleopPeriodic()
 		{
 			turnVal = 0;
 		}
-		
+
 		ArcadeDrive(moveVal, turnVal, false);
 	}
 	else
@@ -251,20 +245,6 @@ void Robot::TeleopPeriodic()
 
 	// Operator
 	gearVal = Operator.GetRawAxis(AXIS_TRIGGER_LEFT) - Operator.GetRawAxis(AXIS_TRIGGER_RIGHT);
-	if (LeftLimit.Get() && gearVal < 0)
-	{
-		GearSlide.Set(gearVal);
-		// reset some encoder values
-	}
-	else if (RightLimit.Get() && gearVal > 0)
-	{
-		GearSlide.Set(gearVal);
-		// reset some encoder values
-	}
-	else
-	{
-		GearSlide.Set(gearVal);
-	}
 
 	if (Operator.GetRawButton(BUTTON_A))
 	{
@@ -372,9 +352,21 @@ void Robot::TeleopPeriodic()
 			LeftFlapState = true;
 			RightFlapState = true;
 		}
-	}
-	// Vision
 
+		// Limit switches on gearmaster 9000
+		if ((!GearSlide.IsFwdLimitSwitchClosed() || gearVal < 0) && (!GearSlide.IsRevLimitSwitchClosed() || gearVal > 0))
+		{
+			GearSlide.Set(gearVal);
+		}
+		else
+		{
+			GearSlide.Set(0);
+		}
+	}
+	else
+	{
+		GearSlide.Set(gearVal);
+	}
 }
 
 void Robot::TestInit()
@@ -384,7 +376,7 @@ void Robot::TestInit()
 	ClimbMotor.Set(0);
 
 	//Center gear holder
-	while (!LeftLimit.Get())
+	while (!GearSlide.IsFwdLimitSwitchClosed())
 	{
 		GearSlide.Set(.5);
 	}
@@ -402,7 +394,7 @@ void Robot::TestInit()
 	Wait(1);
 
 	// Run climber
-	ClimbMotor.Set(1); // Subject to change to -1
+	ClimbMotor.Set(1);
 	Wait(1);
 	ClimbMotor.Set(0);
 	Wait(1);
