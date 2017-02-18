@@ -51,12 +51,8 @@ private:
     Joystick Driver;
     Joystick Operator;
   	Encoder GearEnc;
-  	DigitalInput LeftBreakBeam;
-  	DigitalInput RightBreakBeam; //Troublesome line. If deleted, the code flips out.
     DigitalInput HaveGear;
     DigitalInput ActuateFlaps;
-    DigitalInput LeftLimit;
-    DigitalInput RightLimit;
     AHRS NavX;
     Ultrasonic FrontDist;
     cs::UsbCamera LifeCam;
@@ -92,7 +88,6 @@ public:
 
 	void SetDriveMotors(float left, float right);
 	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
-	void CylinderStateChange(DoubleSolenoid DS, short ID, bool ran);
 
 	//Autonomous scoring with the camera
   	void ScoringSequence();
