@@ -59,6 +59,7 @@ private:
     DigitalInput RightLimit;
     AHRS NavX;
     Ultrasonic FrontDist;
+    Timer RobotTimer;
 
     cs::UsbCamera LifeCam;
     cs::CvSink VisionSink;

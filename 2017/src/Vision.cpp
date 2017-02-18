@@ -183,13 +183,14 @@ inline void adjustThreshold(Scalar& threshold)
 // Drive forward until you get to the peg's location
 void Robot::DriveToPeg()
 {
-	//TODO: Set a timer to ensure you're not accidentally driving too far
+	RobotTimer.Reset();
 	const int pegLength = 10; //Really 10.5", but trivial for coding purposes
 	double forwardSpeed = 0.6;
 
-	while(FrontDist.GetRangeInches() > pegLength)
+	while(FrontDist.GetRangeInches() > pegLength || RobotTimer.HasPeriodPassed(6.0))
 	{
 		DriveTrain.ArcadeDrive(forwardSpeed, 0);
 	}
+	RobotTimer.Reset();
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 }
