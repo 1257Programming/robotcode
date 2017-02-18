@@ -29,6 +29,7 @@ Robot::Robot() :
 	isGearCentered = false;
 	isGearScored = false;
 	XPrevState = false;
+	hasAutoRun = false;
 	LeftFlapState = false;
 	RightFlapState = false;
 	LBPrevState = false;
@@ -342,19 +343,20 @@ void Robot::DriveRobot(double distance)
 	// If needed, store the displacement for more accuracy
 	// Convert distance to meters
 	distance *= 0.0254;
+	double maxSpeed = 0.85;
 	// + distance means drive forward, - distance means drive backward
 	if(distance > 0)
 	{
 		while(DistanceTraveled() < distance)
 		{
-			DriveTrain.ArcadeDrive(.85, 0, false);
+			DriveTrain.ArcadeDrive(maxSpeed, 0, false);
 		}
 	}
 	else if(distance < 0)
 	{
 		while(DistanceTraveled() < -distance)
 		{
-			DriveTrain.ArcadeDrive(-.85, 0, false);
+			DriveTrain.ArcadeDrive(-maxSpeed, 0, false);
 		}
 	}
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
