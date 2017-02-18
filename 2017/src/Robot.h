@@ -37,35 +37,35 @@ inline float square(double num) { return num * num; } //Return the square of the
 class Robot: public IterativeRobot
 {
 private:
-    //Object Definitions
-    CANTalon FrontLeftDrive;
-    CANTalon BackLeftDrive;
-    CANTalon FrontRightDrive;
-    CANTalon BackRightDrive;
-    RobotDrive DriveTrain;
-    CANTalon GearSlide;
-    CANTalon ClimbMotor;
-    DoubleSolenoid LeftFlap;
-    DoubleSolenoid RightFlap;
-    Servo ClimbRelease;
-    Joystick Driver;
-    Joystick Operator;
-  	Encoder GearEnc;
-  	DigitalInput LeftBreakBeam;
-  	DigitalInput RightBreakBeam;
-    DigitalInput HaveGear;
-    DigitalInput ActuateFlaps;
-    DigitalInput LeftLimit;
-    DigitalInput RightLimit;
-    AHRS NavX;
-    Ultrasonic FrontDist;
+	//Object Definitions
+	CANTalon FrontLeftDrive;
+	CANTalon BackLeftDrive;
+	CANTalon FrontRightDrive;
+	CANTalon BackRightDrive;
+	RobotDrive DriveTrain;
+	CANTalon GearSlide;
+	CANTalon ClimbMotor;
+	DoubleSolenoid LeftFlap;
+	DoubleSolenoid RightFlap;
+	Servo ClimbRelease;
+	Joystick Driver;
+	Joystick Operator;
+	Encoder GearEnc;
+	DigitalInput LeftBreakBeam;
+	DigitalInput RightBreakBeam;
+	DigitalInput HaveGear;
+	DigitalInput ActuateFlaps;
+	DigitalInput LeftLimit;
+	DigitalInput RightLimit;
+	AHRS NavX;
+	Ultrasonic FrontDist;
 
-    cs::UsbCamera LifeCam;
-    cs::CvSink VisionSink;
+	cs::UsbCamera LifeCam;
+	cs::CvSink VisionSink;
 
-    double moveVal;
-    double turnVal;
-    double gearVal;
+	double moveVal;
+	double turnVal;
+	double gearVal;
 
 	bool isGearCentered;
 	bool isGearScored;
@@ -84,28 +84,27 @@ private:
 	bool YPrevState;
 
 public:
-    Robot();
-    void DisabledInit();
-    void RobotInit();
-    void AutonomousInit();
-    void AutonomousPeriodic();
-    void TeleopInit();
-    void TeleopPeriodic();
-    void TestInit();
-    void TestPeriodic();
+	Robot();
+	void DisabledInit();
+	void RobotInit();
+	void AutonomousInit();
+	void AutonomousPeriodic();
+	void TeleopInit();
+	void TeleopPeriodic();
+	void TestInit();
+	void TestPeriodic();
 
-    void SetDriveMotors(float left, float right);
-    void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
-    void CylinderStateChange(DoubleSolenoid DS, short ID, bool ran);
+	void SetDriveMotors(float left, float right);
+	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
+	void CylinderStateChange(DoubleSolenoid DS, short ID, bool ran);
 
-    //Autonomous scoring with the camera
+	//Autonomous scoring with the camera
   	void ScoringSequence();
   	void DriveToPeg();
 
   	//NavX Helper Functions
-  	void DriveForward(double distance);
+  	void DriveRobot(double distance);
   	void TurnRobot(double angle);
   	double DistanceTraveled();
 };
 #endif
-
