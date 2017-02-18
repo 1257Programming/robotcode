@@ -51,12 +51,8 @@ private:
     Joystick Driver;
     Joystick Operator;
   	Encoder GearEnc;
-  	DigitalInput LeftBreakBeam;
-  	DigitalInput RightBreakBeam; //Troublesome line. If deleted, the code flips out.
     DigitalInput HaveGear;
     DigitalInput ActuateFlaps;
-    DigitalInput LeftLimit;
-    DigitalInput RightLimit;
     AHRS NavX;
     Ultrasonic FrontDist;
     cs::UsbCamera LifeCam;

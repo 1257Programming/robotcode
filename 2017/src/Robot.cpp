@@ -1,5 +1,4 @@
 #include "Robot.h"
-#include "Vision.cpp"
 
 Robot::Robot() :
 	FrontLeftDrive(1), // CAN
@@ -85,7 +84,7 @@ void Robot::TeleopPeriodic()
 		turnVal = 0;
 		}
 
-		ArcadeDrive(moveVal, turnVal, false);
+		DriveTrain.ArcadeDrive(moveVal, turnVal, false);
 	}
 	else if (Driver.GetRawButton(BUTTON_LB))
 	{
@@ -107,7 +106,7 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		ArcadeDrive(moveVal, turnVal, false);
+		DriveTrain.ArcadeDrive(moveVal, turnVal, false);
 	}
 	else if (Driver.GetRawButton(BUTTON_RB))
 	{
@@ -129,13 +128,13 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		ArcadeDrive(moveVal, turnVal, false);
+		DriveTrain.ArcadeDrive(moveVal, turnVal, false);
 	}
 	else
 	{
 		moveVal = 0;
 		turnVal = 0;
-		SetDriveMotors(0, 0);
+		DriveTrain.SetLeftRightMotorOutputs(0, 0);
 	}
 
 	// Operator
@@ -274,7 +273,7 @@ void Robot::TeleopPeriodic()
 
 void Robot::TestInit()
 {
-	SetDriveMotors(0, 0);
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 
@@ -303,11 +302,11 @@ void Robot::TestInit()
 	Wait(1);
 
 	// Test drive
-	SetDriveMotors(1, 1);
+	DriveTrain.SetLeftRightMotorOutputs(1, 1);
 	Wait(1);
-	SetDriveMotors(-1, -1);
+	DriveTrain.SetLeftRightMotorOutputs(-1, -1);
 	Wait(1);
-	SetDriveMotors(0, 0);
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 
 	//Actuate flaps
 	LeftFlap.Set(DoubleSolenoid::kForward);
@@ -320,7 +319,7 @@ void Robot::TestInit()
 
 void Robot::TestPeriodic()
 {
-	SetDriveMotors(0, 0);
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 
@@ -358,7 +357,7 @@ void Robot::DriveRobot(double distance)
 			DriveTrain.ArcadeDrive(-.85, 0, false);
 		}
 	}
-	SetDriveMotors(0, 0);
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 }
 
 // Turn, angle is from -180 to 180 degrees
@@ -381,7 +380,7 @@ void Robot::TurnRobot(double angle)
 			DriveTrain.ArcadeDrive(0, .85, false);
 		}
 	}
-	SetDriveMotors(0, 0);
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 }
 
 START_ROBOT_CLASS(Robot)

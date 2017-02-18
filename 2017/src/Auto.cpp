@@ -90,7 +90,7 @@ void Robot::AutonomousInit()
 	}
 	else
 	{
-		SetDriveMotors(0, 0);
+		DriveTrain.SetLeftRightMotorOutputs(0, 0);
 		GearSlide.Set(0);
 		ClimbMotor.Set(0);
 	}
