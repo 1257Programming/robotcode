@@ -7,10 +7,11 @@ void Robot::DisabledInit()
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 
-	SmartDashboard::PutString("DB/String 0", "Left Gear");
-	SmartDashboard::PutString("DB/String 1", "Center Gear");
-	SmartDashboard::PutString("DB/String 2", "Right Gear");
-	SmartDashboard::PutString("DB/String 3", "Cross Baseline");
+	SmartDashboard::PutString("DB/String 0", "Left Peg");
+	SmartDashboard::PutString("DB/String 1", "Center Peg Red");
+	SmartDashboard::PutString("DB/String 2", "Center Peg Blue");
+	SmartDashboard::PutString("DB/String 3", "Right Peg");
+	SmartDashboard::PutString("DB/String 4", "Cross Baseline");
 }
 
 void Robot::AutonomousInit()
@@ -21,21 +22,71 @@ void Robot::AutonomousInit()
 
 	ClimbRelease.SetAngle(180);
 
+	// Score in left peg, then cross baseline
 	if(SmartDashboard::GetBoolean("DB/Button 0", false))
 	{
-		// Score gear on left peg
+		DriveRobot(178.6);
+		TurnRobot(120);
+		DriveRobot(39.84);
+
+		ScoringSequence();
+
+		DriveRobot(-66.07);
+		TurnRobot(-120);
+		DriveRobot(194.6);
 	}
+	// Score in center peg on red alliance, then cross baseline
 	else if(SmartDashboard::GetBoolean("DB/Button 1", false))
 	{
-		// Score gear on center peg
+		DriveRobot(24.00);
+		TurnRobot(-30);
+		DriveRobot(26.75);
+		TurnRobot(30);
+		DriveRobot(24.71);
+
+		ScoringSequence();
+
+		DriveRobot(-24.71);
+		TurnRobot(-90);
+		DriveRobot(107.3);
+		TurnRobot(90);
+		DriveRobot(339.1);
 	}
+	// Score in center peg on blue alliance, then cross baseline
 	else if(SmartDashboard::GetBoolean("DB/Button 2", false))
 	{
-		// Score gear on right peg
+		DriveRobot(24.00);
+		TurnRobot(30);
+		DriveRobot(26.75);
+		TurnRobot(-30);
+		DriveRobot(24.71);
+
+		ScoringSequence();
+
+		DriveRobot(-24.71);
+		TurnRobot(-90);
+		DriveRobot(107.3);
+		TurnRobot(90);
+		DriveRobot(339.1);
 	}
+	// Score in right peg, then cross baseline
 	else if(SmartDashboard::GetBoolean("DB/Button 3", false))
 	{
-		// Cross baseline
+		DriveRobot(176.7);
+		TurnRobot(-120);
+		DriveRobot(36.07);
+
+		ScoringSequence();
+
+		DriveRobot(-51.35);
+		TurnRobot(75);
+		DriveRobot(285.6);
+		TurnRobot(45);
+	}
+	// Cross baseline
+	else if(SmartDashboard::GetBoolean("DB/Button 4", false))
+	{
+		DriveRobot(378.3);
 	}
 	else
 	{
@@ -47,11 +98,9 @@ void Robot::AutonomousInit()
 
 void Robot::AutonomousPeriodic()
 {
-  //Init motors/gear
+	//Init motors/gear
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
-	//TODO use encoders better, implement SmartDashboard for choices, and find out about squared inputs
-	//WIP NavX code here lol it doesn't work
-	ScoringSequence();
+	//TODO use encoders better, and find out about squared inputs
 }
