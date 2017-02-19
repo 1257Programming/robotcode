@@ -5,7 +5,7 @@ Robot::Robot() :
 	BackLeftDrive(2), // CAN
 	FrontRightDrive(3), // CAN
 	BackRightDrive(4), // CAN
-	DriveTrain(FrontLeftDrive, BackLeftDrive, FrontLeftDrive, BackRightDrive),
+	DriveTrain(FrontLeftDrive, BackLeftDrive, FrontRightDrive, BackRightDrive),
 	GearSlide(5), // CAN
 	ClimbMotor(6), // CAN
 	LeftFlap(7, 3), // PCM
@@ -16,7 +16,7 @@ Robot::Robot() :
 	GearEnc(4, 5),
 	HaveGear(0), // DIO
 	ActuateFlaps(1), // DIO
-	NavX(SerialPort::Port::kUSB), //NavX Micro Sensor
+	//NavX(SerialPort::Port::kUSB), //NavX Micro Sensor
 	FrontDist(6, 7),
 	LifeCam(),
 	VisionSink(),
@@ -26,6 +26,7 @@ Robot::Robot() :
 	turnVal = 0;
 	gearVal = 0;
 
+	NavX = new AHRS(SerialPort::Port::kUSB);
 	isGearCentered = false;
 	isGearScored = false;
 	XPrevState = false;
@@ -38,12 +39,17 @@ Robot::Robot() :
 	Automation = true;
 	YPrevState = false;
 }
+/*
+void Robot::DisabledInit()
+{
+	RobotTimer.Stop();
+}*/
 
 void Robot::RobotInit()
 {
 	FrontDist.SetAutomaticMode(true);
-	DriveTrain.SetInvertedMotor(RobotDrive::kFrontRightMotor, true); //Drive Motor Init
-	DriveTrain.SetInvertedMotor(RobotDrive::kRearRightMotor, true);
+	//DriveTrain.SetInvertedMotor(RobotDrive::kFrontRightMotor, true); //Drive Motor Init
+	//DriveTrain.SetInvertedMotor(RobotDrive::kRearRightMotor, true);
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 	GearSlide.Set(0);												 //Gear Init
 	ClimbMotor.Set(0);												 //Climb Motor Init
@@ -52,6 +58,7 @@ void Robot::RobotInit()
 	LifeCam.SetExposureManual(0);
 	LifeCam.SetBrightness(5);
 	VisionSink = CameraServer::GetInstance()->GetVideo();
+	NavX->ResetDisplacement();
 }
 
 void Robot::TeleopInit()
@@ -60,10 +67,15 @@ void Robot::TeleopInit()
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
+	NavX->ResetDisplacement();
+	NavX->ZeroYaw();
+
 }
 
 void Robot::TeleopPeriodic()
 {
+	SmartDashboard::PutBoolean("Forward limit", GearSlide.IsFwdLimitSwitchClosed());
+	SmartDashboard::PutBoolean("Reverse limit", GearSlide.IsRevLimitSwitchClosed());
 	// Driver
 	if (Driver.GetRawButton(BUTTON_A))
 	{
@@ -232,7 +244,7 @@ void Robot::TeleopPeriodic()
 	if (Automation)
 	{
 		// Automation flaps
-		if (!ActuateFlaps.Get())
+		/*if (!ActuateFlaps.Get())
 		{
 			RightFlap.Set(DoubleSolenoid::kReverse);
 			LeftFlap.Set(DoubleSolenoid::kReverse);
@@ -246,7 +258,7 @@ void Robot::TeleopPeriodic()
 			RightFlap.Set(DoubleSolenoid::kForward);
 			LeftFlapState = true;
 			RightFlapState = true;
-		}
+		}*/
 
 		// Limit switches on gearmaster 9000
 		if ((!GearSlide.IsFwdLimitSwitchClosed() || gearVal < 0) && (!GearSlide.IsRevLimitSwitchClosed() || gearVal > 0))
@@ -269,6 +281,10 @@ void Robot::TeleopPeriodic()
 		XPrevState = true;
 		ScoringSequence(); //The function checks if it should be switched off after every one of its loops
 	}
+
+	SmartDashboard::PutNumber("NavX X Displacement", NavX->GetDisplacementX());
+	SmartDashboard::PutNumber("NavX Y Displacement", NavX->GetDisplacementY());
+	SmartDashboard::PutNumber("NavX Angle", NavX->GetYaw());
 
 }
 
@@ -330,33 +346,29 @@ void Robot::TestPeriodic()
 	}
 }
 
-// NavX Helper Functions
-double Robot::DistanceTraveled()
-{
-	return sqrt(static_cast<double>(square(NavX.GetDisplacementX()) + square(NavX.GetDisplacementY())));
-}
-
 // Drive forward, distance is in inches
 void Robot::DriveRobot(double distance)
 {
-	NavX.ResetDisplacement();
+	NavX->ResetDisplacement();
 	// If needed, store the displacement for more accuracy
 	// Convert distance to meters
 	distance *= 0.0254;
-	double maxSpeed = 0.85;
+	double maxSpeed = 0.6;
 	// + distance means drive forward, - distance means drive backward
 	if(distance > 0)
 	{
-		while(DistanceTraveled() < distance)
+		while(NavX->GetDisplacementX() < distance)
 		{
-			DriveTrain.ArcadeDrive(maxSpeed, 0, false);
+			SmartDashboard::PutNumber("NavX X Displacement", NavX->GetDisplacementX());
+			DriveTrain.ArcadeDrive(maxSpeed, 0);
 		}
 	}
 	else if(distance < 0)
 	{
-		while(DistanceTraveled() < -distance)
+		while(NavX->GetDisplacementX() < -distance)
 		{
-			DriveTrain.ArcadeDrive(-maxSpeed, 0, false);
+			SmartDashboard::PutNumber("NavX X Displacement", NavX->GetDisplacementX());
+			DriveTrain.ArcadeDrive(-maxSpeed, 0);
 		}
 	}
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
@@ -365,24 +377,29 @@ void Robot::DriveRobot(double distance)
 // Turn, angle is from -180 to 180 degrees
 void Robot::TurnRobot(double angle)
 {
-	NavX.ZeroYaw();
+	NavX->ZeroYaw();
 	// - angle means turn counterclockwise, + angle means turn clockwise
-	if(angle < 0)
+	SmartDashboard::PutNumber("Desired Angle", angle);
+	double maxTurnSpeed = 0.5;
+	DriveTrain.ArcadeDrive(0, maxTurnSpeed);
+	/*if(angle < 0)
 	{
-		while (NavX.GetYaw() > angle)
+		while (NavX->GetYaw() > angle)
 		{
-			DriveTrain.ArcadeDrive(0, -.85, false);
+			SmartDashboard::PutNumber("NavX Angle", NavX->GetYaw());
+			DriveTrain.ArcadeDrive(0, maxTurnSpeed);
 		}
 
 	}
 	else if (angle > 0)
 	{
-		while (NavX.GetYaw() < angle)
+		while (NavX->GetYaw() < angle)
 		{
-			DriveTrain.ArcadeDrive(0, .85, false);
+			SmartDashboard::PutNumber("NavX Angle", NavX->GetYaw());
+			DriveTrain.ArcadeDrive(0, -maxTurnSpeed);
 		}
-	}
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	}*/
+	//DriveTrain.SetLeftRightMotorOutputs(0, 0);
 }
 
 START_ROBOT_CLASS(Robot)
