@@ -32,7 +32,9 @@ inline bool IsReasonable(double axisVal) { return dabs(axisVal) > 0.2; } // Ensu
 inline float square(double num) { return num * num; } //Return the square of the the given number
 
 // Constants
-//const double WHEEL_DIAMETER = 6;
+const double PI = 3.1416;
+const double WHEEL_DIAMETER = 6;
+const double TALON_PPR = 2048; //Pulses per Revolution on the TALON encoders
 
 class Robot: public IterativeRobot
 {
@@ -53,11 +55,13 @@ private:
   	Encoder GearEnc;
     DigitalInput HaveGear;
     DigitalInput ActuateFlaps;
-    AHRS NavX;
+    //AHRS NavX;
     Ultrasonic FrontDist;
     cs::UsbCamera LifeCam;
     cs::CvSink VisionSink;
     Timer RobotTimer;
+    ADXRS450_Gyro Gyro;
+    Encoder DriveEnc;
 
     double moveVal;
     double turnVal;
@@ -92,10 +96,10 @@ public:
 	//Autonomous scoring with the camera
   	void ScoringSequence();
   	void DriveToPeg();
+  	bool ScoringCanceled();
 
   	//NavX Helper Functions
-  	void DriveRobot(double distance);
+  	void DriveForward(double distance);
   	void TurnRobot(double angle);
-  	double DistanceTraveled();
 };
 #endif

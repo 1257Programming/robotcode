@@ -22,22 +22,13 @@ void Robot::ScoringSequence()
 	Mat videoFrame;
 	vector<vector<Point> > contours;
 
-	//If the gear isn't center
-	while(!isGearCentered && !isGearScored)
+	//If the gear isn't centered, run the scoring sequence
+	while(!isGearCentered)
 	{
-		//Code for toggling this function
-		if(Operator.GetRawButton(BUTTON_X))
+		if(ScoringCanceled())
 		{
-			if(!XPrevState)
-			{
-				SmartDashboard::PutString("Scoring Sequence Status", "Scoring sequence cancelled");
-				XPrevState = true;
-				return;
-			}
-		}
-		else
-		{
-			XPrevState = false;
+			SmartDashboard::PutString("Scoring Sequence Status", "Scoring sequence cancelled");
+			return;
 		}
 
 		VisionSink.GrabFrame(videoFrame);
@@ -86,8 +77,37 @@ void Robot::ScoringSequence()
 		}
 	}
 	DriveToPeg();
+	do
+	{
+		// The Gear is Scored
+		isGearScored = !HaveGear.Get();
+	}
+	while(!isGearScored);
 	SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
 	SmartDashboard::PutString("Scoring Sequence Status", "Bagel slicer in position");
+}
+
+bool Robot::ScoringCanceled()
+{
+	//If the X button is being pressed
+	if(Operator.GetRawButton(BUTTON_X))
+	{
+		//If the X button wasn't previously being pressed
+		if(!XPrevState)
+		{
+			XPrevState = true;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		XPrevState = false;
+		return false;
+	}
 }
 
 // Takes in an image from the robot's camera, and filters it for green light.
@@ -195,22 +215,17 @@ void Robot::DriveToPeg()
 	RobotTimer.Start();
 	SmartDashboard::PutString("Scoring Sequence Status", "Scoring gear on peg");
 	const int pegLength = 10; //Really 10.5", but trivial for coding purposes
-	double forwardSpeed = 0.6;
+	double forwardSpeed = 0.5;
 	//If the robot has driven to the peg or it's been driving for 6 seconds
 	while(FrontDist.GetRangeInches() > pegLength && !RobotTimer.HasPeriodPassed(6.0))
 	{
-		if(Operator.GetRawButton(BUTTON_X))
+		if(ScoringCanceled())
 		{
-			if(!XPrevState)
-			{
-				SmartDashboard::PutString("Scoring Sequence Status", "Scoring sequence cancelled");
-				XPrevState = true;
-				return;
-			}
+			SmartDashboard::PutString("Scoring Sequence Status", "Scoring sequence cancelled");
+			return;
 		}
 		else
 		{
-			XPrevState = false;
 			DriveTrain.ArcadeDrive(forwardSpeed, 0);
 		}
 	}

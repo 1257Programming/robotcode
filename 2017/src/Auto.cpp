@@ -8,8 +8,7 @@ void Robot::DisabledInit()
 	ClimbMotor.Set(0);
 
 	SmartDashboard::PutString("DB/String 0", "Left Peg");
-	SmartDashboard::PutString("DB/String 1", "Center Peg Red");
-	SmartDashboard::PutString("DB/String 2", "Center Peg Blue");
+	SmartDashboard::PutString("DB/String 2", "Center Peg");
 	SmartDashboard::PutString("DB/String 3", "Right Peg");
 	SmartDashboard::PutString("DB/String 4", "Cross Baseline");
 }
@@ -19,80 +18,42 @@ void Robot::AutonomousInit()
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
-
 	ClimbRelease.SetAngle(180);
+	LeftFlap.Set(DoubleSolenoid::kForward);
+	RightFlap.Set(DoubleSolenoid::kForward);
 }
 
 void Robot::AutonomousPeriodic()
 {
-	while(!hasAutoRun)
+	while(!hasAutoRun) //Prevents auto from running more than once
 	{
-		// Score in left peg, then cross baseline
+		// Score in left peg
 		if(SmartDashboard::GetBoolean("DB/Button 0", false))
 		{
-			DriveRobot(178.6);
-			TurnRobot(120);
-			DriveRobot(39.84);
+			DriveForward(81.2);
+			TurnRobot(60);
+			DriveForward(27);
 
 			ScoringSequence();
-
-			DriveRobot(-66.07);
-			TurnRobot(-120);
-			DriveRobot(194.6);
 		}
-		// Score in center peg on red alliance, then cross baseline
-		else if(SmartDashboard::GetBoolean("DB/Button 1", false))
-		{
-			DriveRobot(24.00);
-			TurnRobot(-30);
-			DriveRobot(26.75);
-			TurnRobot(30);
-			DriveRobot(24.71);
-
-			ScoringSequence();
-
-			DriveRobot(-24.71);
-			TurnRobot(-90);
-			DriveRobot(107.3);
-			TurnRobot(90);
-			DriveRobot(339.1);
-		}
-		// Score in center peg on blue alliance, then cross baseline
+		// Score in center peg
 		else if(SmartDashboard::GetBoolean("DB/Button 2", false))
 		{
-			DriveRobot(24.00);
-			TurnRobot(30);
-			DriveRobot(26.75);
-			TurnRobot(-30);
-			DriveRobot(24.71);
-
+			DriveForward(59.2);
 			ScoringSequence();
-
-			DriveRobot(-24.71);
-			TurnRobot(-90);
-			DriveRobot(107.3);
-			TurnRobot(90);
-			DriveRobot(339.1);
 		}
-		// Score in right peg, then cross baseline
+		// Score in right peg
 		else if(SmartDashboard::GetBoolean("DB/Button 3", false))
 		{
-			DriveRobot(176.7);
-			TurnRobot(-120);
-			DriveRobot(36.07);
-
+			DriveForward(81.2);
+			TurnRobot(-60);
+			DriveForward(27);
 			ScoringSequence();
-
-			DriveRobot(-51.35);
-			TurnRobot(75);
-			DriveRobot(285.6);
-			TurnRobot(45);
-
 		}
 		// Cross baseline
 		else if(SmartDashboard::GetBoolean("DB/Button 4", false))
 		{
-			DriveRobot(378.3);
+			DriveForward(95);
 		}
 		else
 		{
@@ -105,4 +66,52 @@ void Robot::AutonomousPeriodic()
 		GearSlide.Set(0);
 		ClimbMotor.Set(0);
 	}
+}
+
+// Drive forward, distance is in inches
+void Robot::DriveForward(double distance)
+{
+	double maxSpeed = 0.6;
+	DriveEnc.Reset();
+
+	if(distance > 0)
+	{
+		while(DriveEnc.GetDistance() < distance)
+		{
+			DriveTrain.ArcadeDrive(maxSpeed, 0, false);
+		}
+	}
+	else if(distance < 0)
+	{
+		while(DriveEnc.GetDistance() < -distance)
+		{
+			DriveTrain.ArcadeDrive(-maxSpeed, 0, false);
+		}
+	}
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+}
+
+// Turn, angle is from -180 to 180 degrees
+void Robot::TurnRobot(double angle)
+{
+	double maxTurnSpeed = 0.6;
+	Gyro.Reset();
+
+	// - angle means turn counterclockwise, + angle means turn clockwise
+	if(angle > 0)
+	{
+		while (Gyro.GetAngle() < angle)
+		{
+			DriveTrain.ArcadeDrive(0, maxTurnSpeed, false);
+		}
+	}
+	else if (angle < 0)
+	{
+
+		while (Gyro.GetAngle() > angle)
+		{
+			DriveTrain.ArcadeDrive(0, -maxTurnSpeed, false);
+		}
+	}
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 }

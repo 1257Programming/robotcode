@@ -16,11 +16,13 @@ Robot::Robot() :
 	GearEnc(4, 5),
 	HaveGear(0), // DIO
 	ActuateFlaps(1), // DIO
-	NavX(SerialPort::Port::kUSB), //NavX Micro Sensor
+	//NavX(SerialPort::Port::kUSB), //NavX Micro Sensor
 	FrontDist(6, 7),
 	LifeCam(),
 	VisionSink(),
-	RobotTimer()
+	RobotTimer(),
+	Gyro(SPI::kOnboardCS0), //SPI
+	DriveEnc(4,5 ,false) //TODO: Find right DIO #s
 {
 	moveVal = 0;
 	turnVal = 0;
@@ -41,17 +43,24 @@ Robot::Robot() :
 
 void Robot::RobotInit()
 {
+	//Ultrasonic Init
 	FrontDist.SetAutomaticMode(true);
-	DriveTrain.SetInvertedMotor(RobotDrive::kFrontRightMotor, true); //Drive Motor Init
+	//Gear Init
+	GearSlide.Set(0);
+	//Climb Motor Init
+	ClimbMotor.Set(0);
+	//Encoder Init
+	DriveEnc.SetDistancePerPulse(PI * WHEEL_DIAMETER / TALON_PPR);
+	//Drive Motor Init
+	DriveTrain.SetInvertedMotor(RobotDrive::kFrontRightMotor, true);
 	DriveTrain.SetInvertedMotor(RobotDrive::kRearRightMotor, true);
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
-	GearSlide.Set(0);												 //Gear Init
-	ClimbMotor.Set(0);												 //Climb Motor Init
-	LifeCam = CameraServer::GetInstance()->StartAutomaticCapture();  //Camera Init
+	//Camera Init
+	LifeCam = CameraServer::GetInstance()->StartAutomaticCapture();
 	LifeCam.SetResolution(640, 480);
 	LifeCam.SetExposureManual(0);
 	LifeCam.SetBrightness(5);
 	VisionSink = CameraServer::GetInstance()->GetVideo();
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 }
 
 void Robot::TeleopInit()
@@ -328,61 +337,6 @@ void Robot::TestPeriodic()
 	{
 		ClimbRelease.SetAngle(0);
 	}
-}
-
-// NavX Helper Functions
-double Robot::DistanceTraveled()
-{
-	return sqrt(static_cast<double>(square(NavX.GetDisplacementX()) + square(NavX.GetDisplacementY())));
-}
-
-// Drive forward, distance is in inches
-void Robot::DriveRobot(double distance)
-{
-	NavX.ResetDisplacement();
-	// If needed, store the displacement for more accuracy
-	// Convert distance to meters
-	distance *= 0.0254;
-	double maxSpeed = 0.85;
-	// + distance means drive forward, - distance means drive backward
-	if(distance > 0)
-	{
-		while(DistanceTraveled() < distance)
-		{
-			DriveTrain.ArcadeDrive(maxSpeed, 0, false);
-		}
-	}
-	else if(distance < 0)
-	{
-		while(DistanceTraveled() < -distance)
-		{
-			DriveTrain.ArcadeDrive(-maxSpeed, 0, false);
-		}
-	}
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
-}
-
-// Turn, angle is from -180 to 180 degrees
-void Robot::TurnRobot(double angle)
-{
-	NavX.ZeroYaw();
-	// - angle means turn counterclockwise, + angle means turn clockwise
-	if(angle < 0)
-	{
-		while (NavX.GetYaw() > angle)
-		{
-			DriveTrain.ArcadeDrive(0, -.85, false);
-		}
-
-	}
-	else if (angle > 0)
-	{
-		while (NavX.GetYaw() < angle)
-		{
-			DriveTrain.ArcadeDrive(0, .85, false);
-		}
-	}
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
 }
 
 START_ROBOT_CLASS(Robot)
