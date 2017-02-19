@@ -25,20 +25,56 @@ void Robot::AutonomousInit()
 
 void Robot::AutonomousPeriodic()
 {
+	/*RobotTimer.Reset();
+	RobotTimer.Start();
+
+	while(RobotTimer.HasPeriodPassed(1.0))
+	{
+		DriveTrain.ArcadeDrive(.4, 0);
+	}
+	RobotTimer.Stop();
+	DriveTrain.SetLeftRightMotorOutputs(0, 0);*/
 	while(!hasAutoRun)
 	{
 		// Score in left peg, then cross baseline
 		if(SmartDashboard::GetBoolean("DB/Button 0", false))
 		{
-			DriveRobot(178.6);
-			TurnRobot(120);
-			DriveRobot(39.84);
+			SmartDashboard::PutString("Auto Scheme", "Left Peg 1");
+			RobotTimer.Reset();
+			RobotTimer.Start();
+
+			while(!RobotTimer.HasPeriodPassed(1.9))
+			{
+				DriveTrain.ArcadeDrive(0.6, 0);
+			}
+			RobotTimer.Reset();
+			RobotTimer.Start();
+
+			while(!RobotTimer.HasPeriodPassed(0.8))
+			{
+				DriveTrain.ArcadeDrive(0, -0.5);
+			}
+			DriveTrain.SetLeftRightMotorOutputs(0, 0);
+			//DriveRobot(78.5);
+			//DriveRobot(39.84);
 
 			ScoringSequence();
+			RobotTimer.Reset();
+			RobotTimer.Start();
 
-			DriveRobot(-66.07);
-			TurnRobot(-120);
-			DriveRobot(194.6);
+			while(!RobotTimer.HasPeriodPassed(1.5))
+			{
+				DriveTrain.ArcadeDrive(0.5, 0);
+			}
+			ScoringSequence();
+			RobotTimer.Reset();
+			RobotTimer.Start();
+
+			while(!RobotTimer.HasPeriodPassed(0.5))
+			{
+				DriveTrain.ArcadeDrive(0.3, 0);
+			}
+			DriveTrain.SetLeftRightMotorOutputs(0, 0);
 		}
 		// Score in center peg on red alliance, then cross baseline
 		else if(SmartDashboard::GetBoolean("DB/Button 1", false))
@@ -49,13 +85,7 @@ void Robot::AutonomousPeriodic()
 			TurnRobot(30);
 			DriveRobot(24.71);
 
-			ScoringSequence();
-
-			DriveRobot(-24.71);
-			TurnRobot(-90);
-			DriveRobot(107.3);
-			TurnRobot(90);
-			DriveRobot(339.1);
+			//ScoringSequence();
 		}
 		// Score in center peg on blue alliance, then cross baseline
 		else if(SmartDashboard::GetBoolean("DB/Button 2", false))
@@ -66,13 +96,7 @@ void Robot::AutonomousPeriodic()
 			TurnRobot(-30);
 			DriveRobot(24.71);
 
-			ScoringSequence();
-
-			DriveRobot(-24.71);
-			TurnRobot(-90);
-			DriveRobot(107.3);
-			TurnRobot(90);
-			DriveRobot(339.1);
+			//ScoringSequence();
 		}
 		// Score in right peg, then cross baseline
 		else if(SmartDashboard::GetBoolean("DB/Button 3", false))
@@ -81,13 +105,7 @@ void Robot::AutonomousPeriodic()
 			TurnRobot(-120);
 			DriveRobot(36.07);
 
-			ScoringSequence();
-
-			DriveRobot(-51.35);
-			TurnRobot(75);
-			DriveRobot(285.6);
-			TurnRobot(45);
-
+			//ScoringSequence();
 		}
 		// Cross baseline
 		else if(SmartDashboard::GetBoolean("DB/Button 4", false))
