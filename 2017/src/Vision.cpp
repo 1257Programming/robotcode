@@ -1,15 +1,9 @@
-#include <iostream>
-#include <string>
-#include <vector>
 #include "Robot.h"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/core/core.hpp"
 
 using namespace cv;
 using namespace std;
 
-void findTargets(Mat& rawImage, vector<vector<Point> >& contours);
+//void findTargets(Mat& rawImage, vector<vector<Point> >& contours);
 int getPegLocation(vector<vector<Point> >& contours );
 bool isCentered(int pegLocationX, int imageCenterX);
 double getMotorVelocity(int pegLocation, int imageWidth);
@@ -23,8 +17,11 @@ void Robot::ScoringSequence()
 	vector<vector<Point> > contours;
 
 	//If the gear isn't center
+
+	SmartDashboard::PutString("Testing", "In Scoring Sequnce");
 	while(!isGearCentered && !isGearScored)
 	{
+		SmartDashboard::PutString("Testing", "Passed Checks");
 		//Code for toggling this function
 		if(Operator.GetRawButton(BUTTON_X))
 		{
@@ -44,7 +41,7 @@ void Robot::ScoringSequence()
 		//Try to find the contours in the image
 		try
 		{
-			findTargets(videoFrame, contours);
+			FindTargets(videoFrame, contours);
 			SmartDashboard::PutString("Scoring Sequence Status", "Targets Identified");
 		}
 		//If findTargets throws an exception, print it to the smartDashboard and exit the function
@@ -73,7 +70,7 @@ void Robot::ScoringSequence()
 			}
 			else
 			{
-				GearSlide.Set(velocity);
+				GearSlide.Set(-velocity);
 				DriveTrain.SetLeftRightMotorOutputs(0, 0);
 				SmartDashboard::PutNumber("Bagel Slicer Velocity", velocity);
 			}
@@ -85,20 +82,22 @@ void Robot::ScoringSequence()
 			SmartDashboard::PutString("Scoring Sequence Status", "Gear centered. Moving forward to peg.");
 		}
 	}
-	DriveToPeg();
+	SmartDashboard::PutString("Scoring Sequence Status", "Gear centered. Moving forward to peg.");
+	Wait(1.0);
+	//DriveToPeg();
 	SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
 	SmartDashboard::PutString("Scoring Sequence Status", "Bagel slicer in position");
 }
 
 // Takes in an image from the robot's camera, and filters it for green light.
 // Also searches for contours in this processed image
-void findTargets(Mat& image, vector<vector<Point> >& contours)
+void Robot::FindTargets(Mat& image, vector<vector<Point> >& contours)
 {
 	// How many more times the function is willing to adjust the thresholds
 	int adjustmentsUntilFailure = 4;
 
 	// BGR ranges for pixels we want to turn on
-	Scalar minGreen = Scalar(50, 130, 0);
+	Scalar minGreen = Scalar(0, 70, 0);
 	Scalar maxGreen = Scalar(100, 255, 20);
 
 	// Filter the image for noise
