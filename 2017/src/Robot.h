@@ -5,6 +5,12 @@
 #include "CANTalon.h"
 #include <cmath>
 #include <AHRS.h>
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/core/core.hpp"
+#include <iostream>
+#include <string>
+#include <vector>
 
 // X-Box Controller Button IDs
 #define BUTTON_A 1
@@ -34,6 +40,10 @@ inline float square(double num) { return num * num; } //Return the square of the
 // Constants
 //const double WHEEL_DIAMETER = 6;
 
+using namespace frc;
+using namespace cv;
+using namespace std;
+
 class Robot: public IterativeRobot
 {
 private:
@@ -53,11 +63,13 @@ private:
   	Encoder GearEnc;
     DigitalInput HaveGear;
     DigitalInput ActuateFlaps;
-    AHRS NavX;
+    AHRS* NavX;
     Ultrasonic FrontDist;
     cs::UsbCamera LifeCam;
     cs::CvSink VisionSink;
     Timer RobotTimer;
+
+    LiveWindow* lw = LiveWindow::GetInstance();
 
     double moveVal;
     double turnVal;
@@ -85,6 +97,7 @@ public:
 	void TeleopPeriodic();
 	void TestInit();
 	void TestPeriodic();
+	void FindTargets(Mat& image, vector<vector<Point> >& contours);
 
 	void SetDriveMotors(float left, float right);
 	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
