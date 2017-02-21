@@ -99,7 +99,7 @@ public:
   	bool ScoringCanceled();
 
   	//NavX Helper Functions
-  	void DriveForward(double distance);
+  	void DriveFor(double seconds);
   	void TurnRobot(double angle);
 };
 #endif

@@ -30,30 +30,29 @@ void Robot::AutonomousPeriodic()
 		// Score in left peg
 		if(SmartDashboard::GetBoolean("DB/Button 0", false))
 		{
-			DriveForward(81.2);
+			DriveFor(1.9);
 			TurnRobot(60);
-			DriveForward(27);
-
+			DriveFor(1.5);
 			ScoringSequence();
 		}
 		// Score in center peg
 		else if(SmartDashboard::GetBoolean("DB/Button 2", false))
 		{
-			DriveForward(59.2);
+			DriveFor(1.6);
 			ScoringSequence();
 		}
 		// Score in right peg
 		else if(SmartDashboard::GetBoolean("DB/Button 3", false))
 		{
-			DriveForward(81.2);
+			DriveFor(1.9);
 			TurnRobot(-60);
-			DriveForward(27);
+			DriveFor(1.5);
 			ScoringSequence();
 		}
 		// Cross baseline
 		else if(SmartDashboard::GetBoolean("DB/Button 4", false))
 		{
-			DriveForward(95);
+			DriveFor(2);
 		}
 		else
 		{
@@ -69,26 +68,17 @@ void Robot::AutonomousPeriodic()
 }
 
 // Drive forward, distance is in inches
-void Robot::DriveForward(double distance)
+void Robot::DriveFor(double seconds)
 {
 	double maxSpeed = 0.6;
-	DriveEnc.Reset();
-
-	if(distance > 0)
+	RobotTimer.Reset();
+	RobotTimer.Start();
+	while(!RobotTimer.HasPeriodPassed(seconds))
 	{
-		while(DriveEnc.GetDistance() < distance)
-		{
-			DriveTrain.ArcadeDrive(maxSpeed, 0, false);
-		}
-	}
-	else if(distance < 0)
-	{
-		while(DriveEnc.GetDistance() < -distance)
-		{
-			DriveTrain.ArcadeDrive(-maxSpeed, 0, false);
-		}
+		DriveTrain.ArcadeDrive(maxSpeed, 0);
 	}
 	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	RobotTimer.Stop();
 }
 
 // Turn, angle is from -180 to 180 degrees
