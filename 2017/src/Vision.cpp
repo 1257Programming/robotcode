@@ -219,6 +219,7 @@ void Robot::DriveToPeg()
 	//If the robot has driven to the peg or it's been driving for 6 seconds
 	while(FrontDist.GetRangeInches() > pegLength && !RobotTimer.HasPeriodPassed(6.0))
 	{
+		SmartDashboard::PutNumber("Distance to Peg", FrontDist.GetRangeInches());
 		if(ScoringCanceled())
 		{
 			SmartDashboard::PutString("Scoring Sequence Status", "Scoring sequence cancelled");
