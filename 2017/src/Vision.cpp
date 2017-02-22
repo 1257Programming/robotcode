@@ -20,6 +20,7 @@ void Robot::ScoringSequence()
 {
 	//Create the function-wide variables for the image and contours
 	Mat videoFrame;
+	bool isGearCentered = false;
 	vector<vector<Point> > contours;
 
 	//If the gear isn't centered, run the scoring sequence
@@ -77,7 +78,6 @@ void Robot::ScoringSequence()
 		}
 	}
 	DriveToPeg();
-	isGearCentered = false;
 	SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
 	SmartDashboard::PutString("Scoring Sequence Status", "Bagel slicer in position");
 }

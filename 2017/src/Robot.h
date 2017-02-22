@@ -65,8 +65,6 @@ private:
     double turnVal;
     double gearVal;
 
-	bool isGearCentered;
-	bool isGearScored;
 	bool XPrevState;
 	bool hasAutoRun;
 	bool LeftFlapState;

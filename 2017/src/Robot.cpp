@@ -26,8 +26,6 @@ Robot::Robot() :
 	turnVal = 0;
 	gearVal = 0;
 
-	isGearCentered = false;
-	isGearScored = false;
 	XPrevState = false;
 	hasAutoRun = false;
 	LeftFlapState = false;
