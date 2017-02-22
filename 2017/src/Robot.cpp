@@ -5,7 +5,6 @@ Robot::Robot() :
 	BackLeftDrive(2), // CAN
 	FrontRightDrive(3), // CAN
 	BackRightDrive(4), // CAN
-	DriveTrain(FrontLeftDrive, BackLeftDrive, FrontLeftDrive, BackRightDrive),
 	GearSlide(5), // CAN
 	ClimbMotor(6), // CAN
 	LeftFlap(7, 3), // PCM
@@ -21,8 +20,7 @@ Robot::Robot() :
 	LifeCam(),
 	VisionSink(),
 	RobotTimer(),
-	Gyro(SPI::kOnboardCS0), //SPI
-	DriveEnc(4,5 ,false) //TODO: Find right DIO #'s
+	Gyro(SPI::kOnboardCS0) //SPI
 {
 	moveVal = 0;
 	turnVal = 0;
@@ -49,24 +47,19 @@ void Robot::RobotInit()
 	GearSlide.Set(0);
 	//Climb Motor Init
 	ClimbMotor.Set(0);
-	//Encoder Init
-	DriveEnc.SetDistancePerPulse(PI * WHEEL_DIAMETER / TALON_PPR);
-	//Drive Motor Init
-	DriveTrain.SetInvertedMotor(RobotDrive::kFrontRightMotor, true);
-	DriveTrain.SetInvertedMotor(RobotDrive::kRearRightMotor, true);
 	//Camera Init
 	LifeCam = CameraServer::GetInstance()->StartAutomaticCapture();
 	LifeCam.SetResolution(640, 480);
 	LifeCam.SetExposureManual(0);
 	LifeCam.SetBrightness(5);
 	VisionSink = CameraServer::GetInstance()->GetVideo();
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 }
 
 void Robot::TeleopInit()
 {
 	//Init Motors/Gear
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 }
@@ -94,7 +87,7 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		DriveTrain.ArcadeDrive(moveVal, turnVal, false);
+		ArcadeDrive(moveVal, turnVal, false);
 	}
 	else if (Driver.GetRawButton(BUTTON_LB))
 	{
@@ -116,7 +109,7 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		DriveTrain.ArcadeDrive(moveVal, turnVal, false);
+		ArcadeDrive(moveVal, turnVal, false);
 	}
 	else if (Driver.GetRawButton(BUTTON_RB))
 	{
@@ -138,13 +131,13 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		DriveTrain.ArcadeDrive(moveVal, turnVal, false);
+		ArcadeDrive(moveVal, turnVal, false);
 	}
 	else
 	{
 		moveVal = 0;
 		turnVal = 0;
-		DriveTrain.SetLeftRightMotorOutputs(0, 0);
+		ArcadeDrive(0, 0);
 	}
 
 	// Operator
@@ -283,7 +276,7 @@ void Robot::TeleopPeriodic()
 
 void Robot::TestInit()
 {
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 
@@ -312,11 +305,11 @@ void Robot::TestInit()
 	Wait(1);
 
 	// Test drive
-	DriveTrain.SetLeftRightMotorOutputs(1, 1);
+	ArcadeDrive(1, 1);
 	Wait(1);
-	DriveTrain.SetLeftRightMotorOutputs(-1, -1);
+	ArcadeDrive(-1, -1);
 	Wait(1);
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 
 	//Actuate flaps
 	LeftFlap.Set(DoubleSolenoid::kForward);
@@ -329,7 +322,7 @@ void Robot::TestInit()
 
 void Robot::TestPeriodic()
 {
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 
@@ -337,6 +330,71 @@ void Robot::TestPeriodic()
 	{
 		ClimbRelease.SetAngle(0);
 	}
+}
+
+
+void Robot::SetDriveMotors(float left, float right)
+{
+    FrontLeftDrive.Set(left);
+    BackLeftDrive.Set(left);
+    FrontRightDrive.Set(-right);
+    BackRightDrive.Set(-right);
+}
+
+void Robot::ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs /*= false*/)
+{
+    float LeftMotorOutput;
+    float RightMotorOutput;
+
+    if (squaredInputs)
+    {
+        if (moveValue >= 0.0)
+        {
+            moveValue = (moveValue * moveValue);
+        }
+        else
+        {
+            moveValue = -(moveValue * moveValue);
+        }
+
+        if (rotateValue >= 0.0)
+        {
+            rotateValue = (rotateValue * rotateValue);
+        }
+        else
+        {
+            rotateValue = -(rotateValue * rotateValue);
+        }
+    }
+
+    if (moveValue > 0.0)
+    {
+        if (rotateValue > 0.0)
+        {
+            LeftMotorOutput = moveValue - rotateValue;
+            RightMotorOutput = std::max(moveValue, rotateValue);
+        }
+        else
+        {
+            LeftMotorOutput = std::max(moveValue, -rotateValue);
+            RightMotorOutput = moveValue + rotateValue;
+        }
+    }
+    else
+    {
+        if (rotateValue > 0.0)
+        {
+            LeftMotorOutput = -std::max(-moveValue, rotateValue);
+            RightMotorOutput = moveValue + rotateValue;
+        }
+        else
+        {
+            LeftMotorOutput = moveValue - rotateValue;
+            RightMotorOutput = -std::max(-moveValue, -rotateValue);
+        }
+    }
+
+    SetDriveMotors(LeftMotorOutput, RightMotorOutput);
 }
 
 START_ROBOT_CLASS(Robot)

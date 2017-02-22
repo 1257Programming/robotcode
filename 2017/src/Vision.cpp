@@ -59,20 +59,20 @@ void Robot::ScoringSequence()
 			if(slicerCantMove)
 			{
 				GearSlide.Set(0);
-				DriveTrain.SetLeftRightMotorOutputs(-velocity, velocity);
+				ArcadeDrive(-velocity, velocity);
 				SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
 			}
 			else
 			{
 				GearSlide.Set(velocity);
-				DriveTrain.SetLeftRightMotorOutputs(0, 0);
+				ArcadeDrive(0, 0);
 				SmartDashboard::PutNumber("Bagel Slicer Velocity", velocity);
 			}
 		}
 		else
 		{
 			GearSlide.Set(0);
-			DriveTrain.SetLeftRightMotorOutputs(0, 0);
+			ArcadeDrive(0, 0);
 			SmartDashboard::PutString("Scoring Sequence Status", "Gear centered. Moving forward to peg.");
 		}
 	}
@@ -221,12 +221,12 @@ void Robot::DriveToPeg()
 		}
 		else
 		{
-			DriveTrain.ArcadeDrive(forwardSpeed, 0);
+			ArcadeDrive(forwardSpeed, 0);
 		}
 	}
 	SmartDashboard::PutString("Scoring Sequence Status", "Gear on peg");
 	RobotTimer.Stop();
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 }
 
 // Decrease the green value of a given BGR threshold by 5

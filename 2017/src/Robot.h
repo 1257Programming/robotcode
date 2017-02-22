@@ -44,7 +44,6 @@ private:
     CANTalon BackLeftDrive;
     CANTalon FrontRightDrive;
     CANTalon BackRightDrive;
-    RobotDrive DriveTrain;
     CANTalon GearSlide;
     CANTalon ClimbMotor;
     DoubleSolenoid LeftFlap;
@@ -61,7 +60,6 @@ private:
     cs::CvSink VisionSink;
     Timer RobotTimer;
     ADXRS450_Gyro Gyro;
-    Encoder DriveEnc;
 
     double moveVal;
     double turnVal;
@@ -91,7 +89,7 @@ public:
 	void TestPeriodic();
 
 	void SetDriveMotors(float left, float right);
-	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
+	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs = false);
 
 	//Autonomous scoring with the camera
   	void ScoringSequence();

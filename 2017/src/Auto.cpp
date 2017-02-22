@@ -3,7 +3,7 @@
 void Robot::DisabledInit()
 {
   	//Init motors/gear
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 
@@ -15,7 +15,7 @@ void Robot::DisabledInit()
 
 void Robot::AutonomousInit()
 {
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 	ClimbRelease.SetAngle(180);
@@ -56,12 +56,12 @@ void Robot::AutonomousPeriodic()
 		}
 		else
 		{
-			DriveTrain.SetLeftRightMotorOutputs(0, 0);
+			ArcadeDrive(0, 0);
 			GearSlide.Set(0);
 			ClimbMotor.Set(0);
 		}
 		hasAutoRun = true;
-		DriveTrain.SetLeftRightMotorOutputs(0, 0);
+		ArcadeDrive(0, 0);
 		GearSlide.Set(0);
 		ClimbMotor.Set(0);
 	}
@@ -75,9 +75,9 @@ void Robot::DriveFor(double seconds)
 	RobotTimer.Start();
 	while(!RobotTimer.HasPeriodPassed(seconds))
 	{
-		DriveTrain.ArcadeDrive(maxSpeed, 0);
+		ArcadeDrive(maxSpeed, 0);
 	}
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 	RobotTimer.Stop();
 }
 
@@ -92,7 +92,7 @@ void Robot::TurnRobot(double angle)
 	{
 		while (Gyro.GetAngle() < angle)
 		{
-			DriveTrain.ArcadeDrive(0, maxTurnSpeed, false);
+			ArcadeDrive(0, maxTurnSpeed, false);
 		}
 	}
 	else if (angle < 0)
@@ -100,8 +100,8 @@ void Robot::TurnRobot(double angle)
 
 		while (Gyro.GetAngle() > angle)
 		{
-			DriveTrain.ArcadeDrive(0, -maxTurnSpeed, false);
+			ArcadeDrive(0, -maxTurnSpeed, false);
 		}
 	}
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 }
