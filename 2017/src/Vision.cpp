@@ -77,6 +77,7 @@ void Robot::ScoringSequence()
 		}
 	}
 	DriveToPeg();
+	isGearCentered = false;
 	SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
 	SmartDashboard::PutString("Scoring Sequence Status", "Bagel slicer in position");
 }
