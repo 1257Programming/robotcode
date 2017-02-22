@@ -67,7 +67,7 @@ void Robot::AutonomousPeriodic()
 	}
 }
 
-// Drive forward, distance is in inches
+// Drive forward at maxSpeed for a specific amount of time
 void Robot::DriveFor(double seconds)
 {
 	double maxSpeed = 0.6;

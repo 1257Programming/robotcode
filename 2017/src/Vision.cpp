@@ -77,12 +77,6 @@ void Robot::ScoringSequence()
 		}
 	}
 	DriveToPeg();
-	do
-	{
-		// The Gear is Scored
-		isGearScored = !HaveGear.Get();
-	}
-	while(!isGearScored);
 	SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
 	SmartDashboard::PutString("Scoring Sequence Status", "Bagel slicer in position");
 }

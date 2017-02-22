@@ -22,7 +22,7 @@ Robot::Robot() :
 	VisionSink(),
 	RobotTimer(),
 	Gyro(SPI::kOnboardCS0), //SPI
-	DriveEnc(4,5 ,false) //TODO: Find right DIO #s
+	DriveEnc(4,5 ,false) //TODO: Find right DIO #'s
 {
 	moveVal = 0;
 	turnVal = 0;
