@@ -269,6 +269,10 @@ void Robot::TeleopPeriodic()
 		XPrevState = true;
 		ScoringSequence(); //The function checks if it should be switched off after every one of its loops
 	}
+	else
+	{
+		XPrevState = false;
+	}
 
 }
 
