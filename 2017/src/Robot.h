@@ -95,7 +95,7 @@ public:
   	bool ScoringCanceled();
 
   	//NavX Helper Functions
-  	void DriveFor(double seconds);
-  	void TurnRobot(double angle);
+  	void DriveFor(double seconds, double speed = 0.6);
+  	void TurnRobot(double angle, double speed = 0.5, bool reset = false);
 };
 #endif

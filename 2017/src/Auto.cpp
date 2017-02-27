@@ -21,6 +21,7 @@ void Robot::AutonomousInit()
 	ClimbRelease.SetAngle(180);
 	LeftFlap.Set(DoubleSolenoid::kForward);
 	RightFlap.Set(DoubleSolenoid::kForward);
+	Gyro.Reset();
 }
 
 void Robot::AutonomousPeriodic()
@@ -68,40 +69,40 @@ void Robot::AutonomousPeriodic()
 }
 
 // Drive forward at maxSpeed for a specific amount of time
-void Robot::DriveFor(double seconds)
+void Robot::DriveFor(double seconds, double speed)
 {
-	double maxSpeed = 0.6;
 	RobotTimer.Reset();
 	RobotTimer.Start();
 	while(!RobotTimer.HasPeriodPassed(seconds))
 	{
-		ArcadeDrive(maxSpeed, 0);
+		ArcadeDrive(speed, 0);
 	}
 	ArcadeDrive(0, 0);
 	RobotTimer.Stop();
 }
 
 // Turn, angle is from -180 to 180 degrees
-void Robot::TurnRobot(double angle)
+void Robot::TurnRobot(double angle, double speed, bool reset)
 {
-	double maxTurnSpeed = 0.6;
-	Gyro.Reset();
+    if (reset)
+    {
+        Gyro.Reset();
+    }
 
-	// - angle means turn counterclockwise, + angle means turn clockwise
-	if(angle > 0)
-	{
-		while (Gyro.GetAngle() < angle)
-		{
-			ArcadeDrive(0, maxTurnSpeed, false);
-		}
-	}
-	else if (angle < 0)
-	{
-
-		while (Gyro.GetAngle() > angle)
-		{
-			ArcadeDrive(0, -maxTurnSpeed, false);
-		}
-	}
-	ArcadeDrive(0, 0);
+    while (true)
+    {
+        while (Gyro.GetAngle() < angle)
+        {
+            SetDriveMotors(speed, -speed);
+        }
+        while (Gyro.GetAngle() > angle)
+        {
+            SetDriveMotors(-speed, speed);
+        }
+        if (round(Gyro.GetAngle()) == angle)
+        {
+            break;
+        }
+    }
+    SetDriveMotors(0, 0);
 }
