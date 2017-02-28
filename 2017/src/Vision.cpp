@@ -60,12 +60,12 @@ void Robot::ScoringSequence()
 			if(slicerCantMove)
 			{
 				GearSlide.Set(0);
-				ArcadeDrive(-velocity, velocity);
+				ArcadeDrive(velocity, -velocity);
 				SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
 			}
 			else
 			{
-				GearSlide.Set(velocity);
+				GearSlide.Set(-velocity);
 				ArcadeDrive(0, 0);
 				SmartDashboard::PutNumber("Bagel Slicer Velocity", velocity);
 			}
@@ -209,12 +209,12 @@ void Robot::DriveToPeg()
 	RobotTimer.Reset();
 	RobotTimer.Start();
 	SmartDashboard::PutString("Scoring Sequence Status", "Scoring gear on peg");
-	const int pegLength = 10; //Really 10.5", but trivial for coding purposes
-	double forwardSpeed = 0.5;
+	const int pegLength = 8; //Really 10.5", but trivial for coding purposes
+	double forwardSpeed = 0.2;
 	//If the robot has driven to the peg or it's been driving for 6 seconds
-	while(FrontDist.GetRangeInches() > pegLength && !RobotTimer.HasPeriodPassed(6.0))
+	while(FrontDist->GetRangeInches() > pegLength && !RobotTimer.HasPeriodPassed(6.0))
 	{
-		SmartDashboard::PutNumber("Distance to Peg", FrontDist.GetRangeInches());
+		SmartDashboard::PutNumber("Distance to Peg", FrontDist->GetRangeInches());
 		if(ScoringCanceled())
 		{
 			SmartDashboard::PutString("Scoring Sequence Status", "Scoring sequence cancelled");
@@ -226,6 +226,8 @@ void Robot::DriveToPeg()
 		}
 	}
 	SmartDashboard::PutString("Scoring Sequence Status", "Gear on peg");
+	LeftFlap.Set(DoubleSolenoid::kForward);
+	RightFlap.Set(DoubleSolenoid::kForward);
 	RobotTimer.Stop();
 	ArcadeDrive(0, 0);
 }
