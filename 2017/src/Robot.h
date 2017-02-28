@@ -29,7 +29,7 @@
 // Global Functions
 inline double dabs(double d) { return d > 0.0 ? d : -d; } // Absolute value of a double precision floating point number
 inline bool IsReasonable(double axisVal) { return dabs(axisVal) > 0.2; } // Ensures the axis is intentionally engaged
-inline float square(double num) { return num * num; } //Return the square of the the given number
+//inline float square(double num) { return num * num; } //Return the square of the the given number
 
 // Constants
 const double PI = 3.1416;
@@ -55,7 +55,7 @@ private:
     DigitalInput HaveGear;
     DigitalInput ActuateFlaps;
     //AHRS NavX;
-    Ultrasonic FrontDist;
+    Ultrasonic* FrontDist;
     cs::UsbCamera LifeCam;
     cs::CvSink VisionSink;
     Timer RobotTimer;
@@ -96,6 +96,6 @@ public:
 
   	//NavX Helper Functions
   	void DriveFor(double seconds, double speed = 0.6);
-  	void TurnRobot(double angle, double speed = 0.5, bool reset = false);
+  	void TurnRobot(double angle, double speed = 0.2, bool reset = false);
 };
 #endif
