@@ -16,12 +16,12 @@ Robot::Robot() :
 	HaveGear(0), // DIO
 	ActuateFlaps(1), // DIO
 	//NavX(SerialPort::Port::kUSB), //NavX Micro Sensor
-	FrontDist(6, 7),
 	LifeCam(),
 	VisionSink(),
 	RobotTimer(),
 	Gyro(SPI::kOnboardCS0) //SPI
 {
+	FrontDist = new Ultrasonic(6, 7);
 	moveVal = 0;
 	turnVal = 0;
 	gearVal = 0;
@@ -40,7 +40,7 @@ Robot::Robot() :
 void Robot::RobotInit()
 {
 	//Ultrasonic Init
-	FrontDist.SetAutomaticMode(true);
+	FrontDist->SetAutomaticMode(true);
 	//Gear Init
 	GearSlide.Set(0);
 	//Climb Motor Init
@@ -240,7 +240,7 @@ void Robot::TeleopPeriodic()
 			LeftFlapState = false;
 		}
 
-		if (!targetInSight && FrontDist.GetRangeInches() <= 20)
+		if (!targetInSight && FrontDist->GetRangeInches() <= 20)
 		{
 			LeftFlap.Set(DoubleSolenoid::kForward);
 			RightFlap.Set(DoubleSolenoid::kForward);
