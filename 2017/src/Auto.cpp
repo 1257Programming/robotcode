@@ -8,20 +8,21 @@ void Robot::DisabledInit()
 	ClimbMotor.Set(0);
 
 	SmartDashboard::PutString("DB/String 0", "Left Peg");
+	SmartDashboard::PutString("DB/String 1", "Test");
 	SmartDashboard::PutString("DB/String 2", "Center Peg");
 	SmartDashboard::PutString("DB/String 3", "Right Peg");
 	SmartDashboard::PutString("DB/String 4", "Cross Baseline");
-	SmartDashboard::PutString("DB/String 5", "Turn 90, Drive Straight for 1s");
 }
 
 void Robot::AutonomousInit()
 {
 	ArcadeDrive(0, 0);
+	hasAutoRun = false;
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 	ClimbRelease.SetAngle(180);
-	LeftFlap.Set(DoubleSolenoid::kForward);
-	RightFlap.Set(DoubleSolenoid::kForward);
+	LeftFlap.Set(DoubleSolenoid::kReverse);
+	RightFlap.Set(DoubleSolenoid::kReverse);
 	Gyro.Reset();
 }
 
@@ -33,16 +34,24 @@ void Robot::AutonomousPeriodic()
 		if(SmartDashboard::GetBoolean("DB/Button 0", false))
 		{
 			SmartDashboard::PutString("Auto Status", "Scoring on the left peg");
-			DriveFor(1.9);
+			DriveFor(0.9);
 			TurnRobot(60);
-			DriveFor(1.5);
+			DriveFor(0.4);
 			ScoringSequence();
+		}
+		//Test Code
+		else if(SmartDashboard::GetBoolean("DB/Button 1", false))
+		{
+			while(true)
+			{
+				SmartDashboard::PutNumber("UD Distance", FrontDist->GetRangeInches());
+			}
 		}
 		// Score in center peg
 		else if(SmartDashboard::GetBoolean("DB/Button 2", false))
 		{
 			SmartDashboard::PutString("Auto Status", "Scoring on the center peg");
-			DriveFor(1.6);
+			DriveFor(0.75);
 			ScoringSequence();
 		}
 		// Score in right peg
@@ -59,12 +68,6 @@ void Robot::AutonomousPeriodic()
 		{
 			SmartDashboard::PutString("Auto Status", "Crossing the Baseline");
 			DriveFor(2);
-		}
-		else if(SmartDashboard::GetBoolean("DB/Button 5", false))
-		{
-			DriveFor(1);
-			TurnRobot(180);
-			DriveFor(1);
 		}
 		else
 		{
@@ -101,19 +104,18 @@ void Robot::TurnRobot(double angle, double speed, bool reset)
         Gyro.Reset();
     }
 
-    while (true)
+    while (round(Gyro.GetAngle()) != angle)
     {
+    	SmartDashboard::PutNumber("Gyro", Gyro.GetAngle());
         while (Gyro.GetAngle() < angle)
         {
+        	SmartDashboard::PutNumber("Gyro", Gyro.GetAngle());
             SetDriveMotors(speed, -speed);
         }
         while (Gyro.GetAngle() > angle)
         {
+        	SmartDashboard::PutNumber("Gyro", Gyro.GetAngle());
             SetDriveMotors(-speed, speed);
-        }
-        if (round(Gyro.GetAngle()) == angle)
-        {
-            break;
         }
     }
     SetDriveMotors(0, 0);
