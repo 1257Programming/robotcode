@@ -59,7 +59,13 @@ void Robot::ScoringSequence()
 			bool slicerCantMove = (GearSlide.IsFwdLimitSwitchClosed() && velocity < 0) || (GearSlide.IsRevLimitSwitchClosed() && velocity > 0);
 			if(slicerCantMove)
 			{
-				double adjustingSpeed = 0.2;
+				double adjustingSpeed = 0.225;
+				// Change the direction the robot turns if necessary
+				if(velocity < 0)
+				{
+					adjustingSpeed = -adjustingSpeed;
+				}
+
 				SmartDashboard::PutString("Scoring Sequence Status", "Reached limit switch");
 				GearSlide.Set(0);
 				SetDriveMotors(-adjustingSpeed, adjustingSpeed);
@@ -96,6 +102,7 @@ bool Robot::ScoringCanceled()
 			XPrevState = true;
 			return true;
 		}
+		//Otherwise, the XPrevState is already true and the scoring sequence wasn't canceled
 		else
 		{
 			return false;
@@ -116,7 +123,8 @@ void findTargets(Mat& image, vector<vector<Point> >& contours)
 	int adjustmentsUntilFailure = 4;
 
 	// BGR ranges for pixels we want to turn on
-	Scalar minGreen = Scalar(40, 80, 0);
+	//REMEMBER: Scalar(Blue, Green, Red)
+	Scalar minGreen = Scalar(0, 80, 0);
 	Scalar maxGreen = Scalar(125, 255, 30);
 
 	// Filter the image for noise
@@ -218,41 +226,55 @@ void Robot::DriveToPeg()
 	int prevDistance = 0;
 	while(FrontDist->GetRangeInches() > pegLength && !RobotTimer.HasPeriodPassed(4))
 	{
-		if( dabs( FrontDist->GetRangeInches() - prevDistance ) > 0.1)
-		{
-			SmartDashboard::PutString("Stuck in the Middle", "Moving left");
-			GearSlide.Set(0.2);
-			Wait(0.25);
-		}
-		else
-		{
-			SmartDashboard::PutString("Stuck in the Middle", "Unstuck");
-		}
-
 		SmartDashboard::PutNumber("Distance to Peg", FrontDist->GetRangeInches());
 		if(ScoringCanceled())
 		{
 			SmartDashboard::PutString("Scoring Sequence Status", "Scoring sequence cancelled");
 			return;
 		}
+
+		//If the robot is obstructed
+		if( dabs( FrontDist->GetRangeInches() - prevDistance ) > 0.1)
+		{
+			//If you're blocked on the left, move right
+			if(GearSlide.IsFwdLimitSwitchClosed())
+			{
+				SmartDashboard::PutString("Stuck in the Middle", "Moving right");
+				GearSlide.Set(-0.2);
+			}
+			//Otherwise, always move left
+			else
+			{
+				SmartDashboard::PutString("Stuck in the Middle", "Moving left");
+				GearSlide.Set(0.2);
+			}
+			prevDistance = 0; //Make sure that this doesn't run again unless it's still blocked
+			Wait(0.2);
+			continue;
+		}
 		else
 		{
-			ArcadeDrive(forwardSpeed, 0);
+			prevDistance = FrontDist->GetRangeInches();
+			SmartDashboard::PutString("Stuck in the Middle", "Not stuck");
 		}
+
+		ArcadeDrive(forwardSpeed, 0);
 	}
+	//Take the pressure off of the peg, drive forward a bit, and then stop
 	ArcadeDrive(0, 0);
 	Wait(0.25);
 	ArcadeDrive(0.4, 0);
 	Wait(0.25);
 	ArcadeDrive(0, 0);
+
 	SmartDashboard::PutString("Scoring Sequence Status", "Gear on peg");
 	LeftFlap.Set(DoubleSolenoid::kForward);
 	RightFlap.Set(DoubleSolenoid::kForward);
 	RobotTimer.Stop();
 }
 
-// Decrease the green value of a given BGR threshold by 5
+// Decrease the green value of a given BGR threshold by 10
 inline void adjustThreshold(Scalar& threshold)
 {
-	threshold.val[1] -= 5;
+	threshold.val[1] -= 10;
 }

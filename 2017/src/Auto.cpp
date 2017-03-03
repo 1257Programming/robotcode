@@ -8,10 +8,10 @@ void Robot::DisabledInit()
 	ClimbMotor.Set(0);
 
 	SmartDashboard::PutString("DB/String 0", "Left Peg");
-	SmartDashboard::PutString("DB/String 1", "Test");
-	SmartDashboard::PutString("DB/String 2", "Center Peg");
-	SmartDashboard::PutString("DB/String 3", "Right Peg");
-	SmartDashboard::PutString("DB/String 4", "Cross Baseline");
+	//SmartDashboard::PutString("DB/String 1", "Test");
+	SmartDashboard::PutString("DB/String 1", "Center Peg");
+	SmartDashboard::PutString("DB/String 2", "Right Peg");
+	SmartDashboard::PutString("DB/String 3", "Cross Baseline");
 }
 
 void Robot::AutonomousInit()
@@ -23,42 +23,38 @@ void Robot::AutonomousInit()
 	LeftFlap.Set(DoubleSolenoid::kReverse);
 	RightFlap.Set(DoubleSolenoid::kReverse);
 	Gyro.Reset();
-
+	// Score in left peg
 	if(SmartDashboard::GetBoolean("DB/Button 0", false))
 	{
 		SmartDashboard::PutString("Auto Status", "Scoring on the left peg");
 		DriveFor(1.0);
 		TurnRobot(60);
-		DriveFor(0.4);
+		DriveFor(0.5);
 		ScoringSequence();
 	}
-	//Test Code
-	else if(SmartDashboard::GetBoolean("DB/Button 1", false))
-	{
-		TurnRobot(-60);
-	}
 	// Score in center peg
-	else if(SmartDashboard::GetBoolean("DB/Button 2", false))
+	else if(SmartDashboard::GetBoolean("DB/Button 1", false))
 	{
 		SmartDashboard::PutString("Auto Status", "Scoring on the center peg");
 		DriveFor(0.75);
 		ScoringSequence();
 	}
 	// Score in right peg
-	else if(SmartDashboard::GetBoolean("DB/Button 3", false))
+	else if(SmartDashboard::GetBoolean("DB/Button 2", false))
 	{
 		SmartDashboard::PutString("Auto Status", "Scoring on the right peg");
-		DriveFor(1.9);
+		DriveFor(1.0);
 		TurnRobot(-60);
-		DriveFor(1.5);
+		DriveFor(0.5);
 		ScoringSequence();
 	}
 	// Cross baseline
-	else if(SmartDashboard::GetBoolean("DB/Button 4", false))
+	else if(SmartDashboard::GetBoolean("DB/Button 3", false))
 	{
 		SmartDashboard::PutString("Auto Status", "Crossing the Baseline");
 		DriveFor(2);
 	}
+	//Otherwise
 	else
 	{
 		ArcadeDrive(0, 0);
