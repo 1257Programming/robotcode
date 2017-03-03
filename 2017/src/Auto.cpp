@@ -98,7 +98,10 @@ void Robot::TurnRobot(double angle, double speed, bool reset)
 
     SmartDashboard::PutString("Auto Status", "Turning to angle");
 
-    while (round(Gyro.GetAngle()) != angle)
+    RobotTimer.Reset();
+    RobotTimer.Start();
+    //While you're not at the angle and 3 seconds haven't passed
+    while (round(Gyro.GetAngle()) != angle && !RobotTimer.HasPeriodPassed(3))
     {
     	SmartDashboard::PutNumber("Gyro", Gyro.GetAngle());
         while (Gyro.GetAngle() < angle)
@@ -112,7 +115,7 @@ void Robot::TurnRobot(double angle, double speed, bool reset)
             SetDriveMotors(-speed, speed);
         }
     }
-
+    RobotTimer.Stop();
     SmartDashboard::PutString("Auto Status", "Success to angle");
     SetDriveMotors(0, 0);
 }

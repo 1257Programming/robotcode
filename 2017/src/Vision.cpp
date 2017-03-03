@@ -22,9 +22,11 @@ void Robot::ScoringSequence()
 	Mat videoFrame;
 	bool isGearCentered = false;
 	vector<vector<Point> > contours;
+	RobotTimer.Reset();
+	RobotTimer.Start();
 
-	//If the gear isn't centered, run the scoring sequence
-	while(!isGearCentered)
+	//If the gear isn't centered and it hasn't been running for more than six seconds, run the scoring sequence
+	while(!isGearCentered && !RobotTimer.Get() > 6.5)
 	{
 		if(ScoringCanceled())
 		{
@@ -85,6 +87,12 @@ void Robot::ScoringSequence()
 			ArcadeDrive(0, 0);
 			SmartDashboard::PutString("Scoring Sequence Status", "Gear centered. Moving forward to peg.");
 		}
+	}
+	RobotTimer.Stop();
+	// If the vision took more than 6.5 seconds to run, don't try to drive to the peg
+	if(RobotTimer.Get() > 6.5)
+	{
+		return;
 	}
 	DriveToPeg();
 	SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
