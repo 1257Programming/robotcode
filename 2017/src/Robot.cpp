@@ -27,7 +27,6 @@ Robot::Robot() :
 	gearVal = 0;
 
 	XPrevState = false;
-	hasAutoRun = false;
 	LeftFlapState = false;
 	RightFlapState = false;
 	LBPrevState = false;
@@ -85,7 +84,7 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		ArcadeDrive(moveVal, turnVal, false);
+		ArcadeDrive(moveVal, turnVal, true);
 	}
 	else if (Driver.GetRawButton(BUTTON_LB))
 	{
@@ -107,7 +106,7 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		ArcadeDrive(moveVal, turnVal, false);
+		ArcadeDrive(moveVal, turnVal, true);
 	}
 	else if (Driver.GetRawButton(BUTTON_RB))
 	{
@@ -129,7 +128,7 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		ArcadeDrive(moveVal, turnVal, false);
+		ArcadeDrive(moveVal, turnVal, true);
 	}
 	else
 	{
@@ -240,13 +239,13 @@ void Robot::TeleopPeriodic()
 			LeftFlapState = false;
 		}
 
-		if (!targetInSight && FrontDist->GetRangeInches() <= 20)
+		/*if (!targetInSight && FrontDist->GetRangeInches() <= 20 && !Operator.GetRawButton(BUTTON_B))
 		{
 			LeftFlap.Set(DoubleSolenoid::kForward);
 			RightFlap.Set(DoubleSolenoid::kForward);
 			LeftFlapState = true;
 			RightFlapState = true;
-		}
+		}*/
 
 		// Limit switches on gearmaster 9000
 		if ((!GearSlide.IsFwdLimitSwitchClosed() || gearVal < 0) && (!GearSlide.IsRevLimitSwitchClosed() || gearVal > 0))
