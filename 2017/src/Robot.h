@@ -66,7 +66,6 @@ private:
     double gearVal;
 
 	bool XPrevState;
-	bool hasAutoRun;
 	bool LeftFlapState;
 	bool RightFlapState;
 	bool LBPrevState;
@@ -94,8 +93,8 @@ public:
   	void DriveToPeg();
   	bool ScoringCanceled();
 
-  	//NavX Helper Functions
+  	//Autonomous Helper Functions
   	void DriveFor(double seconds, double speed = 0.6);
-  	void TurnRobot(double angle, double speed = 0.2, bool reset = false);
+  	void TurnRobot(double angle, double speed = 0.275, bool reset = false);
 };
 #endif
