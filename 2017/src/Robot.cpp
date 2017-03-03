@@ -231,13 +231,13 @@ void Robot::TeleopPeriodic()
 	if (Automation)
 	{
 		// Automation flaps
-		if (!ActuateFlaps.Get())
+		/*if (!ActuateFlaps.Get())
 		{
 			RightFlap.Set(DoubleSolenoid::kReverse);
 			LeftFlap.Set(DoubleSolenoid::kReverse);
 			LeftFlapState = false;
 			LeftFlapState = false;
-		}
+		}*/
 
 		/*if (!targetInSight && FrontDist->GetRangeInches() <= 20 && !Operator.GetRawButton(BUTTON_B))
 		{
