@@ -59,12 +59,15 @@ void Robot::ScoringSequence()
 			bool slicerCantMove = (GearSlide.IsFwdLimitSwitchClosed() && velocity < 0) || (GearSlide.IsRevLimitSwitchClosed() && velocity > 0);
 			if(slicerCantMove)
 			{
+				double adjustingSpeed = 0.2;
+				SmartDashboard::PutString("Scoring Sequence Status", "Reached limit switch");
 				GearSlide.Set(0);
-				ArcadeDrive(velocity, -velocity);
+				SetDriveMotors(-adjustingSpeed, adjustingSpeed);
 				SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
 			}
 			else
 			{
+				SmartDashboard::PutString("Scoring Sequence Status", "Adjusting bagel slicer");
 				GearSlide.Set(-velocity);
 				ArcadeDrive(0, 0);
 				SmartDashboard::PutNumber("Bagel Slicer Velocity", velocity);
@@ -113,8 +116,8 @@ void findTargets(Mat& image, vector<vector<Point> >& contours)
 	int adjustmentsUntilFailure = 4;
 
 	// BGR ranges for pixels we want to turn on
-	Scalar minGreen = Scalar(50, 130, 0);
-	Scalar maxGreen = Scalar(100, 255, 20);
+	Scalar minGreen = Scalar(40, 80, 0);
+	Scalar maxGreen = Scalar(125, 255, 30);
 
 	// Filter the image for noise
 	GaussianBlur(image, image, Size(15, 15), 0);
@@ -175,14 +178,14 @@ int getPegLocation(vector<vector<Point> >& contours )
 bool isCentered(int pegLocationX, int imageCenterX)
 {
 	int imageWidth = 2 * imageCenterX;
-	return abs(pegLocationX - imageCenterX) < (imageWidth / 7);
+	return abs(pegLocationX - imageCenterX) < (imageWidth / 15);
 }
 
 double getMotorVelocity(int pegLocation, int imageWidth)
 {
 	double leftTolerance = .3;  // 30%
 	double rightTolerance = .7; // 70%
-	double maxSpeed =.4;
+	double maxSpeed = 0.75;
 
 	//If  pegLocation is greater than 70% of imageWidth, return the maxSpeed going right
 	if (pegLocation > (rightTolerance * imageWidth) )
@@ -209,11 +212,23 @@ void Robot::DriveToPeg()
 	RobotTimer.Reset();
 	RobotTimer.Start();
 	SmartDashboard::PutString("Scoring Sequence Status", "Scoring gear on peg");
-	const int pegLength = 8; //Really 10.5", but trivial for coding purposes
+	const int pegLength = 10; //Really 10.5", but trivial for coding purposes
 	double forwardSpeed = 0.2;
 	//If the robot has driven to the peg or it's been driving for 6 seconds
-	while(FrontDist->GetRangeInches() > pegLength && !RobotTimer.HasPeriodPassed(6.0))
+	int prevDistance = 0;
+	while(FrontDist->GetRangeInches() > pegLength && !RobotTimer.HasPeriodPassed(4))
 	{
+		if( dabs( FrontDist->GetRangeInches() - prevDistance ) > 0.1)
+		{
+			SmartDashboard::PutString("Stuck in the Middle", "Moving left");
+			GearSlide.Set(0.2);
+			Wait(0.25);
+		}
+		else
+		{
+			SmartDashboard::PutString("Stuck in the Middle", "Unstuck");
+		}
+
 		SmartDashboard::PutNumber("Distance to Peg", FrontDist->GetRangeInches());
 		if(ScoringCanceled())
 		{
@@ -225,11 +240,15 @@ void Robot::DriveToPeg()
 			ArcadeDrive(forwardSpeed, 0);
 		}
 	}
+	ArcadeDrive(0, 0);
+	Wait(0.25);
+	ArcadeDrive(0.4, 0);
+	Wait(0.25);
+	ArcadeDrive(0, 0);
 	SmartDashboard::PutString("Scoring Sequence Status", "Gear on peg");
 	LeftFlap.Set(DoubleSolenoid::kForward);
 	RightFlap.Set(DoubleSolenoid::kForward);
 	RobotTimer.Stop();
-	ArcadeDrive(0, 0);
 }
 
 // Decrease the green value of a given BGR threshold by 5
