@@ -17,70 +17,66 @@ void Robot::DisabledInit()
 void Robot::AutonomousInit()
 {
 	ArcadeDrive(0, 0);
-	hasAutoRun = false;
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
 	ClimbRelease.SetAngle(180);
 	LeftFlap.Set(DoubleSolenoid::kReverse);
 	RightFlap.Set(DoubleSolenoid::kReverse);
 	Gyro.Reset();
-}
 
-void Robot::AutonomousPeriodic()
-{
-	while(!hasAutoRun) //Prevents auto from running more than once
+	if(SmartDashboard::GetBoolean("DB/Button 0", false))
 	{
-		// Score in left peg
-		if(SmartDashboard::GetBoolean("DB/Button 0", false))
-		{
-			SmartDashboard::PutString("Auto Status", "Scoring on the left peg");
-			DriveFor(0.9);
-			TurnRobot(60);
-			DriveFor(0.4);
-			ScoringSequence();
-		}
-		//Test Code
-		else if(SmartDashboard::GetBoolean("DB/Button 1", false))
-		{
-			while(true)
-			{
-				SmartDashboard::PutNumber("UD Distance", FrontDist->GetRangeInches());
-			}
-		}
-		// Score in center peg
-		else if(SmartDashboard::GetBoolean("DB/Button 2", false))
-		{
-			SmartDashboard::PutString("Auto Status", "Scoring on the center peg");
-			DriveFor(0.75);
-			ScoringSequence();
-		}
-		// Score in right peg
-		else if(SmartDashboard::GetBoolean("DB/Button 3", false))
-		{
-			SmartDashboard::PutString("Auto Status", "Scoring on the right peg");
-			DriveFor(1.9);
-			TurnRobot(-60);
-			DriveFor(1.5);
-			ScoringSequence();
-		}
-		// Cross baseline
-		else if(SmartDashboard::GetBoolean("DB/Button 4", false))
-		{
-			SmartDashboard::PutString("Auto Status", "Crossing the Baseline");
-			DriveFor(2);
-		}
-		else
-		{
-			ArcadeDrive(0, 0);
-			GearSlide.Set(0);
-			ClimbMotor.Set(0);
-		}
-		hasAutoRun = true;
+		SmartDashboard::PutString("Auto Status", "Scoring on the left peg");
+		DriveFor(1.0);
+		TurnRobot(60);
+		DriveFor(0.4);
+		ScoringSequence();
+	}
+	//Test Code
+	else if(SmartDashboard::GetBoolean("DB/Button 1", false))
+	{
+		TurnRobot(-60);
+	}
+	// Score in center peg
+	else if(SmartDashboard::GetBoolean("DB/Button 2", false))
+	{
+		SmartDashboard::PutString("Auto Status", "Scoring on the center peg");
+		DriveFor(0.75);
+		ScoringSequence();
+	}
+	// Score in right peg
+	else if(SmartDashboard::GetBoolean("DB/Button 3", false))
+	{
+		SmartDashboard::PutString("Auto Status", "Scoring on the right peg");
+		DriveFor(1.9);
+		TurnRobot(-60);
+		DriveFor(1.5);
+		ScoringSequence();
+	}
+	// Cross baseline
+	else if(SmartDashboard::GetBoolean("DB/Button 4", false))
+	{
+		SmartDashboard::PutString("Auto Status", "Crossing the Baseline");
+		DriveFor(2);
+	}
+	else
+	{
 		ArcadeDrive(0, 0);
 		GearSlide.Set(0);
 		ClimbMotor.Set(0);
 	}
+
+	ArcadeDrive(0, 0);
+	GearSlide.Set(0);
+	ClimbMotor.Set(0);
 	SmartDashboard::PutString("Auto Status", "Autonomous completed");
+}
+
+void Robot::AutonomousPeriodic()
+{
+	ArcadeDrive(0, 0);
+	GearSlide.Set(0);
+	ClimbMotor.Set(0);
 }
 
 // Drive forward at maxSpeed for a specific amount of time
@@ -104,6 +100,8 @@ void Robot::TurnRobot(double angle, double speed, bool reset)
         Gyro.Reset();
     }
 
+    SmartDashboard::PutString("Auto Status", "Turning to angle");
+
     while (round(Gyro.GetAngle()) != angle)
     {
     	SmartDashboard::PutNumber("Gyro", Gyro.GetAngle());
@@ -118,5 +116,7 @@ void Robot::TurnRobot(double angle, double speed, bool reset)
             SetDriveMotors(-speed, speed);
         }
     }
+
+    SmartDashboard::PutString("Auto Status", "Success to angle");
     SetDriveMotors(0, 0);
 }
