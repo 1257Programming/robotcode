@@ -198,7 +198,7 @@ void Robot::TeleopPeriodic()
 		RBPrevState = false;
 	}
 
-	if (Operator.GetRawButton(BUTTON_Y) && IsReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)))
+	if (IsReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)) && Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y) > 0)
 	{
 		ClimbMotor.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
 	}
