@@ -25,7 +25,7 @@ void Robot::ScoringSequence()
 	RobotTimer.Reset();
 	RobotTimer.Start();
 
-	//If the gear isn't centered and it hasn't been running for more than six seconds, run the scoring sequence
+	//If the gear isn't centered and it hasn't been running for more than 6.5 seconds, run the scoring sequence
 	while(!isGearCentered && !RobotTimer.Get() > 6.5)
 	{
 		if(ScoringCanceled())
@@ -58,7 +58,7 @@ void Robot::ScoringSequence()
 		{
 			float velocity = getMotorVelocity(pegLocationX, videoFrame.cols);
 			//If the slicer is blocked in the direction it's trying to go
-			bool slicerCantMove = (GearSlide.IsFwdLimitSwitchClosed() && velocity < 0) || (GearSlide.IsRevLimitSwitchClosed() && velocity > 0);
+			bool slicerCantMove = (GearSlide.IsFwdLimitSwitchClosed() && velocity > 0) || (GearSlide.IsRevLimitSwitchClosed() && velocity < 0);
 			if(slicerCantMove)
 			{
 				double adjustingSpeed = 0.225;
@@ -230,7 +230,7 @@ void Robot::DriveToPeg()
 	SmartDashboard::PutString("Scoring Sequence Status", "Scoring gear on peg");
 	const int pegLength = 10; //Really 10.5", but trivial for coding purposes
 	double forwardSpeed = 0.2;
-	//If the robot has driven to the peg or it's been driving for 6 seconds
+	//If the robot has driven to the peg or it's been driving for 4 seconds
 	int prevDistance = 0;
 	while(FrontDist->GetRangeInches() > pegLength && !RobotTimer.HasPeriodPassed(4))
 	{
@@ -242,7 +242,7 @@ void Robot::DriveToPeg()
 		}
 
 		//If the robot is obstructed
-		if( dabs( FrontDist->GetRangeInches() - prevDistance ) > 0.1)
+		if( dabs( FrontDist->GetRangeInches() - prevDistance ) < 0.1)
 		{
 			//If you're blocked on the left, move right
 			if(GearSlide.IsFwdLimitSwitchClosed())
