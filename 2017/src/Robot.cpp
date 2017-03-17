@@ -18,6 +18,7 @@ Robot::Robot() :
 	//NavX(SerialPort::Port::kUSB), //NavX Micro Sensor
 	LifeCam(),
 	VisionSink(),
+	OutputStream(),
 	RobotTimer(),
 	Gyro(SPI::kOnboardCS0) //SPI
 {
@@ -50,7 +51,7 @@ void Robot::RobotInit()
 	LifeCam.SetExposureManual(0);
 	LifeCam.SetBrightness(5);
 	VisionSink = CameraServer::GetInstance()->GetVideo();
-	ArcadeDrive(0, 0);
+	OutputStream = CameraServer::GetInstance()->PutVideo("Thresholded Image", 640, 480);
 }
 
 void Robot::TeleopInit()
@@ -59,6 +60,8 @@ void Robot::TeleopInit()
 	ArcadeDrive(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
+	LifeCam.SetExposureManual(50);
+	LifeCam.SetBrightness(50);
 }
 
 void Robot::TeleopPeriodic()
@@ -198,7 +201,7 @@ void Robot::TeleopPeriodic()
 		RBPrevState = false;
 	}
 
-	if (IsReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)) && Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y) > 0)
+	if (IsReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)) && Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y) < 0)
 	{
 		ClimbMotor.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
 	}
@@ -273,6 +276,21 @@ void Robot::TeleopPeriodic()
 		XPrevState = false;
 	}
 
+	LimitDriveCurrent(MAX_CURRENT);
+
+	//Update Smartdashboard
+	SmartDashboard::PutNumber("Distance to Peg", FrontDist->GetRangeInches());
+	SmartDashboard::PutNumber("Gyro", Gyro.GetAngle());
+	SmartDashboard::PutNumber("Front Left Drive", FrontLeftDrive.GetOutputCurrent());
+	SmartDashboard::PutNumber("Back Left Drive", BackLeftDrive.GetOutputCurrent());
+	SmartDashboard::PutNumber("Front Right Drive", FrontRightDrive.GetOutputCurrent());
+	SmartDashboard::PutNumber("Back Right Drive", BackRightDrive.GetOutputCurrent());
+
+	//Change Exposure
+	int exposure = SmartDashboard::GetNumber("Exposure", 50);
+	int brightness = SmartDashboard::GetNumber("Brightness", 50);
+	LifeCam.SetExposureManual(exposure);
+	LifeCam.SetBrightness(brightness);
 }
 
 void Robot::TestInit()
@@ -312,7 +330,7 @@ void Robot::TestInit()
 	Wait(1);
 	ArcadeDrive(0, 0);
 
-	//Actuate flaps
+	// Actuate flaps
 	LeftFlap.Set(DoubleSolenoid::kForward);
 	RightFlap.Set(DoubleSolenoid::kForward);
 	Wait(1);
@@ -396,6 +414,27 @@ void Robot::ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs /
     }
 
     SetDriveMotors(LeftMotorOutput, RightMotorOutput);
+}
+
+void Robot::LimitDriveCurrent(int maxCurrent)
+{
+	bool exceedFLCurrent = FrontLeftDrive.GetOutputCurrent() > maxCurrent;
+	bool exceedBLCurrent = BackLeftDrive.GetOutputCurrent() > maxCurrent;
+	bool exceedFRCurrent = FrontRightDrive.GetOutputCurrent() > maxCurrent;
+	bool exceedBRCurrent = BackRightDrive.GetOutputCurrent() > maxCurrent;
+	if(exceedFLCurrent || exceedBLCurrent || exceedFRCurrent || exceedBRCurrent)
+	{
+		SmartDashboard::PutBoolean("Maxed Out Current", true);
+		//Halve the speeds of each motor when the maximum current is exceeded
+		FrontLeftDrive.Set( FrontLeftDrive.Get() / 2 );
+		BackLeftDrive.Set( BackLeftDrive.Get() / 2 );
+		FrontRightDrive.Set( FrontRightDrive.Get() / 2 );
+		BackRightDrive.Set( BackRightDrive.Get() / 2 );
+	}
+	else
+	{
+		SmartDashboard::PutBoolean("Maxed Out Current", false);
+	}
 }
 
 START_ROBOT_CLASS(Robot)
