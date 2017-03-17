@@ -8,7 +8,7 @@ void Robot::DisabledInit()
 	ClimbMotor.Set(0);
 
 	SmartDashboard::PutString("DB/String 0", "Left Peg");
-	//SmartDashboard::PutString("DB/String 1", "Test");
+	SmartDashboard::PutString("DB/String 4", "Test");
 	SmartDashboard::PutString("DB/String 1", "Center Peg");
 	SmartDashboard::PutString("DB/String 2", "Right Peg");
 	SmartDashboard::PutString("DB/String 3", "Cross Baseline");
@@ -23,14 +23,21 @@ void Robot::AutonomousInit()
 	LeftFlap.Set(DoubleSolenoid::kReverse);
 	RightFlap.Set(DoubleSolenoid::kReverse);
 	Gyro.Reset();
-	// Score in left peg
+	LifeCam.SetExposureManual(0);
+	LifeCam.SetBrightness(5);
+
 	if(SmartDashboard::GetBoolean("DB/Button 0", false))
 	{
 		SmartDashboard::PutString("Auto Status", "Scoring on the left peg");
 		DriveFor(1.0);
 		TurnRobot(60);
-		DriveFor(0.5);
+		DriveFor(0.4);
 		ScoringSequence();
+	}
+	//Test Code
+	else if(SmartDashboard::GetBoolean("DB/Button 4", false))
+	{
+		TurnRobot(-60);
 	}
 	// Score in center peg
 	else if(SmartDashboard::GetBoolean("DB/Button 1", false))
@@ -43,9 +50,9 @@ void Robot::AutonomousInit()
 	else if(SmartDashboard::GetBoolean("DB/Button 2", false))
 	{
 		SmartDashboard::PutString("Auto Status", "Scoring on the right peg");
-		DriveFor(1.0);
+		DriveFor(1.9);
 		TurnRobot(-60);
-		DriveFor(0.5);
+		DriveFor(1.5);
 		ScoringSequence();
 	}
 	// Cross baseline
@@ -54,7 +61,6 @@ void Robot::AutonomousInit()
 		SmartDashboard::PutString("Auto Status", "Crossing the Baseline");
 		DriveFor(2);
 	}
-	//Otherwise
 	else
 	{
 		ArcadeDrive(0, 0);
@@ -98,10 +104,7 @@ void Robot::TurnRobot(double angle, double speed, bool reset)
 
     SmartDashboard::PutString("Auto Status", "Turning to angle");
 
-    RobotTimer.Reset();
-    RobotTimer.Start();
-    //While you're not at the angle and 3 seconds haven't passed
-    while (round(Gyro.GetAngle()) != angle && !RobotTimer.HasPeriodPassed(3))
+    while (round(Gyro.GetAngle()) != angle)
     {
     	SmartDashboard::PutNumber("Gyro", Gyro.GetAngle());
         while (Gyro.GetAngle() < angle)
@@ -115,7 +118,7 @@ void Robot::TurnRobot(double angle, double speed, bool reset)
             SetDriveMotors(-speed, speed);
         }
     }
-    RobotTimer.Stop();
+
     SmartDashboard::PutString("Auto Status", "Success to angle");
     SetDriveMotors(0, 0);
 }
