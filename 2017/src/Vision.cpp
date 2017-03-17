@@ -9,7 +9,7 @@
 using namespace cv;
 using namespace std;
 
-void findTargets(Mat& rawImage, vector<vector<Point> >& contours);
+void findTargets(Mat& rawImage, vector<vector<Point> >& contours, cs::CvSource& output);
 int getPegLocation(vector<vector<Point> >& contours );
 bool isCentered(int pegLocationX, int imageCenterX);
 double getMotorVelocity(int pegLocation, int imageWidth);
@@ -22,11 +22,9 @@ void Robot::ScoringSequence()
 	Mat videoFrame;
 	bool isGearCentered = false;
 	vector<vector<Point> > contours;
-	RobotTimer.Reset();
-	RobotTimer.Start();
 
-	//If the gear isn't centered and it hasn't been running for more than 6.5 seconds, run the scoring sequence
-	while(!isGearCentered && !RobotTimer.Get() > 6.5)
+	//If the gear isn't centered, run the scoring sequence
+	while(!isGearCentered)
 	{
 		if(ScoringCanceled())
 		{
@@ -38,7 +36,8 @@ void Robot::ScoringSequence()
 		//Try to find the contours in the image
 		try
 		{
-			findTargets(videoFrame, contours);
+			findTargets(videoFrame, contours, OutputStream);
+			//SmartDashboard::PutValue("Threshold",)
 			SmartDashboard::PutString("Scoring Sequence Status", "Targets Identified");
 		}
 		//If findTargets throws an exception, print it to the smartDashboard and exit the function
@@ -51,26 +50,48 @@ void Robot::ScoringSequence()
 		//Get image constants from the contours
 		int imageCenterX = videoFrame.cols / 2;
 		int pegLocationX = getPegLocation(contours);
+		SmartDashboard::PutNumber("Image Center", imageCenterX);
+		SmartDashboard::PutNumber("Peg Location", pegLocationX);
 		isGearCentered = isCentered(pegLocationX, imageCenterX);
 		SmartDashboard::PutBoolean("Peg Centered", isGearCentered);
 
 		if(!isGearCentered)
 		{
 			float velocity = getMotorVelocity(pegLocationX, videoFrame.cols);
-			//If the slicer is blocked in the direction it's trying to go
-			bool slicerCantMove = (GearSlide.IsFwdLimitSwitchClosed() && velocity > 0) || (GearSlide.IsRevLimitSwitchClosed() && velocity < 0);
-			if(slicerCantMove)
+			const double minSpeed = 0.2;
+			if(abs(velocity) < minSpeed / 2)
 			{
-				double adjustingSpeed = 0.225;
-				// Change the direction the robot turns if necessary
-				if(velocity < 0)
+				isGearCentered = true;
+				break;
+			}
+			else if(abs(velocity) < minSpeed)
+			{
+				if(velocity > 0)
 				{
-					adjustingSpeed = -adjustingSpeed;
+					velocity = minSpeed;
 				}
+				else if(velocity < 0)
+				{
+					velocity = -minSpeed;
+				}
+			}
+			//If the slicer is blocked in the direction it's trying to go
+			bool slicerCantMoveRight = GearSlide.IsFwdLimitSwitchClosed() && velocity < 0;
+			bool slicerCantMoveLeft = GearSlide.IsRevLimitSwitchClosed() && velocity > 0;
 
+			if(slicerCantMoveRight || slicerCantMoveLeft)
+			{
+				double adjustingSpeed = 0.14;
 				SmartDashboard::PutString("Scoring Sequence Status", "Reached limit switch");
 				GearSlide.Set(0);
-				SetDriveMotors(-adjustingSpeed, adjustingSpeed);
+				if(slicerCantMoveRight)
+				{
+					SetDriveMotors(-adjustingSpeed, adjustingSpeed);
+				}
+				else if(slicerCantMoveLeft)
+				{
+					SetDriveMotors(adjustingSpeed, -adjustingSpeed);
+				}
 				SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
 			}
 			else
@@ -80,6 +101,7 @@ void Robot::ScoringSequence()
 				ArcadeDrive(0, 0);
 				SmartDashboard::PutNumber("Bagel Slicer Velocity", velocity);
 			}
+			SmartDashboard::PutBoolean("Slicer Can't Move", slicerCantMoveRight || slicerCantMoveLeft);
 		}
 		else
 		{
@@ -88,13 +110,11 @@ void Robot::ScoringSequence()
 			SmartDashboard::PutString("Scoring Sequence Status", "Gear centered. Moving forward to peg.");
 		}
 	}
-	RobotTimer.Stop();
-	// If the vision took more than 6.5 seconds to run, don't try to drive to the peg
-	if(RobotTimer.Get() > 6.5)
-	{
-		return;
-	}
-	DriveToPeg();
+	//DriveToPeg();
+	Wait(2);
+	DriveFor(0.85, 0.4);
+	LeftFlap.Set(DoubleSolenoid::kForward);
+	RightFlap.Set(DoubleSolenoid::kForward);
 	SmartDashboard::PutNumber("Bagel Slicer Velocity", 0);
 	SmartDashboard::PutString("Scoring Sequence Status", "Bagel slicer in position");
 }
@@ -110,7 +130,6 @@ bool Robot::ScoringCanceled()
 			XPrevState = true;
 			return true;
 		}
-		//Otherwise, the XPrevState is already true and the scoring sequence wasn't canceled
 		else
 		{
 			return false;
@@ -125,30 +144,29 @@ bool Robot::ScoringCanceled()
 
 // Takes in an image from the robot's camera, and filters it for green light.
 // Also searches for contours in this processed image
-void findTargets(Mat& image, vector<vector<Point> >& contours)
+void findTargets(Mat& image, vector<vector<Point> >& contours, cs::CvSource& output)
 {
 	// How many more times the function is willing to adjust the thresholds
 	int adjustmentsUntilFailure = 4;
-
+	Mat thresholdedImage;
 	// BGR ranges for pixels we want to turn on
-	//REMEMBER: Scalar(Blue, Green, Red)
 	Scalar minGreen = Scalar(0, 80, 0);
-	Scalar maxGreen = Scalar(125, 255, 30);
+	Scalar maxGreen = Scalar(200, 255, 30);
 
 	// Filter the image for noise
 	GaussianBlur(image, image, Size(15, 15), 0);
 
 	while(adjustmentsUntilFailure > 0)
 	{
-		inRange( image, minGreen, maxGreen, image);
-
+		inRange( image, minGreen, maxGreen, thresholdedImage);
+		output.PutFrame(thresholdedImage);
 		//Morphological Opening
 		//Removes small white patterns in an image
 		erode( image, image, getStructuringElement( MORPH_ELLIPSE, Size(3, 3)) );
 		dilate( image, image, getStructuringElement( MORPH_ELLIPSE, Size(3, 3)) );
 
 		//Create a 2D array of points to store the various contours
-		findContours(image, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		findContours(thresholdedImage, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
 		//If you can't see at least 1 target, adjust the thresholds and decrement the counter
 		if(contours.size() < 1)
@@ -193,15 +211,14 @@ int getPegLocation(vector<vector<Point> >& contours )
 // Checks whether the difference between the peg location and the image center is in a range
 bool isCentered(int pegLocationX, int imageCenterX)
 {
-	int imageWidth = 2 * imageCenterX;
-	return abs(pegLocationX - imageCenterX) < (imageWidth / 15);
+	return abs(pegLocationX - imageCenterX) < 10;
 }
 
 double getMotorVelocity(int pegLocation, int imageWidth)
 {
-	double leftTolerance = .3;  // 30%
-	double rightTolerance = .7; // 70%
-	double maxSpeed = 0.75;
+	double leftTolerance = .4;  // 30%
+	double rightTolerance = .6; // 70%
+	double maxSpeed = 0.6;
 
 	//If  pegLocation is greater than 70% of imageWidth, return the maxSpeed going right
 	if (pegLocation > (rightTolerance * imageWidth) )
@@ -230,59 +247,63 @@ void Robot::DriveToPeg()
 	SmartDashboard::PutString("Scoring Sequence Status", "Scoring gear on peg");
 	const int pegLength = 10; //Really 10.5", but trivial for coding purposes
 	double forwardSpeed = 0.2;
-	//If the robot has driven to the peg or it's been driving for 4 seconds
-	int prevDistance = 0;
+	//If the robot has driven to the peg or it's been driving for 6 seconds
+	//int prevDistance = 0;
+	double startingAngle = Gyro.GetAngle();
+
 	while(FrontDist->GetRangeInches() > pegLength && !RobotTimer.HasPeriodPassed(4))
 	{
+		/*if( dabs( FrontDist->GetRangeInches() - prevDistance ) < 0.05)
+		{
+			SmartDashboard::PutString("Stuck in the Middle", "Moving left");
+			GearSlide.Set(0.2);
+			Wait(0.25);
+		}
+		else
+		{
+			SmartDashboard::PutString("Stuck in the Middle", "Unstuck");
+		}*/
+
 		SmartDashboard::PutNumber("Distance to Peg", FrontDist->GetRangeInches());
 		if(ScoringCanceled())
 		{
 			SmartDashboard::PutString("Scoring Sequence Status", "Scoring sequence cancelled");
 			return;
 		}
-
-		//If the robot is obstructed
-		if( dabs( FrontDist->GetRangeInches() - prevDistance ) < 0.1)
-		{
-			//If you're blocked on the left, move right
-			if(GearSlide.IsFwdLimitSwitchClosed())
-			{
-				SmartDashboard::PutString("Stuck in the Middle", "Moving right");
-				GearSlide.Set(-0.2);
-			}
-			//Otherwise, always move left
-			else
-			{
-				SmartDashboard::PutString("Stuck in the Middle", "Moving left");
-				GearSlide.Set(0.2);
-			}
-			prevDistance = 0; //Make sure that this doesn't run again unless it's still blocked
-			Wait(0.2);
-			continue;
-		}
 		else
 		{
-			prevDistance = FrontDist->GetRangeInches();
-			SmartDashboard::PutString("Stuck in the Middle", "Not stuck");
+			// Drive forward and correct the angle
+			if(Gyro.GetAngle() - startingAngle > 5)
+			{
+				SetDriveMotors(forwardSpeed, forwardSpeed + 0.1);
+			}
+			else if(Gyro.GetAngle() - startingAngle < 5)
+			{
+				SetDriveMotors(forwardSpeed + 0.1, forwardSpeed);
+			}
+			else
+			{
+				SetDriveMotors(forwardSpeed, forwardSpeed);
+			}
 		}
-
-		ArcadeDrive(forwardSpeed, 0);
 	}
-	//Take the pressure off of the peg, drive forward a bit, and then stop
+	if(RobotTimer.HasPeriodPassed(4))
+	{
+		SmartDashboard::PutString("Scoring Sequence Status", "Took more than 4 seconds to score");
+	}
 	ArcadeDrive(0, 0);
 	Wait(0.25);
 	ArcadeDrive(0.4, 0);
 	Wait(0.25);
 	ArcadeDrive(0, 0);
-
 	SmartDashboard::PutString("Scoring Sequence Status", "Gear on peg");
 	LeftFlap.Set(DoubleSolenoid::kForward);
 	RightFlap.Set(DoubleSolenoid::kForward);
 	RobotTimer.Stop();
 }
 
-// Decrease the green value of a given BGR threshold by 10
+// Decrease the green value of a given BGR threshold by 5
 inline void adjustThreshold(Scalar& threshold)
 {
-	threshold.val[1] -= 10;
+	threshold.val[1] -= 5;
 }
