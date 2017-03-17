@@ -35,6 +35,7 @@ inline bool IsReasonable(double axisVal) { return dabs(axisVal) > 0.2; } // Ensu
 const double PI = 3.1416;
 const double WHEEL_DIAMETER = 6;
 const double TALON_PPR = 2048; //Pulses per Revolution on the TALON encoders
+const int MAX_CURRENT = 40; //Amps
 
 class Robot: public IterativeRobot
 {
@@ -58,6 +59,7 @@ private:
     Ultrasonic* FrontDist;
     cs::UsbCamera LifeCam;
     cs::CvSink VisionSink;
+    cs::CvSource OutputStream;
     Timer RobotTimer;
     ADXRS450_Gyro Gyro;
 
@@ -87,6 +89,9 @@ public:
 
 	void SetDriveMotors(float left, float right);
 	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs = false);
+
+	//Current limiting
+	void LimitDriveCurrent(int maxCurrent);
 
 	//Autonomous scoring with the camera
   	void ScoringSequence();
