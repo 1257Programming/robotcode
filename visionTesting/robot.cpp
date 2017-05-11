@@ -16,6 +16,39 @@ void TrainingRobit::RobotInit()
 
 }
 
+void TrainingRobit::AutonomousInit()
+{
+	Gyro.Reset();
+
+}
+void TrainingRobit::AutonomousPeriodic()
+{
+	SmartDashboard::PutNumber("Gyro", Gyro.GetAngle());
+	int angle = round(Gyro.GetAngle());
+	if(angle > .5 && angle % 360 < 180)
+	{
+		DriveTrain.ArcadeDrive(0, .1, false);
+	}
+	else if(angle < -.5 && angle % 360 < 180)
+	{
+		DriveTrain.ArcadeDrive(0, -.1, false);
+	}
+	else
+	{
+		DriveTrain.ArcadeDrive(.5, 0, false);
+	}
+}
+
+void TrainingRobit::TeleopInit()
+{
+
+}
+
+void TrainingRobit::TeleopPeriodic()
+{
+
+}
+
 void TrainingRobit::DisabledInit()
 {
 
