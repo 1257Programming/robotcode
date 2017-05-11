@@ -2,7 +2,7 @@
  * Robot.h
  *
  *  Created on: Apr 17, 2017
- *      Author: zhama
+ *      Author: zhama + Tim
  */
 
 #ifndef SRC_ROBOT_H_
