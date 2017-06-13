@@ -5,77 +5,44 @@ Robot::Robot() :
 	BackLeftDrive(2), // CAN
 	FrontRightDrive(3), // CAN
 	BackRightDrive(4), // CAN
-	DriveTrain(FrontLeftDrive, BackLeftDrive, FrontRightDrive, BackRightDrive),
 	GearSlide(5), // CAN
 	ClimbMotor(6), // CAN
-	LeftFlap(7, 3), // PCM
-	RightFlap(0, 1), // PCM
-	ClimbRelease(0),
+	Doors(0, 1), // PCM
+	Pusher(2, 3), // PCM
+	Flaps(4, 5), // PCM
 	Driver(0),
 	Operator(1),
-	GearEnc(4, 5),
-	HaveGear(0), // DIO
-	ActuateFlaps(1), // DIO
-	//NavX(SerialPort::Port::kUSB), //NavX Micro Sensor
-	FrontDist(6, 7),
-	LifeCam(),
-	VisionSink(),
-	RobotTimer()
+	RobotTimer(),
+	matchTimer(),
+	Gyro(SPI::kOnboardCS0) //SPI
 {
 	moveVal = 0;
 	turnVal = 0;
 	gearVal = 0;
 
-	NavX = new AHRS(SerialPort::Port::kUSB);
-	isGearCentered = false;
-	isGearScored = false;
-	XPrevState = false;
-	hasAutoRun = false;
-	LeftFlapState = false;
-	RightFlapState = false;
-	LBPrevState = false;
-	RBPrevState = false;
-	targetInSight = false;
 	Automation = true;
 	YPrevState = false;
 }
-/*
-void Robot::DisabledInit()
-{
-	RobotTimer.Stop();
-}*/
 
 void Robot::RobotInit()
 {
-	FrontDist.SetAutomaticMode(true);
-	//DriveTrain.SetInvertedMotor(RobotDrive::kFrontRightMotor, true); //Drive Motor Init
-	//DriveTrain.SetInvertedMotor(RobotDrive::kRearRightMotor, true);
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
-	GearSlide.Set(0);												 //Gear Init
-	ClimbMotor.Set(0);												 //Climb Motor Init
-	LifeCam = CameraServer::GetInstance()->StartAutomaticCapture();  //Camera Init
-	LifeCam.SetResolution(640, 480);
-	LifeCam.SetExposureManual(0);
-	LifeCam.SetBrightness(5);
-	VisionSink = CameraServer::GetInstance()->GetVideo();
-	NavX->ResetDisplacement();
+	//Gear Init
+	GearSlide.Set(0);
+	//Climb Motor Init
+	ClimbMotor.Set(0);
 }
 
 void Robot::TeleopInit()
 {
 	//Init Motors/Gear
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
-	NavX->ResetDisplacement();
-	NavX->ZeroYaw();
-
+	Flaps.Set(DoubleSolenoid::kForward);
 }
 
 void Robot::TeleopPeriodic()
 {
-	SmartDashboard::PutBoolean("Forward limit", GearSlide.IsFwdLimitSwitchClosed());
-	SmartDashboard::PutBoolean("Reverse limit", GearSlide.IsRevLimitSwitchClosed());
 	// Driver
 	if (Driver.GetRawButton(BUTTON_A))
 	{
@@ -97,7 +64,7 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		DriveTrain.ArcadeDrive(moveVal, turnVal, false);
+		ArcadeDrive(moveVal, turnVal, true);
 	}
 	else if (Driver.GetRawButton(BUTTON_LB))
 	{
@@ -119,7 +86,7 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		DriveTrain.ArcadeDrive(moveVal, turnVal, false);
+		ArcadeDrive(moveVal, turnVal, true);
 	}
 	else if (Driver.GetRawButton(BUTTON_RB))
 	{
@@ -141,83 +108,77 @@ void Robot::TeleopPeriodic()
 			turnVal = 0;
 		}
 
-		DriveTrain.ArcadeDrive(moveVal, turnVal, false);
+		ArcadeDrive(moveVal, turnVal, true);
 	}
 	else
 	{
 		moveVal = 0;
 		turnVal = 0;
-		DriveTrain.SetLeftRightMotorOutputs(0, 0);
+		ArcadeDrive(0, 0);
 	}
 
-	// Operator
 	gearVal = Operator.GetRawAxis(AXIS_TRIGGER_LEFT) - Operator.GetRawAxis(AXIS_TRIGGER_RIGHT);
 
-	if (Operator.GetRawButton(BUTTON_A))
-	{
-		LeftFlap.Set(DoubleSolenoid::kForward);
-		RightFlap.Set(DoubleSolenoid::kForward);
-		LeftFlapState = true;
-		RightFlapState = true;
-	}
-	else if (Operator.GetRawButton(BUTTON_B))
-	{
-		RightFlap.Set(DoubleSolenoid::kReverse);
-		LeftFlap.Set(DoubleSolenoid::kReverse);
-		LeftFlapState = false;
-		LeftFlapState = false;
-	}
-	else if (Operator.GetRawButton(BUTTON_LB))
-	{
-		if (!LBPrevState)
+	// GMA
+		if (Operator.GetRawButton(BUTTON_A))
 		{
-			if (LeftFlapState)
+			Flaps.Set(DoubleSolenoid::kForward);
+		}
+		else if (Operator.GetRawButton(BUTTON_B))
+		{
+			Flaps.Set(DoubleSolenoid::kReverse);
+		}
+		else
+		{
+			Flaps.Set(DoubleSolenoid::kOff);
+		}
+
+		if (Operator.GetRawButton(BUTTON_LB) && !wait)
+		{
+			Doors.Set(DoubleSolenoid::kForward);
+			matchTimer.Stop();
+			matchTimer.Reset();
+			matchTimer.Start();
+			SmartDashboard::PutNumber("startTime", startTime);
+			wait = true;
+			open = true;
+		}
+		if (Operator.GetRawButton(BUTTON_RB) && !wait)
+		{
+			Pusher.Set(DoubleSolenoid::kReverse);
+			matchTimer.Stop();
+			matchTimer.Reset();
+			matchTimer.Start();
+			SmartDashboard::PutNumber("startTime", startTime);
+			wait = true;
+			open = false;
+		}
+		if (wait && matchTimer.HasPeriodPassed(.1))
+		{
+			if (open)
 			{
-				LeftFlap.Set(DoubleSolenoid::kReverse);
-				LeftFlapState = false;
+				Pusher.Set(DoubleSolenoid::kForward);
+				wait = false;
 			}
 			else
 			{
-				LeftFlap.Set(DoubleSolenoid::kForward);
-				LeftFlapState = true;
+				Doors.Set(DoubleSolenoid::kReverse);
+				wait = false;
 			}
-
-			LBPrevState = true;
 		}
-	}
-	else if (Operator.GetRawButton(BUTTON_RB))
-	{
-		if (!RBPrevState)
-		{
-			if (RightFlapState)
-			{
-				RightFlap.Set(DoubleSolenoid::kReverse);
-				RightFlapState = false;
-			}
-			else
-			{
-				RightFlap.Set(DoubleSolenoid::kForward);
-				RightFlapState = true;
-			}
 
-			RBPrevState = true;
-		}
-	}
-	else
-	{
-		LeftFlap.Set(DoubleSolenoid::kOff);
-		RightFlap.Set(DoubleSolenoid::kOff);
-		LBPrevState = false;
-		RBPrevState = false;
-	}
-
-	if (Operator.GetRawButton(BUTTON_Y) && IsReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)) && Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y) > 0)
+	if (IsReasonable(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y)) && Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y) < 0)
 	{
 		ClimbMotor.Set(Operator.GetRawAxis(AXIS_ANALOG_LEFT_Y));
 	}
 	else
 	{
 		ClimbMotor.Set(0);
+	}
+
+	if (Driver.GetRawButton(BUTTON_Y))
+	{
+		ClimbMotor.Set(-1);
 	}
 
 	// Automation
@@ -243,23 +204,6 @@ void Robot::TeleopPeriodic()
 
 	if (Automation)
 	{
-		// Automation flaps
-		/*if (!ActuateFlaps.Get())
-		{
-			RightFlap.Set(DoubleSolenoid::kReverse);
-			LeftFlap.Set(DoubleSolenoid::kReverse);
-			LeftFlapState = false;
-			LeftFlapState = false;
-		}
-
-		if (!targetInSight && FrontDist.GetRangeInches() <= 20)
-		{
-			LeftFlap.Set(DoubleSolenoid::kForward);
-			RightFlap.Set(DoubleSolenoid::kForward);
-			LeftFlapState = true;
-			RightFlapState = true;
-		}*/
-
 		// Limit switches on gearmaster 9000
 		if ((!GearSlide.IsFwdLimitSwitchClosed() || gearVal < 0) && (!GearSlide.IsRevLimitSwitchClosed() || gearVal > 0))
 		{
@@ -275,131 +219,112 @@ void Robot::TeleopPeriodic()
 		GearSlide.Set(gearVal);
 	}
 
-	//Vision
-	if(Operator.GetRawButton(BUTTON_X))
-	{
-		XPrevState = true;
-		ScoringSequence(); //The function checks if it should be switched off after every one of its loops
-	}
+	LimitDriveCurrent(MAX_CURRENT);
 
-	SmartDashboard::PutNumber("NavX X Displacement", NavX->GetDisplacementX());
-	SmartDashboard::PutNumber("NavX Y Displacement", NavX->GetDisplacementY());
-	SmartDashboard::PutNumber("NavX Angle", NavX->GetYaw());
-
+	//Update Smartdashboard
+	SmartDashboard::PutNumber("Gyro", Gyro.GetAngle());
+	SmartDashboard::PutNumber("Front Left Drive", FrontLeftDrive.GetOutputCurrent());
+	SmartDashboard::PutNumber("Back Left Drive", BackLeftDrive.GetOutputCurrent());
+	SmartDashboard::PutNumber("Front Right Drive", FrontRightDrive.GetOutputCurrent());
+	SmartDashboard::PutNumber("Back Right Drive", BackRightDrive.GetOutputCurrent());
 }
 
 void Robot::TestInit()
 {
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
-	GearSlide.Set(0);
-	ClimbMotor.Set(0);
 
-	//Center gear holder
-	while (!GearSlide.IsFwdLimitSwitchClosed())
-	{
-		GearSlide.Set(.5);
-	}
-	/*while (encoder value < encoder value while centered)
-	{
-		GearSlide.Set(.5);
-	}*/
-	GearSlide.Set(-.5);
-	Wait(2);
-	GearSlide.Set(0);
-	Wait(1);
-
-	// Release Climber
-	ClimbRelease.SetAngle(180);
-	Wait(1);
-
-	// Run climber
-	ClimbMotor.Set(1);
-	Wait(1);
-	ClimbMotor.Set(0);
-	Wait(1);
-
-	// Test drive
-	DriveTrain.SetLeftRightMotorOutputs(1, 1);
-	Wait(1);
-	DriveTrain.SetLeftRightMotorOutputs(-1, -1);
-	Wait(1);
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
-
-	//Actuate flaps
-	LeftFlap.Set(DoubleSolenoid::kForward);
-	RightFlap.Set(DoubleSolenoid::kForward);
-	Wait(1);
-	LeftFlap.Set(DoubleSolenoid::kReverse);
-	RightFlap.Set(DoubleSolenoid::kReverse);
-	Wait(1);
 }
 
 void Robot::TestPeriodic()
 {
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+	ArcadeDrive(0, 0);
 	GearSlide.Set(0);
 	ClimbMotor.Set(0);
-
-	if (Operator.GetRawButton(BUTTON_A) || Driver.GetRawButton(BUTTON_A))
-	{
-		ClimbRelease.SetAngle(0);
-	}
 }
 
-// Drive forward, distance is in inches
-void Robot::DriveRobot(double distance)
+
+void Robot::SetDriveMotors(float left, float right)
 {
-	NavX->ResetDisplacement();
-	// If needed, store the displacement for more accuracy
-	// Convert distance to meters
-	distance *= 0.0254;
-	double maxSpeed = 0.6;
-	// + distance means drive forward, - distance means drive backward
-	if(distance > 0)
-	{
-		while(NavX->GetDisplacementX() < distance)
-		{
-			SmartDashboard::PutNumber("NavX X Displacement", NavX->GetDisplacementX());
-			DriveTrain.ArcadeDrive(maxSpeed, 0);
-		}
-	}
-	else if(distance < 0)
-	{
-		while(NavX->GetDisplacementX() < -distance)
-		{
-			SmartDashboard::PutNumber("NavX X Displacement", NavX->GetDisplacementX());
-			DriveTrain.ArcadeDrive(-maxSpeed, 0);
-		}
-	}
-	DriveTrain.SetLeftRightMotorOutputs(0, 0);
+    FrontLeftDrive.Set(left);
+    BackLeftDrive.Set(left);
+    FrontRightDrive.Set(-right);
+    BackRightDrive.Set(-right);
 }
 
-// Turn, angle is from -180 to 180 degrees
-void Robot::TurnRobot(double angle)
+void Robot::ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs /*= false*/)
 {
-	NavX->ZeroYaw();
-	// - angle means turn counterclockwise, + angle means turn clockwise
-	SmartDashboard::PutNumber("Desired Angle", angle);
-	double maxTurnSpeed = 0.5;
-	DriveTrain.ArcadeDrive(0, maxTurnSpeed);
-	/*if(angle < 0)
-	{
-		while (NavX->GetYaw() > angle)
-		{
-			SmartDashboard::PutNumber("NavX Angle", NavX->GetYaw());
-			DriveTrain.ArcadeDrive(0, maxTurnSpeed);
-		}
+    float LeftMotorOutput;
+    float RightMotorOutput;
 
-	}
-	else if (angle > 0)
+    if (squaredInputs)
+    {
+        if (moveValue >= 0.0)
+        {
+            moveValue = (moveValue * moveValue);
+        }
+        else
+        {
+            moveValue = -(moveValue * moveValue);
+        }
+
+        if (rotateValue >= 0.0)
+        {
+            rotateValue = (rotateValue * rotateValue);
+        }
+        else
+        {
+            rotateValue = -(rotateValue * rotateValue);
+        }
+    }
+
+    if (moveValue > 0.0)
+    {
+        if (rotateValue > 0.0)
+        {
+            LeftMotorOutput = moveValue - rotateValue;
+            RightMotorOutput = std::max(moveValue, rotateValue);
+        }
+        else
+        {
+            LeftMotorOutput = std::max(moveValue, -rotateValue);
+            RightMotorOutput = moveValue + rotateValue;
+        }
+    }
+    else
+    {
+        if (rotateValue > 0.0)
+        {
+            LeftMotorOutput = -std::max(-moveValue, rotateValue);
+            RightMotorOutput = moveValue + rotateValue;
+        }
+        else
+        {
+            LeftMotorOutput = moveValue - rotateValue;
+            RightMotorOutput = -std::max(-moveValue, -rotateValue);
+        }
+    }
+
+    SetDriveMotors(LeftMotorOutput, RightMotorOutput);
+}
+
+void Robot::LimitDriveCurrent(int maxCurrent)
+{
+	bool exceedFLCurrent = FrontLeftDrive.GetOutputCurrent() > maxCurrent;
+	bool exceedBLCurrent = BackLeftDrive.GetOutputCurrent() > maxCurrent;
+	bool exceedFRCurrent = FrontRightDrive.GetOutputCurrent() > maxCurrent;
+	bool exceedBRCurrent = BackRightDrive.GetOutputCurrent() > maxCurrent;
+	if(exceedFLCurrent || exceedBLCurrent || exceedFRCurrent || exceedBRCurrent)
 	{
-		while (NavX->GetYaw() < angle)
-		{
-			SmartDashboard::PutNumber("NavX Angle", NavX->GetYaw());
-			DriveTrain.ArcadeDrive(0, -maxTurnSpeed);
-		}
-	}*/
-	//DriveTrain.SetLeftRightMotorOutputs(0, 0);
+		SmartDashboard::PutBoolean("Maxed Out Current", true);
+		//Halve the speeds of each motor when the maximum current is exceeded
+		FrontLeftDrive.Set( FrontLeftDrive.Get() / 2 );
+		BackLeftDrive.Set( BackLeftDrive.Get() / 2 );
+		FrontRightDrive.Set( FrontRightDrive.Get() / 2 );
+		BackRightDrive.Set( BackRightDrive.Get() / 2 );
+	}
+	else
+	{
+		SmartDashboard::PutBoolean("Maxed Out Current", false);
+	}
 }
 
 START_ROBOT_CLASS(Robot)
