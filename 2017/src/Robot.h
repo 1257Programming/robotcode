@@ -4,13 +4,6 @@
 #include "WPILib.h"
 #include "CANTalon.h"
 #include <cmath>
-#include <AHRS.h>
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/core/core.hpp"
-#include <iostream>
-#include <string>
-#include <vector>
 
 // X-Box Controller Button IDs
 #define BUTTON_A 1
@@ -35,14 +28,13 @@
 // Global Functions
 inline double dabs(double d) { return d > 0.0 ? d : -d; } // Absolute value of a double precision floating point number
 inline bool IsReasonable(double axisVal) { return dabs(axisVal) > 0.2; } // Ensures the axis is intentionally engaged
-inline float square(double num) { return num * num; } //Return the square of the the given number
+//inline float square(double num) { return num * num; } //Return the square of the the given number
 
 // Constants
-//const double WHEEL_DIAMETER = 6;
-
-using namespace frc;
-using namespace cv;
-using namespace std;
+const double PI = 3.1416;
+const double WHEEL_DIAMETER = 6;
+const double TALON_PPR = 2048; //Pulses per Revolution on the TALON encoders
+const int MAX_CURRENT = 40; //Amps
 
 class Robot: public IterativeRobot
 {
@@ -52,44 +44,32 @@ private:
     CANTalon BackLeftDrive;
     CANTalon FrontRightDrive;
     CANTalon BackRightDrive;
-    RobotDrive DriveTrain;
     CANTalon GearSlide;
     CANTalon ClimbMotor;
-    DoubleSolenoid LeftFlap;
-    DoubleSolenoid RightFlap;
-    Servo ClimbRelease;
+    DoubleSolenoid Doors;
+    DoubleSolenoid Pusher;
+    DoubleSolenoid Flaps;
     Joystick Driver;
     Joystick Operator;
-  	Encoder GearEnc;
-    DigitalInput HaveGear;
-    DigitalInput ActuateFlaps;
-    AHRS* NavX;
-    Ultrasonic FrontDist;
-    cs::UsbCamera LifeCam;
-    cs::CvSink VisionSink;
     Timer RobotTimer;
+    Timer matchTimer;
+    ADXRS450_Gyro Gyro;
 
-    LiveWindow* lw = LiveWindow::GetInstance();
+    bool wait = false;
+    bool open = false;
+    double startTime = 0;
 
     double moveVal;
     double turnVal;
     double gearVal;
 
-	bool isGearCentered;
-	bool isGearScored;
-	bool XPrevState;
-	bool hasAutoRun;
-	bool LeftFlapState;
-	bool RightFlapState;
-	bool LBPrevState;
-	bool RBPrevState;
-	bool targetInSight;
 	bool Automation;
 	bool YPrevState;
 
 public:
 	Robot();
 	void DisabledInit();
+	//void DisabledPeriodic();
 	void RobotInit();
 	void AutonomousInit();
 	void AutonomousPeriodic();
@@ -97,18 +77,15 @@ public:
 	void TeleopPeriodic();
 	void TestInit();
 	void TestPeriodic();
-	void FindTargets(Mat& image, vector<vector<Point> >& contours);
 
 	void SetDriveMotors(float left, float right);
-	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs);
+	void ArcadeDrive(float moveValue, float rotateValue, bool squaredInputs = false);
 
-	//Autonomous scoring with the camera
-  	void ScoringSequence();
-  	void DriveToPeg();
+	//Current limiting
+	void LimitDriveCurrent(int maxCurrent);
 
-  	//NavX Helper Functions
-  	void DriveRobot(double distance);
-  	void TurnRobot(double angle);
-  	double DistanceTraveled();
+  	//Autonomous Helper Functions
+  	void DriveFor(double seconds, double speed = 0.6);
+  	void TurnRobot(double angle, double speed = 0.275, bool reset = false);
 };
 #endif
